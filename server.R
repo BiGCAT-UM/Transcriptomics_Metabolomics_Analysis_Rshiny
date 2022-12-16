@@ -186,6 +186,46 @@ server = function(input, output,session) {
       ))
   })
   
+  #####Data upload selected########
+  output$met_upload <- renderUI({
+    
+    tagList(
+      conditionalPanel(condition = 'input.tabs=="Metabolomics Analysis" && input.tabs_trans=="Data Upload"',
+                       
+                       fileInput("file1", "Choose a metadata file",
+                                 multiple = FALSE,
+                                 accept = c("text/csv",
+                                            "text/comma-separated-values,text/plain",
+                                            ".csv")),
+                       # Input: Checkbox if file has header
+                       checkboxInput("header1", "Header", TRUE),
+                       # Input: Checkbox if file has row names
+                       checkboxInput("rowNames1", "Rownames", TRUE),
+                       # Input: Select separator ----
+                       radioButtons("sep1", "Separator",
+                                    choices = c(Comma = ",",
+                                                Semicolon = ";",
+                                                Tab = "\t"),
+                                    selected = ","),
+                       # Horizontal line ----
+                       tags$hr(),
+                      
+                       #Go forward
+                       actionBttn(inputId ="metUpload_NEXT", label ="NEXT", style = "jelly",
+                                  btn_type = "button", type = "primary")
+                       
+      )#conditionalPanel
+    )#tagList
+    
+  })
+  
+  output$met_preprocess <- renderUI({
+    
+  })
+  
+  output$met_statistical<- renderUI({
+    
+  })
   
   
   ################# SAMPLE-GENE FILTERING BUTTON CLICK ################

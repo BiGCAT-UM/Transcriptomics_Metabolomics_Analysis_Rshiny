@@ -7,7 +7,8 @@
                    sidebar = dashboardSidebar(minified = F, collapsed = F,
                                               h4("Selected Processes"),
                                               uiOutput("trans_upload"),uiOutput("trans_preprocess"),uiOutput("trans_deg"),
-                                              uiOutput("trans_mapping"),uiOutput("trans_pathway"),uiOutput("trans_heatmap"),uiOutput("trans_network")
+                                              uiOutput("trans_mapping"),uiOutput("trans_pathway"),uiOutput("trans_heatmap"),uiOutput("trans_network"),
+                                              uiOutput("met_upload"),uiOutput("met_preprocess"),uiOutput("met_statistical")
                                               
                    ),#eof side bar
                    
@@ -91,6 +92,13 @@
                                  
                                  tabPanel("Metabolomics Analysis",
                                           tabsetPanel(id="tabs_mets",
+                                                      tabPanel("Data Upload",
+                                                               mainPanel(
+                                                                 # Output: meta data file  ----
+                                                                 DT::dataTableOutput("metaData"),
+                                                                 
+                                                               )
+                                                      ),
                                                       tabPanel("Preprocessing",value = "pre_mets"),
                                                       tabPanel("Statistical Analysis", value= "stat_mets"),
                                                       tabPanel("Pathway Analysis", value = "pathway_mets"),
