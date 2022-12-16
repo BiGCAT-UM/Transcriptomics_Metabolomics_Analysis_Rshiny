@@ -295,6 +295,7 @@ server = function(input, output,session) {
       footer = NULL
     ))
     
+    #show next process tabset 
      updateTabsetPanel(session, "tabs_trans",
                      selected = "Preprocessing"
                       )
@@ -498,39 +499,28 @@ server = function(input, output,session) {
   
   observeEvent(input$volcanoButton, {
     
-    showModal(modalDialog(title = h4("volcano plot started. Please wait...",
-                                     align = "center"), 
-                          footer = NULL,
-                          easyClose = TRUE,
-                          br())
-    )
+      showModal(modalDialog(title = h4("volcano plot started. Please wait...",
+                                       align = "center"), 
+                            footer = NULL,
+                            easyClose = TRUE,
+                            br())
+      )
     
-    #call the function for list showing
-    df <- showFileList()
+     output$compList   <- DT::renderDataTable ({
+        req(df)
+        df <- showFileList()
+        return(df) 
+      },selection = list(mode = "single", selected = 1), rownames = FALSE, escape = FALSE,server = TRUE)
     
-    # browser()
-    
-    output$compList   <- DT::renderDataTable (
-      #df,selection = "single", 
-      df, server = TRUE
-    )
-    
-    #show selected file name
-    output$selected <- renderText({
-     selectedValue(" textOutput(, )")
-      
-    })
+     observe({
+       req(input$compList_rows_selected)
+       print (input$compList_rows_selected)
+       output$selected <- renderText ({input$compList_rows_selected})
+     })#observe
     
   
-     
-  showModal(modalDialog(title = h4("volcano plot finished\n
-                                    You can find all plots under 2-differential_gene_expression_analysis",
-                                     align = "center"), 
-                          footer = NULL,
-                          easyClose = TRUE,
-                          br()))
     
-  })#
+  })#observeEvent
   
   
   

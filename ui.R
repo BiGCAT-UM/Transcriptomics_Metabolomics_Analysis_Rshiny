@@ -47,20 +47,20 @@
                                                           mainPanel(
                                                            
                                                            
-                                                          fluidPage( 
-                                                          
-                                                              #output from DE analysis
-                                                              tableOutput("outTable"),
-                                                           
-                                                              #outputs from volcano plots
-                                                              fluidRow(
-                                                                column(3,DTOutput("compList")),
-                                                                br(),
-                                                                verbatimTextOutput('selected'),
-                                                                column(9,imageOutput("volcanoPlot"))
-                                                              )
-                                                            
-                                                          )#fluidPage
+                                                                fluidPage( 
+                                                                
+                                                                    #output from DE analysis
+                                                                    tableOutput("outTable"),
+                                                                 
+                                                                    #outputs from volcano plots
+                                                                    fluidRow(
+                                                                      column(3,dataTableOutput("compList")),
+                                                                      br(),
+                                                                      verbatimTextOutput('selected'),
+                                                                      column(9,imageOutput("volcanoPlot"))
+                                                                    )
+                                                                  
+                                                                )#fluidPage
                                                           
                                                          
                                                          ),#mainPanel

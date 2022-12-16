@@ -176,7 +176,8 @@ mean_log_cpm = aveLogCPM(htxCount)
 cat("selected threshold:", filter_threshold,"\n")
 
 # We plot the distribution of average log2 CPM values to verify that our chosen presence threshold is appropriate. 
-#The distribution is expected to be bi modal, with a low-abundance peak representing non-expressed genes and a high-abundance peak representing expressed genes. The chosen threshold should separate the two peaks of the bi modal distribution. 
+#The distribution is expected to be bi modal, with a low-abundance peak representing non-expressed genes and a high-abundance peak representing expressed genes. 
+#The chosen threshold should separate the two peaks of the bi modal distribution. 
 
 #jpeg(file="avgLogCpmDist.jpeg")#if you want to save the histogram uncomment the following command  
 histogram_tmp <- ggplot() + aes(x=mean_log_cpm) +
@@ -252,17 +253,7 @@ cont.matrix <- makeContrasts(
 # cat ("FC degeri", FC_threshold,"\n")
 createPvalTab(files,postfix="",namePVal="pvalue",nameAdjPVal="padj",nameFC="FoldChange",nameLogFC="log2FoldChange",html=TRUE, FC_threshold)
 
-# 
-#   WORK.DIR <- getwd()
-#  # setwd(paste0(WORK.DIR,"/2-differential_gene_expression_analysis"))
-#   readPath <- paste0(WORK.DIR,"/2-differential_gene_expression_analysis/statsmodel/Summary_tables.tab")
-#   summaryTab <- readLines(readPath)
-#   
-#   for (i in 2:length(summaryTab)){
-#     strsplit(summaryTab[i], split = "\t")
-#     
-#   }
-  
+
 }
 
 #
@@ -274,6 +265,7 @@ showFileList <- function(){
   #read all files with .tab extension under statsmodel folder
   allFiles <- list.files(path=readFilePath, pattern = ".tab", all.files=TRUE,full.names=TRUE)
   
+  #select file names to be shown in volcano Plot panel
   fileList = list()
   for(i in 1:length(allFiles)) {
     splitted <- strsplit(allFiles[i], split = "/")[[1]]
