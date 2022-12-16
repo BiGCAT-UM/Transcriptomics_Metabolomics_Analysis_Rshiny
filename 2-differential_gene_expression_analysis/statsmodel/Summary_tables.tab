@@ -1,0 +1,32 @@
+Total number of measurements	17670
+	
+Comparisons	pVal < 1.5 total	pVal < 1.5 up	pVal < 1.5 down	NAs
+Number expected	26505	13253	13253	0
+table_CD_Ileum_vs_nonIBD_Ileum	17670	8746	8924	0
+table_CD_Rectum_vs_nonIBD_Rectum	17670	9703	7967	0
+table_UC_Ileum_vs_nonIBD_Ileum	17670	6274	11396	0
+table_UC_Rectum_vs_nonIBD_Rectum	17670	9085	8585	0
+table_UC_Ileum_vs_CD_Illeum	17670	6245	11425	0
+table_UC_Rectum_vs_CD_Rectum	17670	8826	8844	0
+table_CD_Rectum_vs_CD_Ileum	17670	10002	7668	0
+table_UC_Rectum_vs_UC_Ileum	17670	10287	7383	0
+				
+Comparisons	adj.pVal < 0.05 total	adj.pVal < 0.05 up	adj.pVal < 0.05 down	NAs
+table_CD_Ileum_vs_nonIBD_Ileum	1755	1380	375	0
+table_CD_Rectum_vs_nonIBD_Rectum	1401	1109	292	0
+table_UC_Ileum_vs_nonIBD_Ileum	117	3	114	0
+table_UC_Rectum_vs_nonIBD_Rectum	6891	3856	3035	0
+table_UC_Ileum_vs_CD_Illeum	2520	374	2146	0
+table_UC_Rectum_vs_CD_Rectum	3529	1514	2015	0
+table_CD_Rectum_vs_CD_Ileum	106	26	80	0
+table_UC_Rectum_vs_UC_Ileum	3596	2534	1062	0
+													
+Comparisons	|FC| >= 1.1 total	FC >= 1.1 up	FC <= 1.1 down	|FC| >= 1.2 total	FC >= 1.2 up	FC <= 1.2 down	|FC| >= 1.5 total	FC >= 1.5 up	FC <= 1.5 down	|FC| >= 2 total	FC >= 2 up	FC <= 2 down	NAs
+table_CD_Ileum_vs_nonIBD_Ileum	8833	4667	4166	5004	2965	2039	1845	1365	480	823	651	172	0
+table_CD_Rectum_vs_nonIBD_Rectum	7924	5139	2785	4473	3284	1189	1701	1362	339	835	657	178	0
+table_UC_Ileum_vs_nonIBD_Ileum	6980	1998	4982	3319	738	2581	919	117	802	290	31	259	0
+table_UC_Rectum_vs_nonIBD_Rectum	11944	6328	5616	8467	4759	3708	4110	2709	1401	1829	1317	512	0
+table_UC_Ileum_vs_CD_Illeum	9422	2905	6517	5772	1539	4233	2105	285	1820	825	24	801	0
+table_UC_Rectum_vs_CD_Rectum	10211	5080	5131	6058	3053	3005	1654	857	797	363	205	158	0
+table_CD_Rectum_vs_CD_Ileum	8000	4834	3166	4360	2611	1749	1316	786	530	478	271	207	0
+table_UC_Rectum_vs_UC_Ileum	12350	7559	4791	8901	5684	3217	4605	3353	1252	2418	1935	483	0
