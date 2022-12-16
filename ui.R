@@ -95,14 +95,17 @@
                                                       tabPanel("Data Upload",
                                                                mainPanel(
                                                                  # Output: meta data file  ----
-                                                                 DT::dataTableOutput("metaData"),
+                                                                 DT::dataTableOutput("meta"),
                                                                  
                                                                )
                                                       ),
-                                                      tabPanel("Preprocessing",value = "pre_mets"),
-                                                      tabPanel("Statistical Analysis", value= "stat_mets"),
-                                                      tabPanel("Pathway Analysis", value = "pathway_mets"),
-                                                      tabPanel("Identifier Mapping", value = "mapping_mets")
+                                                      tabPanel("Preprocessing"),
+                                                      
+                                                      tabPanel("Statistical Analysis"),
+                                                      
+                                                      tabPanel("Pathway Analysis"),
+                                                      
+                                                      tabPanel("Identifier Mapping")
                                                       
                                           )
                                           

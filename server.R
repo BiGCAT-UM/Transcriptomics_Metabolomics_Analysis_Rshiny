@@ -5,15 +5,13 @@ server = function(input, output,session) {
   
   ###########Updating Side bar based on selected process##############
  
+  
+  ###################      TRANSCRIPTOMICS DATA ANALYSIS        ################
+  
   #####Preprocess tab selected########
   output$trans_preprocess <- renderUI({
     tagList(
       conditionalPanel(condition = 'input.tabs=="Transcriptomics Analysis" && input.tabs_trans=="Preprocessing"',
-                       
-                       #Go forward
-                       #******************************************************#
-                       #   Information
-                       #******************************************************#
                        
                        h3(strong("Pre-processing")),
                        h5("Sample filtering based on visit number and data type will be performed."),
@@ -40,7 +38,6 @@ server = function(input, output,session) {
           
       ))
   })#renderUI
-  
   
   #####Data upload selected########
   output$trans_upload <- renderUI({
@@ -186,29 +183,34 @@ server = function(input, output,session) {
       ))
   })
   
+  
+  
+  
+  ##########################     METABOLOMICS DATA ANALYSIS    #######################
+  
   #####Data upload selected########
   output$met_upload <- renderUI({
     
     tagList(
-      conditionalPanel(condition = 'input.tabs=="Metabolomics Analysis" && input.tabs_trans=="Data Upload"',
+      conditionalPanel(condition = 'input.tabs=="Metabolomics Analysis" && input.tabs_mets=="Data Upload"',
                        
-                       fileInput("file1", "Choose a metadata file",
+                       fileInput("metaFile", "Choose a metadata file",
                                  multiple = FALSE,
                                  accept = c("text/csv",
                                             "text/comma-separated-values,text/plain",
                                             ".csv")),
-                       # Input: Checkbox if file has header
-                       checkboxInput("header1", "Header", TRUE),
-                       # Input: Checkbox if file has row names
-                       checkboxInput("rowNames1", "Rownames", TRUE),
-                       # Input: Select separator ----
-                       radioButtons("sep1", "Separator",
-                                    choices = c(Comma = ",",
+                                 checkboxInput("headerMet", "Header", TRUE),
+                                 checkboxInput("rowNamesMet", "Rownames", TRUE),
+                                 radioButtons("sepMet", "Separator",
+                                 choices = c(Comma = ",",
                                                 Semicolon = ";",
                                                 Tab = "\t"),
-                                    selected = ","),
+                                 selected = ","),
                       
-  
+                        #Metabolomics data upload button
+                       actionBttn(inputId ="metDownload", label ="Download Data", style = "jelly",
+                                  btn_type = "button", type = "primary"),
+                       
                        # Horizontal line ----
                        tags$hr(),
                       
@@ -219,9 +221,25 @@ server = function(input, output,session) {
       )#conditionalPanel
     )#tagList
     
-  })
+  })#
   
+  ### Metabolomics Preprocessing 
   output$met_preprocess <- renderUI({
+    
+    tagList(
+      conditionalPanel(condition = 'input.tabs=="Metabolomics Analysis" && input.tabs_mets=="Preprocessing"',
+                       
+                       
+                       h3(strong("Pre-processing")),
+                       h5("Sample filtering based on visit number and data type will be performed."),
+                       br(),
+                       h5("Metabolites with NA or empty value for HMDBID will be filtered."),
+                       tags$br(),
+                       actionBttn(inputId ="metsFiltering", label ="Apply", style = "jelly",
+                                  btn_type = "button", type = "primary"),
+                      
+                       
+      ))
     
   })
   
@@ -277,15 +295,12 @@ server = function(input, output,session) {
      output$plot <- renderPlot({
        cpm_filter( data()[[1]],  data()[[2]], input$threshold)
        
-    
-       
    })
 
   })
   
    
-   
-  #############################    DATA UPLOAD   ###########################
+  #############################    DATA UPLOAD  TRANSCRIPTOMICS ###########################
   observeEvent(input$upload_NEXT, {
     
     showModal(modalDialog(
@@ -297,7 +312,7 @@ server = function(input, output,session) {
     
     #show next process tabset 
      updateTabsetPanel(session, "tabs_trans",
-                     selected = "Preprocessing"
+                       selected = "Preprocessing"
                       )
     
   })#eof observeEvent
@@ -314,7 +329,49 @@ server = function(input, output,session) {
     return (countData)
   }, server = TRUE)
   
- #######################    DATA UPLOAD ####################################
+  
+  ######### DATA UPLOAD METABOLOMICS ##########
+  output$meta <- DT::renderDataTable({
+    req(input$metaFile)
+    meta <<- read.csv(input$metaFile$datapath,sep = input$sepMet)
+    return (meta)
+  }, server=TRUE)
+  ###############################################
+  
+  #### METABOLOMICS DATA DOWNLOAD BUTTON ####
+  observeEvent (input$metDownload, {
+    
+    #download and read metabolomics peak intensity data
+    if(file.exists("data/metabolomics.csv.gz")){print("Metabolomics zipped data already downloaded")}else{
+      fileUrl <- "https://ibdmdb.org/tunnel/products/HMP2/Metabolites/1723/HMP2_metabolomics.csv.gz?accessType=DOWNLOAD"
+      download(fileUrl, "data/metabolomics.csv.gz", mode = "wb")
+    }
+    showModal(modalDialog(
+      title = "Message",
+      paste0("You now have metabolomics intensity data!"),
+      easyClose = TRUE,
+      footer = NULL
+    ))
+    
+  })#observeEvent
+  
+  
+  observeEvent(input$metUpload_NEXT, {
+    
+    showModal(modalDialog(
+      title = "Message",
+      paste0("You can start analysis now!"),
+      easyClose = TRUE,
+      footer = NULL
+    ))
+    
+    #show next process tabset 
+    updateTabsetPanel(session, "tabs_mets",
+                      selected = "Preprocessing"
+    )
+    
+  })#eof observeEvent
+  
   
   
   
@@ -473,7 +530,6 @@ server = function(input, output,session) {
     #output$outTable <- DT::renderDataTable(summaryTable(), server=TRUE)
     summaryTable()
   
-    
     
     showModal(modalDialog(
       title = "Process status",

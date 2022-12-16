@@ -14,6 +14,7 @@ if(!"ggplot2" %in% installed.packages()){install.packages("ggplot2")}
 if(!"limma" %in% installed.packages()){install.packages("limma")}
 if(!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager",repos = "http://cran.us.r-project.org")
 if(!"readxl" %in% installed.packages()) BiocManager::install("readxl")
+if(!"downloader" %in% installed.packages()) BiocManager::install("downloader")
 
 library(rstudioapi)
 library(readxl)
@@ -33,6 +34,7 @@ library(shinydashboard)
 library(shinydashboardPlus)
 library(DT)
 library(shinyBS)
+library(downloader)
 
 #source("functions_ArrayAnalysis_v2.R")
 
@@ -347,6 +349,46 @@ networkAnalysis <- function(){
   
 }
 
+#preprocessing metabolomics data 
+preprocessingMetabolomics <- function(){
+  
+  #read metadata file
+  metaData <- read.csv("data/hmp2_metadata.csv")
+  #filter out by data type and week number
+  metaDataMBX <- subset(metaData, metaData$data_type == "metabolomics" )
+  #we need to have the samples which has same visit number
+  metaDataMBX<- subset(metaDataMBX, metaDataMBX$visit_num == 4)
+
+  metaDataMBX <- metaDataMBX %>% dplyr::select(External.ID,Participant.ID,diagnosis)
+  #rename columns of metaDataMBX
+  colnames(metaDataMBX) <- c("ExternalID","ParticipantID","disease" )
+  
+  #Note: if the URL download does not work, the zipped file is located on GitHub to continue the rest of this script.
+  if(file.exists("data/metabolomics.csv")){print("Unzipped Metabolomics data already downloaded")}else{
+    if(!"R.utils" %in% installed.packages()){install.packages("R.utils")}
+    library(R.utils)
+    gunzip("data/metabolomics.csv.gz", remove=FALSE)
+  }
+  
+  mbxData <- read.csv("data/metabolomics.csv")
+  #delete not used columns
+  mbxData = subset(mbxData, select = -c(1,2,3,4,7) )
+  
+  ### row (metabolite) filtering ###
+  #delete metabolite or row if it has NA or empty value for hmdbID
+  mbxData<- mbxData[!(is.na(mbxData$HMDB...Representative.ID.) | mbxData$HMDB...Representative.ID.=="") , ]
+  #remove rows which has hmdb as "redundant ion"
+  mbxData<- mbxData[!(mbxData$HMDB...Representative.ID.=="redundant ion") , ]
+  #remove character (asterisk) in some hmdb column values
+  mbxData$HMDB...Representative.ID.<- stringr::str_replace(mbxData$HMDB...Representative.ID., '\\*', '')
+  #Update HMDB IDs to new data structure
+  mbxData$HMDB...Representative.ID.<- stringr::str_replace(mbxData$HMDB...Representative.ID., 'HMDB', 'HMDB00')
+  #back up original mbxdata
+  mbxData.b <- mbxData
+  
+  
+  
+}
 
 #################################################  STATISTICAL ANALYSIS FUNCTIONS  #########################################
 
