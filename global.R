@@ -193,8 +193,6 @@ ileum = nrow(htxMeta[htxMeta$biopsy_location=="Ileum",])
 rectum = nrow(htxMeta[htxMeta$biopsy_location=="Rectum",])
 cat ("Number of samples in ileum:", ileum ,"\nNumber of samples in rectum:",rectum)
 
-#create output folder if it doesn't exist
-#if(!dir.exists("output")) dir.create("output")
 
 #Write all the generated data into the related output files 
 write.table(htxCount, "1-data_preprocessing/htxCount.csv", sep=",",quote=FALSE, row.names = TRUE )
@@ -358,7 +356,7 @@ networkAnalysis <- function(){
 }
 
 
-####################################################STATISTICAL ANALYSIS FUNCTIONS  #########################################
+#################################################  STATISTICAL ANALYSIS FUNCTIONS  #########################################
 
 ##########################
 ## saveStatOutputDESeq2 ##

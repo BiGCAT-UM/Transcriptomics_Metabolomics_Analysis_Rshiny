@@ -208,6 +208,7 @@ server = function(input, output,session) {
                                                 Tab = "\t"),
                                     selected = ","),
                       
+  
                        # Horizontal line ----
                        tags$hr(),
                       
