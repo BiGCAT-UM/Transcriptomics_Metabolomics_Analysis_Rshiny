@@ -207,6 +207,7 @@ server = function(input, output,session) {
                                                 Semicolon = ";",
                                                 Tab = "\t"),
                                     selected = ","),
+                      
                        # Horizontal line ----
                        tags$hr(),
                       
