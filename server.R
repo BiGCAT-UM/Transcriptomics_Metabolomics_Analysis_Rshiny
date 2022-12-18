@@ -3,399 +3,185 @@ server = function(input, output,session) {
   #to limit file size
   options(shiny.maxRequestSize = 125*1024^2)
   
-  ###########Updating Side bar based on selected process##############
- 
+  ################################################################
   
-  ###################      TRANSCRIPTOMICS DATA ANALYSIS        ################
+  # Transcriptomics
   
-  #####Preprocess tab selected########
-  output$trans_preprocess <- renderUI({
-    tagList(
-      conditionalPanel(condition = 'input.tabs=="Transcriptomics Analysis" && input.tabs_trans=="Preprocessing"',
-                       
-                       h3(strong("Pre-processing")),
-                       h5("Sample filtering based on visit number and data type will be performed."),
-                       br(),
-                       h5("Samples with all zero values across all genes will be filtered."),
-                       br(),
-                       h5("Genes with all zero values across all samples will be filtered."),
-                       tags$br(),
-                       actionBttn(inputId ="filtering", label ="Apply", style = "jelly",
-                                  btn_type = "button", type = "primary"),
-                       tags$hr(),
-                       h5("Average log CPM filtering will be performed to filter lowly expressed genes."),
-                       textInput("threshold", "Threshold", 1),
-                       verbatimTextOutput("value"),
-                       actionBttn(inputId ="cpm_filtering", label ="Apply", style = "jelly",
-                                  btn_type = "button", type = "primary"),
-                       #Go forward
-                       tags$br(),
-                       tags$br(),
-                       # Horizontal line ----
-                       tags$hr(),
-                       actionBttn(inputId ="preprocess_NEXT", label ="NEXT", style = "jelly",
-                                  btn_type = "button", type = "primary")
-          
-      ))
-  })#renderUI
+  ################################################################
   
-  #####Data upload selected########
-  output$trans_upload <- renderUI({
-   
-     tagList(
-      conditionalPanel(condition = 'input.tabs=="Transcriptomics Analysis" && input.tabs_trans=="Data Upload"',
-                       
-                       fileInput("file1", "Choose a metadata file",
-                                 multiple = FALSE,
-                                 accept = c("text/csv",
-                                            "text/comma-separated-values,text/plain",
-                                            ".csv")),
-                       # Input: Checkbox if file has header
-                       checkboxInput("header1", "Header", TRUE),
-                       # Input: Checkbox if file has row names
-                       checkboxInput("rowNames1", "Rownames", TRUE),
-                       # Input: Select separator ----
-                       radioButtons("sep1", "Separator",
-                                    choices = c(Comma = ",",
-                                                Semicolon = ";",
-                                                Tab = "\t"),
-                                    selected = ","),
-                       # Horizontal line ----
-                       tags$hr(),
-                       
-                       ###### -------------------COUNT DATA FILE READ --------####
-                       # Input: Select a file ----
-                       fileInput("file2", "Choose host transcriptomics count file",
-                                 multiple = FALSE,
-                                 accept = c("text/csv",
-                                            "text/comma-separated-values,text/plain",
-                                            ".csv")),
-                       
-                       # Input: Checkbox if file has header ----
-                       checkboxInput("header2", "Header", TRUE),
-                       # Input: Checkbox if file has row names
-                       checkboxInput("rowNames2", "RowNames", TRUE),
-                       # Input: Select separator ----
-                       radioButtons("sep2", "Separator",
-                                    choices = c(Comma = ",",
-                                                Semicolon = ";",
-                                                Tab = "\t"),
-                                    selected = "\t"),
-                       
-                       # Horizontal line ----
-                       tags$hr(),
-                       #Go forward
-                       actionBttn(inputId ="upload_NEXT", label ="NEXT", style = "jelly",
-                                 btn_type = "button", type = "primary")
-                       
-      )#conditionalPanel
-      )#tagList
-    
-  }) #eof renderUI
+  hideTab("tabs_trans", target = "filtering_trans")
+  hideTab("tabs_trans", target = "norm_trans")
+  hideTab("tabs_trans", target = "deg_trans")
+  hideTab("tabs_trans", target = "mapping_trans")
+  hideTab("tabs_trans", target = "pathway_trans")
+  hideTab("tabs_trans", target = "heatmap_trans")
+  hideTab("tabs_trans", target = "network_trans")
   
-  #####DEG analysis tab selected########
-  output$trans_deg <- renderUI({
-    tagList(
-      conditionalPanel(condition = 'input.tabs=="Transcriptomics Analysis" && input.tabs_trans=="DEG Analysis"',
-                      
-                       h3(strong("Differential Gene Expression Analysis")),
-                       h5("Statistical Analysis will be performed"),
-                       br(),
-                       
-                       ########  Remove outliers #########
-                       h4(strong("1. Remove samples")),
-                       
-                       awesomeCheckbox(inputId = "outlierCheckBox",
-                                       label = "Keep all samples",
-                                       value = TRUE,
-                                       status = "danger"),
-                       
-                       uiOutput("outliersout"),
-                       
-                       h4(strong("2. Normalization & QC plots")),
-                       
-                       actionBttn(inputId ="outlierButton", label ="Apply", style = "jelly",
-                                  btn_type = "button", type = "primary"),
-                       hr(),
-                       
-                       ############################ DEG Analysis ###########################
-                       h4(strong("3. DEG Analysis")),
-                           # sliderInput(
-                           #   inputId = "pthreshold",
-                           #   label = "P threshold",
-                           #   value = 0.05,
-                           #   min = 0,
-                           #   max = 0.5,
-                           #   step = 0.01
-                           # ),
-                           
-                           sliderInput(
-                             inputId = "FCthreshold",
-                             label = "FC threshold",
-                             value = 0,
-                             min = 0,
-                             max = 5,
-                             step = 0.1
-                           ),
-                       actionBttn(inputId ="DEGButton", label ="Apply", style = "jelly",
-                                  btn_type = "button", type = "primary"),
-                       hr(),
-                       
-                       h4(strong("4. Volcano Plots")),
-                       actionBttn(inputId ="volcanoButton", label ="Apply", style = "jelly",
-                                  btn_type = "button", type = "primary"),
-                       
-                       #Go forward
-                       tags$br(),
-                       tags$br(),
-                       # Horizontal line ----
-                       tags$hr(),
-                       actionBttn(inputId ="deg_NEXT", label ="NEXT", style = "jelly",
-                                  btn_type = "button", type = "primary")
-                       
-      ))
+  
+  #***************************************************#
+  # Data Upload
+  #***************************************************#
+  
+  # Output of meta data
+  metaData1 <- reactive({
+    req(input$file1)
+    metaData1 <- read.csv(input$file1$datapath,sep = input$sep1)
+    return (metaData1)
   })
-  
-  #####Identifier mapping tab selected########
-  output$trans_mapping <- renderUI({
-    tagList(
-      conditionalPanel(condition = 'input.tabs=="Transcriptomics Analysis" && input.tabs_trans=="Identifier Mapping"',
-                       
-                       #Go forward
-                       #******************************************************#
-                       #   Information
-                       #******************************************************#
-                       
-                       h3(strong("Identifier Mapping")),
-                       h5("HGNC gene symbols will be transformed into ENTREZ IDs"),
-                       br(),
-                      
-                       actionBttn(inputId ="mapping", label ="Apply", style = "jelly",
-                                  btn_type = "button", type = "primary"),
-                       #Go forward
-                       tags$br(),
-                       tags$br(),
-                       # Horizontal line ----
-                       tags$hr(),
-                       actionBttn(inputId ="mapping_NEXT", label ="NEXT", style = "jelly",
-                                  btn_type = "button", type = "primary")
-                       
-      ))
-  })
-  
-  
-  
-  
-  ##########################     METABOLOMICS DATA ANALYSIS    #######################
-  
-  #####Data upload selected########
-  output$met_upload <- renderUI({
-    
-    tagList(
-      conditionalPanel(condition = 'input.tabs=="Metabolomics Analysis" && input.tabs_mets=="Data Upload"',
-                       
-                       fileInput("metaFile", "Choose a metadata file",
-                                 multiple = FALSE,
-                                 accept = c("text/csv",
-                                            "text/comma-separated-values,text/plain",
-                                            ".csv")),
-                                 checkboxInput("headerMet", "Header", TRUE),
-                                 checkboxInput("rowNamesMet", "Rownames", TRUE),
-                                 radioButtons("sepMet", "Separator",
-                                 choices = c(Comma = ",",
-                                                Semicolon = ";",
-                                                Tab = "\t"),
-                                 selected = ","),
-                      
-                        #Metabolomics data upload button
-                       actionBttn(inputId ="metDownload", label ="Download Data", style = "jelly",
-                                  btn_type = "button", type = "primary"),
-                       
-                       # Horizontal line ----
-                       tags$hr(),
-                      
-                       #Go forward
-                       actionBttn(inputId ="metUpload_NEXT", label ="NEXT", style = "jelly",
-                                  btn_type = "button", type = "primary")
-                       
-      )#conditionalPanel
-    )#tagList
-    
-  })#
-  
-  ### Metabolomics Preprocessing 
-  output$met_preprocess <- renderUI({
-    
-    tagList(
-      conditionalPanel(condition = 'input.tabs=="Metabolomics Analysis" && input.tabs_mets=="Preprocessing"',
-                       
-                       
-                       h3(strong("Pre-processing")),
-                       h5("Sample filtering based on visit number and data type will be performed."),
-                       br(),
-                       h5("Metabolites with NA or empty value for HMDBID will be filtered."),
-                       tags$br(),
-                       actionBttn(inputId ="metsFiltering", label ="Apply", style = "jelly",
-                                  btn_type = "button", type = "primary"),
-                      
-                       
-      ))
-    
-  })
-  
-  output$met_statistical<- renderUI({
-    
-  })
-  
-  
-  ################# SAMPLE-GENE FILTERING BUTTON CLICK ################
- # FilterFunc<-reactive({sample_gene_filtering(input$metaData, input$countData)})
-  
-   data <- eventReactive(input$filtering, {
-          
-     sample_gene_filtering(metaData, countData )
-                            
-  })#eventReactive
-   
-  
-   observeEvent(input$filtering, {
-    
-      showModal(modalDialog(
-        title = "Message",
-        paste0("Preprocessing started. Please wait it to be finished!"),
-        easyClose = TRUE,
-        footer = NULL
-      ))
-      
-      #show preprocessed data 
-      output$metaPreprocessed <- DT::renderDataTable(data()[[1]], server=TRUE)
-      output$countPreprocessed <- DT::renderDataTable(data()[[2]], server=TRUE)
-    
-      showModal(modalDialog(
-        title = "Process status",
-        paste0("Samples and genes were filtered"),
-        easyClose = TRUE,
-        footer = NULL
-      ))
-      
-  })#eof observeEvent
-   
-   
-  ################ CPM FILTERING BUTTON CLICK #####################    
-  observeEvent(input$cpm_filtering, {
-    
-    #Show loading message
-    showModal(modalDialog(title = h4("CPM filtering is being applied....", 
-                                     align = "center"), 
-                          footer = NULL,
-                          h5("Please be patient. This might take a while.", 
-                             align = "center"), easyClose = TRUE,
-                          br()))
-    
-     output$plot <- renderPlot({
-       cpm_filter( data()[[1]],  data()[[2]], input$threshold)
-       
-   })
-
-  })
-  
-   
-  #############################    DATA UPLOAD  TRANSCRIPTOMICS ###########################
-  observeEvent(input$upload_NEXT, {
-    
-    showModal(modalDialog(
-      title = "Message",
-      paste0("You can start analysis now!"),
-      easyClose = TRUE,
-      footer = NULL
-    ))
-    
-    #show next process tabset 
-     updateTabsetPanel(session, "tabs_trans",
-                       selected = "Preprocessing"
-                      )
-    
-  })#eof observeEvent
   
   output$fileContent1 <- DT::renderDataTable({
-    req(input$file1)
-    metaData <<- read.csv(input$file1$datapath,sep = input$sep1)
-    return (metaData)
-  }, server=TRUE)
+    metaData1()
+  }, server=TRUE, options = list(pageLength = 5), rownames= FALSE)
   
-  output$fileContent2<- DT::renderDataTable({
+  
+  observeEvent((length(metaData1())> 0),{
+    output$metaText <- renderUI({
+      tagList(
+        h3(strong("Meta data"))
+      )
+    })
+  })
+  
+  
+  # Output of transcriptomics data
+  countData1 <- reactive({
     req(input$file2)
-    countData <<- read.csv(input$file2$datapath,sep = input$sep2)
-    return (countData)
-  }, server = TRUE)
+    countData1 <- read.csv(input$file2$datapath,sep = input$sep2)
+    return (countData1)
+  })
+  
+  output$fileContent2 <- DT::renderDataTable({
+    countData1()
+  }, server = TRUE, options = list(pageLength = 5), rownames= FALSE)
   
   
-  ######### DATA UPLOAD METABOLOMICS ##########
-  output$meta <- DT::renderDataTable({
-    req(input$metaFile)
-    meta <<- read.csv(input$metaFile$datapath,sep = input$sepMet)
-    return (meta)
-  }, server=TRUE)
-  ###############################################
+  observeEvent((length(countData1())> 0),{
+    output$countText <- renderUI({
+      tagList(
+        br(),
+        hr(),
+        h3(strong("Transcriptomics data"))
+      )
+    })
+  })
   
-  #### METABOLOMICS DATA DOWNLOAD BUTTON ####
-  observeEvent (input$metDownload, {
+  # Go the next step
+  observeEvent(if ((length(countData1())> 0) && (length(metaData1())> 0)){input$upload_NEXT}, {
     
-    #download and read metabolomics peak intensity data
-    if(file.exists("data/metabolomics.csv.gz")){print("Metabolomics zipped data already downloaded")}else{
-      fileUrl <- "https://ibdmdb.org/tunnel/products/HMP2/Metabolites/1723/HMP2_metabolomics.csv.gz?accessType=DOWNLOAD"
-      download(fileUrl, "data/metabolomics.csv.gz", mode = "wb")
-    }
-    showModal(modalDialog(
-      title = "Message",
-      paste0("You now have metabolomics intensity data!"),
-      easyClose = TRUE,
-      footer = NULL
-    ))
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "Data successfully selected! You can now start with the pre-processing!",
+      type = "success")
     
-  })#observeEvent
-  
-  
-  observeEvent(input$metUpload_NEXT, {
+    updateTabsetPanel(session, "tabs_trans",
+                      selected = "filtering_trans")
     
-    showModal(modalDialog(
-      title = "Message",
-      paste0("You can start analysis now!"),
-      easyClose = TRUE,
-      footer = NULL
-    ))
-    
-    #show next process tabset 
-    updateTabsetPanel(session, "tabs_mets",
-                      selected = "Preprocessing"
-    )
+    showTab("tabs_trans", target = "filtering_trans")
     
   })#eof observeEvent
   
   
+  #***************************************************#
+  # Data preprocessing
+  #***************************************************#
   
   
-  ########################### DEG analysis  ###############################
-
-  observeEvent(input$preprocess_NEXT, { 
+  # Sample/Gene filtering
+  data <- eventReactive(input$filtering, {
+    sample_gene_filtering(metaData1(), countData1())
+  })#eventReactive
+  
+  # Filtered meta data
+  observeEvent((length(data())> 0),{
+    output$metaText1 <- renderUI({
+      tagList(
+        h3(strong("Meta data"))
+      )
+    })
+  })
+  
+  output$metaPreprocessed <- DT::renderDataTable(data()[[1]], server=TRUE,
+                                                 options = list(pageLength = 5))
+  
+  # Filtered transcriptomics data
+  observeEvent((length(data())> 0),{
+    output$countText1 <- renderUI({
+      tagList(
+        br(),
+        hr(),
+        h3(strong("Transcriptomics data"))
+      )
+    })
+  })
+  
+  output$countPreprocessed <- DT::renderDataTable(data()[[2]], server=TRUE,
+                                                  options = list(pageLength = 5))
+  
+  observeEvent(input$filtering, {
     
-    #Show loading message
-    showModal(modalDialog(title = h4("You can apply DEG analysis now", 
-                                     align = "center"), 
-                          footer = NULL,
-                          easyClose = TRUE,
-                          br()))
-    #show DEG analysis tab panel
-     updateTabsetPanel(session, "tabs_trans",
-                      selected = "DEG Analysis"
-    )
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "Samples and genes were successfully filtered!",
+      type = "success")
     
-  })#observeEvent
+  })#eof observeEvent
+  
+  output$plot <- renderPlot({
+    NULL     
+  })
+  
+  # Log CPM filtering   
+  observeEvent(input$cpm_filtering, {
+    observeEvent(if (length(data())> 0){input$cpm_filtering},{
+      output$histText <- renderUI({
+        tagList(
+          br(),
+          hr(),
+          h3(strong("Histogram of Mean Expression Values"))
+        )
+      })
+    })
+    
+    output$plot <- renderPlot({
+      cpm_filter(data()[[1]],data()[[2]], input$threshold)       
+    })
+    
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "Log CPM filtering was successfully applied",
+      type = "success")
+    
+  })
+  
+  # Go the next step
+  observeEvent(if (length(data())> 0){input$preprocess_NEXT}, {
+    
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "Data successfully filtered! You can now start with the normalization!",
+      type = "success")
+    
+    updateTabsetPanel(session, "tabs_trans",
+                      selected = "norm_trans")
+    
+    showTab("tabs_trans", target = "norm_trans")
+    
+  })
+  
+  #***************************************************#
+  # Normalization and QC
+  #***************************************************#
   
   
-  #-----Select outlier samples for removal---
+  #====================================================#
+  # Select outlier(s)
+  #====================================================#
   output$outliersout <- renderUI({
-
+    
     if (length(input$outlierCheckBox) > 0){
       if(input$outlierCheckBox == FALSE){
         #samples <- meta()[,1]
@@ -403,133 +189,141 @@ server = function(input, output,session) {
                     label = "Select samples to be removed",
                     choices = as.vector(colnames(data()[[2]])),
                     multiple = TRUE)
-
+        
       }
     }
-  })#renderUI
-
-
+  })
   
-########## Normalize and QC plots and remove outliers  #######
+  #====================================================#
+  # Normalize data
+  #====================================================#
   observeEvent(input$outlierButton, {
     
-
     ### if remove outlier not selected
     if (input$outlierCheckBox == TRUE){
-       
-       outliers <- NULL
-          
-       showModal(modalDialog(title = h4("Normalization and QC plots are
-                                         being processing", 
-                                        align = "center"), 
-                             footer = NULL,
-                             easyClose = TRUE,
-                             br()))
-       
-        #the preprocessed data will be normalized
-         normalize_QCplots(data()[[1]],  data()[[2]])
-       
-         showModal(modalDialog(title = h4("Normalization and QC plots done\n
-                                          You can find all QC plots form 2-differential_gene_expression_analysis", 
-                                           align = "center"), 
-                                footer = NULL,
-                                easyClose = TRUE,
-                                br()))
-          
-    }
-
-    ### if outlier removal selected
-    if (input$outlierCheckBox == FALSE){
-          
-      if (length(input$outliersPicker) < 1){
-            outliers <- NULL
-          }
-          if (length(input$outliersPicker) > 0){
-            outliers <- input$outliersPicker
-            
-           #remove outliers
-           data <-  removeOutliers( data()[[1]],  data()[[2]], outliers)
-                            
-            
-           showModal(modalDialog(title = h4("Selected outlier(s) removed", 
-                                             align = "center"), 
-                                  footer = NULL,
-                                  easyClose = TRUE,
-                                  br()))
-           
-           showModal(modalDialog(title = h4("Normalization and QC plots are
-                                         being processing", 
-                                            align = "center"), 
-                                 footer = NULL,
-                                 easyClose = TRUE,
-                                 br()))
-           #normalize QC plots   
-           normalize_QCplots(data()[[1]],  data()[[2]])
-           
-           showModal(modalDialog(title = h4("Normalization and QC plots done\n
-                                             You can find all QC plots form 2-differential_gene_expression_analysis", 
-                                             align = "center"), 
-                                  footer = NULL,
-                                  easyClose = TRUE,
-                                  br()))
-            
-          }
+      
+      outliers <- NULL
+      
+      showModal(modalDialog(title = h4(strong("Normalization and Quality Control"),
+                                       align = "center"), 
+                            footer = NULL,
+                            h5("This might take a while. Please be patient.", 
+                               align = "center")))
+      
+      #the preprocessed data will be normalized
+      normalize_QCplots(data()[[1]], data()[[2]])
+      
+      removeModal()
+      
+      sendSweetAlert(
+        session = session,
+        title = "Success!",
+        text = "Normalization and QC plots done. 
+        You can find all QC plots in 2-differential_gene_expression_analysis",
+        type = "success")
+      
     }
     
+    ### if outlier removal selected
+    if (input$outlierCheckBox == FALSE){
+      
+      if (length(input$outliersPicker) < 1){
+        outliers <- NULL
+      }
+      if (length(input$outliersPicker) > 0){
+        outliers <- input$outliersPicker
+        
+        #remove outliers
+        data <-  removeOutliers( data()[[1]],  data()[[2]], outliers)
+        
+        
+        showModal(modalDialog(title = h4(strong("Normalization and Quality Control"),
+                                         align = "center"), 
+                              footer = NULL,
+                              h5("This might take a while. Please be patient.", 
+                                 align = "center")))
+        
+        #normalize QC plots   
+        normalize_QCplots(data()[[1]], data()[[2]])
+        
+        removeModal()
+        
+        sendSweetAlert(
+          session = session,
+          title = "Success!",
+          text = "Normalization and QC plots done. 
+        You can find all QC plots in 2-differential_gene_expression_analysis",
+          type = "success")
+        
+      }
+    }
+    
+    
+    #====================================================#
+    # Make PCA plots
+    #====================================================#
     observe({
       
       cat ("PCA plots will be shown\n")
       WORK_DIR <- getwd()
-
+      
       path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCraw/PCAanalysis__biopsylocation2.png")
       cat ("image path =",path,"\n")
-
-       output$pcaPlotRaw <- renderImage({
-        list(src = path, contentType = 'image/png',width = "500px", height = "500px",
+      
+      output$pcaPlotRaw <- renderImage({
+        list(src = path, contentType = 'image/png',width = "1000px", height = "800px",
              alt = "This is alternate text")
-
-      })
-       path2 <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCnorm/PCAanalysis__biopsylocation2.png")
-       cat ("image path =",path,"\n")
-
-       output$pcaPlotNorm <- renderImage({
-         list(src = path2, contentType = 'image/png',width = "500px", height = "500px",
-              alt = "This is alternate text")
-
-       })
-
-       
+        
+      }, deleteFile=FALSE)
+      path2 <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCnorm/PCAanalysis__biopsylocation2.png")
+      cat ("image path =",path,"\n")
+      
+      output$pcaPlotNorm <- renderImage({
+        list(src = path2, contentType = 'image/png',width = "500px", height = "500px",
+             alt = "This is alternate text")
+        
+      }, deleteFile=FALSE)
+      
+      
     })#observe
-
+    
   })#observeEvent
-
+  
+  # Go the next step
+  observeEvent(input$norm_NEXT, {
+    
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "Data successfully normalized! You can now start with the DEG analysis!",
+      type = "success")
+    
+    updateTabsetPanel(session, "tabs_trans",
+                      selected = "deg_trans")
+    
+    showTab("tabs_trans", target = "deg_trans")
+    
+  })
+  
+  #***************************************************#
+  # DEG analysis
+  #***************************************************#
+  
   FC_threshold <- reactive({
     input$FCthreshold
   })
+  
 
- 
-  ######################## DEG BUTTOON ########################
-  
-  summaryTable <- eventReactive(input$DEGButton, {
-    
-    DE_analysis  (data()[[1]],  data()[[2]], FC_threshold)
-    
-  })#eventReactive
-  
   
   observeEvent(input$DEGButton, {
     
-    showModal(modalDialog(
-      title = "Message",
-      paste0("DEG analysis started. Please wait it to be finished!"),
-      easyClose = TRUE,
-      footer = NULL
-    ))
+    showModal(modalDialog(title = h4(strong("Statistical Analysis"),
+                                     align = "center"), 
+                          footer = NULL,
+                          h5("This might take a while. Please be patient.", 
+                             align = "center")))
     
-    #show preprocessed data 
-    #output$outTable <- DT::renderDataTable(summaryTable(), server=TRUE)
-    summaryTable()
-  
+    
     
     showModal(modalDialog(
       title = "Process status",
@@ -539,44 +333,55 @@ server = function(input, output,session) {
     ))
     
   })#eof observeEvent
-
+  
   
   selectedValue <- reactiveVal()
   
   
-   selectedRow <- eventReactive(input$compList,{
-     print("compList_rows_selected")
-
-   })
-
+  selectedRow <- eventReactive(input$compList,{
+    print("compList_rows_selected")
+    
+  })
+  
   
   ############################################################################
   
   
   observeEvent(input$volcanoButton, {
     
-      showModal(modalDialog(title = h4("volcano plot started. Please wait...",
-                                       align = "center"), 
-                            footer = NULL,
-                            easyClose = TRUE,
-                            br())
-      )
+    showModal(modalDialog(title = h4("volcano plot started. Please wait...",
+                                     align = "center"), 
+                          footer = NULL,
+                          easyClose = TRUE,
+                          br())
+    )
     
-     output$compList   <- DT::renderDataTable ({
-        req(df)
-        df <- showFileList()
-        return(df) 
-      },selection = list(mode = "single", selected = 1), rownames = FALSE, escape = FALSE,server = TRUE)
+    #call the function for list showing
+    df <- showFileList()
     
-     observe({
-       req(input$compList_rows_selected)
-       print (input$compList_rows_selected)
-       output$selected <- renderText ({input$compList_rows_selected})
-     })#observe
+    # browser()
     
-  
+    output$compList   <- DT::renderDataTable (
+      #df,selection = "single", 
+      df, server = TRUE
+    )
     
-  })#observeEvent
+    #show selected file name
+    output$selected <- renderText({
+      selectedValue(" textOutput(, )")
+      
+    })
+    
+    
+    
+    showModal(modalDialog(title = h4("volcano plot finished\n
+                                    You can find all plots under 2-differential_gene_expression_analysis",
+                                     align = "center"), 
+                          footer = NULL,
+                          easyClose = TRUE,
+                          br()))
+    
+  })#
   
   
   

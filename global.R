@@ -14,7 +14,6 @@ if(!"ggplot2" %in% installed.packages()){install.packages("ggplot2")}
 if(!"limma" %in% installed.packages()){install.packages("limma")}
 if(!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager",repos = "http://cran.us.r-project.org")
 if(!"readxl" %in% installed.packages()) BiocManager::install("readxl")
-if(!"downloader" %in% installed.packages()) BiocManager::install("downloader")
 
 library(rstudioapi)
 library(readxl)
@@ -34,9 +33,9 @@ library(shinydashboard)
 library(shinydashboardPlus)
 library(DT)
 library(shinyBS)
-library(downloader)
+library(shinycssloaders)
 
-#source("functions_ArrayAnalysis_v2.R")
+source("functions_ArrayAnalysis_v2.R")
 
 #Normalization and QC plot generation
 normalize_QCplots <- function (sampleLabels, htxCount){
@@ -178,14 +177,16 @@ mean_log_cpm = aveLogCPM(htxCount)
 cat("selected threshold:", filter_threshold,"\n")
 
 # We plot the distribution of average log2 CPM values to verify that our chosen presence threshold is appropriate. 
-#The distribution is expected to be bi modal, with a low-abundance peak representing non-expressed genes and a high-abundance peak representing expressed genes. 
-#The chosen threshold should separate the two peaks of the bi modal distribution. 
+#The distribution is expected to be bi modal, with a low-abundance peak representing non-expressed genes and a high-abundance peak representing expressed genes. The chosen threshold should separate the two peaks of the bi modal distribution. 
 
 #jpeg(file="avgLogCpmDist.jpeg")#if you want to save the histogram uncomment the following command  
 histogram_tmp <- ggplot() + aes(x=mean_log_cpm) +
-  geom_histogram(binwidth=0.2) +
-  geom_vline(xintercept=filter_threshold) +
-  ggtitle("Histogram of mean expression values")
+  geom_histogram(binwidth=0.2, fill = "grey", color = "black") +
+  geom_vline(xintercept = filter_threshold, color = "red", linewidth = 1.5, linetype = "dashed") +
+  theme_classic() +
+  xlab("Mean log CPM") +
+  ylab("Count")
+  #ggtitle("Histogram of mean expression values")
 #dev.off()#to save the plot to the file
 #Having chosen our threshold, lets pick the subset of genes whose average expression passes that threshold.
 keep_genes <- mean_log_cpm >= filter_threshold 
@@ -196,6 +197,8 @@ ileum = nrow(htxMeta[htxMeta$biopsy_location=="Ileum",])
 rectum = nrow(htxMeta[htxMeta$biopsy_location=="Rectum",])
 cat ("Number of samples in ileum:", ileum ,"\nNumber of samples in rectum:",rectum)
 
+#create output folder if it doesn't exist
+#if(!dir.exists("output")) dir.create("output")
 
 #Write all the generated data into the related output files 
 write.table(htxCount, "1-data_preprocessing/htxCount.csv", sep=",",quote=FALSE, row.names = TRUE )
@@ -253,9 +256,19 @@ cont.matrix <- makeContrasts(
 # #create summary table of the contrast results
 #
 # cat ("FC degeri", FC_threshold,"\n")
-createPvalTab(files,postfix="",namePVal="pvalue",nameAdjPVal="padj",nameFC="FoldChange",nameLogFC="log2FoldChange",html=TRUE, FC_threshold)
+createPvalTab(files,postfix="",namePVal="pvalue",nameAdjPVal="padj",nameFC="FoldChange",nameLogFC="log2FoldChange",html=FALSE, FC_threshold)
 
-
+# 
+#   WORK.DIR <- getwd()
+#  # setwd(paste0(WORK.DIR,"/2-differential_gene_expression_analysis"))
+#   readPath <- paste0(WORK.DIR,"/2-differential_gene_expression_analysis/statsmodel/Summary_tables.tab")
+#   summaryTab <- readLines(readPath)
+#   
+#   for (i in 2:length(summaryTab)){
+#     strsplit(summaryTab[i], split = "\t")
+#     
+#   }
+  
 }
 
 #
@@ -267,7 +280,6 @@ showFileList <- function(){
   #read all files with .tab extension under statsmodel folder
   allFiles <- list.files(path=readFilePath, pattern = ".tab", all.files=TRUE,full.names=TRUE)
   
-  #select file names to be shown in volcano Plot panel
   fileList = list()
   for(i in 1:length(allFiles)) {
     splitted <- strsplit(allFiles[i], split = "/")[[1]]
@@ -349,48 +361,8 @@ networkAnalysis <- function(){
   
 }
 
-#preprocessing metabolomics data 
-preprocessingMetabolomics <- function(){
-  
-  #read metadata file
-  metaData <- read.csv("data/hmp2_metadata.csv")
-  #filter out by data type and week number
-  metaDataMBX <- subset(metaData, metaData$data_type == "metabolomics" )
-  #we need to have the samples which has same visit number
-  metaDataMBX<- subset(metaDataMBX, metaDataMBX$visit_num == 4)
 
-  metaDataMBX <- metaDataMBX %>% dplyr::select(External.ID,Participant.ID,diagnosis)
-  #rename columns of metaDataMBX
-  colnames(metaDataMBX) <- c("ExternalID","ParticipantID","disease" )
-  
-  #Note: if the URL download does not work, the zipped file is located on GitHub to continue the rest of this script.
-  if(file.exists("data/metabolomics.csv")){print("Unzipped Metabolomics data already downloaded")}else{
-    if(!"R.utils" %in% installed.packages()){install.packages("R.utils")}
-    library(R.utils)
-    gunzip("data/metabolomics.csv.gz", remove=FALSE)
-  }
-  
-  mbxData <- read.csv("data/metabolomics.csv")
-  #delete not used columns
-  mbxData = subset(mbxData, select = -c(1,2,3,4,7) )
-  
-  ### row (metabolite) filtering ###
-  #delete metabolite or row if it has NA or empty value for hmdbID
-  mbxData<- mbxData[!(is.na(mbxData$HMDB...Representative.ID.) | mbxData$HMDB...Representative.ID.=="") , ]
-  #remove rows which has hmdb as "redundant ion"
-  mbxData<- mbxData[!(mbxData$HMDB...Representative.ID.=="redundant ion") , ]
-  #remove character (asterisk) in some hmdb column values
-  mbxData$HMDB...Representative.ID.<- stringr::str_replace(mbxData$HMDB...Representative.ID., '\\*', '')
-  #Update HMDB IDs to new data structure
-  mbxData$HMDB...Representative.ID.<- stringr::str_replace(mbxData$HMDB...Representative.ID., 'HMDB', 'HMDB00')
-  #back up original mbxdata
-  mbxData.b <- mbxData
-  
-  
-  
-}
-
-#################################################  STATISTICAL ANALYSIS FUNCTIONS  #########################################
+####################################################STATISTICAL ANALYSIS FUNCTIONS  #########################################
 
 ##########################
 ## saveStatOutputDESeq2 ##
