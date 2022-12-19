@@ -383,7 +383,7 @@ ui <- tagList(
                                     #***************************************************#
                                     # Preprocessing
                                     #***************************************************#
-                                    tabPanel("Preprocessing",value = "pre_mets"),
+                                    tabPanel("Preprocessing",value = "filtering_mets"),
                                     
                                     #***************************************************#
                                     #Statistical Analysis
