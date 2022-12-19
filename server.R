@@ -7,8 +7,8 @@ server = function(input, output,session) {
   
   # Transcriptomics
   
-  ################################################################
-  
+  # ################################################################
+  # 
   hideTab("tabs_trans", target = "filtering_trans")
   hideTab("tabs_trans", target = "norm_trans")
   hideTab("tabs_trans", target = "deg_trans")
@@ -16,18 +16,18 @@ server = function(input, output,session) {
   hideTab("tabs_trans", target = "pathway_trans")
   hideTab("tabs_trans", target = "heatmap_trans")
   hideTab("tabs_trans", target = "network_trans")
-  
-  ################################################################
-  
-  # Metabolomics
-  
-  ################################################################
-  
+  # 
+  # ################################################################
+  # 
+  # # Metabolomics
+  # 
+  # ################################################################
+  # 
   hideTab("tabs_mets", target = "filtering_mets")
   hideTab("tabs_mets", target = "stat_mets")
   hideTab("tabs_mets", target = "pathway_mets")
   hideTab("tabs_mets", target = "mapping_mets")
-  
+
   
   #***************************************************#
   # Data Upload
@@ -263,7 +263,7 @@ server = function(input, output,session) {
           session = session,
           title = "Success!",
           text = "Normalization and QC plots done. 
-        You can find all QC plots in 2-differential_gene_expression_analysis",
+          You can find all QC plots in 2-differential_gene_expression_analysis",
           type = "success")
         
       }
@@ -410,9 +410,9 @@ server = function(input, output,session) {
     
   })#
   
-  #***************************************************#
+  #**************************************************************************************************************#
   #                      Metabolomics Data Operations
-  #***************************************************#
+  #**************************************************************************************************************#
   
   #***************************************************#
   # Data Upload
@@ -438,6 +438,94 @@ server = function(input, output,session) {
     })
   })
   
+  
+  
+  #output of metabolite intensity data
+  observeEvent( input$metDownload,{
+    
+    #download and read metabolomics peak intensity data
+    if(file.exists("data/metabolomics.csv.gz"))
+      {print("Metabolomics zipped data already downloaded")}
+    else{
+      fileUrl <- "https://ibdmdb.org/tunnel/products/HMP2/Metabolites/1723/HMP2_metabolomics.csv.gz?accessType=DOWNLOAD"
+      download(fileUrl, "data/metabolomics.csv.gz", mode = "wb")
+    }
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "You now have metabolomics count data! You can now start analysis!",
+      type = "success")
+   
+  })#observeEvent
+
+  #go to next step
+  observeEvent(if ((length(mbxMeta())> 0)){input$metUpload_NEXT}, {
+    
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "Data successfully uploaded! You can now start with the pre-processing!",
+      type = "success")
+    
+    updateTabsetPanel(session, "tabs_mets",
+                      selected = "filtering_mets")
+    
+    showTab("tabs_mets", target = "filtering_mets")
+    
+  })#eof observeEvent
+ 
+  #***************************************************#
+  # Data preprocessing
+  #***************************************************#
+  #*
+  # Metabolomics Sample/Gene filtering
+  data2 <- eventReactive(input$metsFiltering, {
+    # sendSweetAlert(
+    #   session = session,
+    #   title = "Message",
+    #   text = "Filtering process started! It might take time please be patient.",
+    #   type = "info"
+    #   )
+    preprocessMets(mbxMeta())
+    
+  })#eventReactive
+
+
+  # Filtered meta data
+  observeEvent((length(data2())> 0),{
+    output$metaPreprocessText <- renderUI({
+      tagList(
+        h3(strong("Meta data"))
+      )
+    })
+  })
+
+  output$mbxMetaPreprocessed <- DT::renderDataTable(data2()[[1]], server=TRUE,
+                                                 options = list(pageLength = 5))
+
+  # Filtered  data
+  observeEvent((length(data2())> 0),{
+    output$mbxCountText <- renderUI({
+      tagList(
+        br(),
+        hr(),
+        h3(strong("Metabolomics data"))
+      )
+    })
+  })
+  
+  output$mbxCountPreprocessed <- DT::renderDataTable(data2()[[2]], server=TRUE,
+                                                  options = list(pageLength = 5))
+
+  observeEvent(input$metsFiltering, {
+
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "Samples and genes were successfully filtered!",
+      type = "success")
+
+  })#eof observeEvent
   
   
   

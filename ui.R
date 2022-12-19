@@ -425,10 +425,18 @@ ui <- tagList(
                                                             selected = ","),
                                                # Horizontal line
                                                tags$hr(),
-                                               
-                                               #Metabolomics data upload button
-                                               actionBttn(inputId ="metDownload", label ="Download Data", style = "jelly",
-                                                          btn_type = "button", type = "primary"),
+                                              
+                                               h3(strong("Metabolomics count data")),
+                                               hr(),
+                                               h5("The peak intensity value data will be downloaded,"),
+                                               h5("If you already downloaded it, the count data will be uploaded"),
+                                              
+                                               #Metabolomics data download button
+                                               actionBttn(inputId ="metDownload", 
+                                                          label ="Download Data", 
+                                                          style = "jelly",
+                                                          btn_type = "button", 
+                                                          type = "primary"),
                                                
                                                # Horizontal line ----
                                                tags$hr(),
@@ -452,18 +460,51 @@ ui <- tagList(
                                                uiOutput("mbxMetaText"),
                                                DT::dataTableOutput("mbxMetaFile")%>% 
                                                  withSpinner(color="#0dc5c1")
-                                               
-                                           
+                                            
                                                
                                              )#mainPanel
                                              
-                                    ),
+                                    ),#tabPanel
                                     
                                     
                                     #***************************************************#
                                     # Preprocessing
                                     #***************************************************#
-                                    tabPanel("Preprocessing",value = "filtering_mets"),
+                                    tabPanel("Preprocessing",value = "filtering_mets",
+                                             
+                                             br(),
+                                             #==========================================#
+                                             # Side bar
+                                             #==========================================#
+                                             sidebarPanel(
+                                               # Title + description
+                                               h3(strong("Pre-processing")),
+                                               hr(),
+                                               h4(strong("Sample and gene filtering")),
+                                               h5("1. Samples based on visit number and data type will be filtered."),
+                                               h5("2. Metabolites with all zero values across all samples will be filtered."),
+                                               br(),
+
+                                               # Apply filtering
+                                               actionBttn(inputId ="metsFiltering", label ="Apply", style = "jelly",
+                                                          btn_type = "button", type = "primary", color = "primary"),
+                                               tags$hr()
+                                             
+                                             ),#sidebarPanel
+                                             mainPanel(
+                                               # Output: Data file-1 ----
+                                               uiOutput("metaPreprocessText"),
+                                               DT::dataTableOutput("mbxMetaPreprocessed")%>%
+                                                 withSpinner(color="#0dc5c1"),
+                                               br(),
+                                               # Output: Data file-2 ----
+                                               uiOutput("mbxCountText"),
+                                               DT::dataTableOutput("mbxCountPreprocessed")%>%
+                                                 withSpinner(color="#0dc5c1"),
+                                               
+                                             )#mainPanel
+                                             
+                                    ),#tabPanel
                                     
                                     #***************************************************#
                                     #Statistical Analysis
