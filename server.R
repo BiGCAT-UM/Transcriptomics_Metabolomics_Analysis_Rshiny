@@ -245,7 +245,7 @@ server = function(input, output,session) {
         outliers <- input$outliersPicker
         
         #remove outliers
-        data <-  removeOutliers( data()[[1]],  data()[[2]], outliers)
+        data1 <-  removeOutliers(data()[[1]], data()[[2]], outliers)
         
         
         showModal(modalDialog(title = h4(strong("Normalization and Quality Control"),
@@ -255,7 +255,7 @@ server = function(input, output,session) {
                                  align = "center")))
         
         #normalize QC plots   
-        normalize_QCplots(data()[[1]], data()[[2]])
+        normalize_QCplots(data1[[1]], data1[[2]])
         
         removeModal()
         
@@ -333,6 +333,14 @@ server = function(input, output,session) {
   })
   
 
+  topTable <- eventReactive(input$DEGButton, {
+    WORK_DIR <- getwd()
+    topTable <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Ileum_vs_nonIBD_Ileum.tab"))
+    return(topTable)
+  })
+  
+  output$topTable <- DT::renderDataTable(topTable(), server=TRUE,
+                                                 options = list(pageLength = 5))
   
   observeEvent(input$DEGButton, {
     
@@ -344,12 +352,12 @@ server = function(input, output,session) {
     
     
     
-    showModal(modalDialog(
-      title = "Process status",
-      paste0("Samples and genes were filtered"),
-      easyClose = TRUE,
-      footer = NULL
-    ))
+    removeModal()
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "DEG analysis is finished!",
+      type = "success")
     
   })#eof observeEvent
   

@@ -296,7 +296,8 @@ ui <- tagList(
                                                fluidPage(
                                                  
                                                  #output from DE analysis
-                                                 tableOutput("outTable"),
+                                                 DT::dataTableOutput("topTable")%>% 
+                                                   withSpinner(color="#0dc5c1"),
                                                  
                                                  #outputs from volcano plots
                                                  fluidRow(

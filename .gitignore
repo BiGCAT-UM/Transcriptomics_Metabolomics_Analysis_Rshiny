@@ -1,0 +1,5 @@
+# Ignore png images
+*.png
+
+# Ignore .Rhistory files
+.Rhistory
