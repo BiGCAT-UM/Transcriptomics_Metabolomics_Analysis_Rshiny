@@ -1,7 +1,7 @@
 ui <- tagList(
   fluidPage(
     
-    # Allow arning/information messages
+    # Allow warning/information messages
     useSweetAlert(),
     
     navbarPage(title = "IBD Analysis", id = "dataTypes",
@@ -441,15 +441,12 @@ ui <- tagList(
                                              mainPanel(
                                                # Output: Data file-1 ----
                                                uiOutput("mbxMetaText"),
-                                               DT::dataTableOutput("mbxMetaPreprocessed")%>% 
-                                                 withSpinner(color="#0dc5c1"),
-                                               
-                                               uiOutput("mbxcDataText"),
-                                               # Output: Data file-2 ----
-                                               DT::dataTableOutput("mbxDataPreprocessed")%>% 
+                                               DT::dataTableOutput("mbxMetaFile")%>% 
                                                  withSpinner(color="#0dc5c1")
                                                
-                                             )
+                                           
+                                               
+                                             )#mainPanel
                                              
                                     ),
                                     

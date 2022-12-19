@@ -394,6 +394,37 @@ server = function(input, output,session) {
     
   })#
   
+  #***************************************************#
+  #                      Metabolomics Data Operations
+  #***************************************************#
+  
+  #***************************************************#
+  # Data Upload
+  #***************************************************#
+  
+  # Output of meta data
+  mbxMeta <- reactive({
+    req(input$metaFile)
+    mbxMeta <- read.csv(input$metaFile$datapath,sep = input$sepMet)
+    return (mbxMeta)
+  })
+  
+  output$mbxMetaFile <- DT::renderDataTable({
+    mbxMeta()
+  }, server=TRUE, options = list(pageLength = 5), rownames= FALSE)
+  
+  
+  observeEvent((length(mbxMeta())> 0),{
+    output$mbxMetaText <- renderUI({
+      tagList(
+        h3(strong("Meta data"))
+      )
+    })
+  })
+  
+  
+  
+  
   
   
 }#eof server
