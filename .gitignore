@@ -2,4 +2,4 @@
 *.png
 
 # Ignore .Rhistory files
-.Rhistory
+*.Rhistory
