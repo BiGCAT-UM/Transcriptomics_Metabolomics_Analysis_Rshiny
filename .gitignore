@@ -3,3 +3,6 @@
 
 # Ignore .Rhistory files
 *.Rhistory
+
+#Ignore .gz files
+*.gz
