@@ -73,7 +73,7 @@ normalize_QCplots <- function (sampleLabels, htxCount){
 
   #create QC plots for raw data, colored by different variables
   factors <- c("disease","biopsy_location","group")
-  if(!dir.exists("QCraw")) dir.create("QCraw")
+  if(!dir.exists("QCraw")){dir.create("QCraw")}
   setwd("QCraw")
   png("sizefactors.png")
   plot(sizeFactors(dds),type='h',lwd=5,ylim=c(0,max(sizeFactors(dds))),col="darkblue")
@@ -84,7 +84,7 @@ normalize_QCplots <- function (sampleLabels, htxCount){
   cat ("QC plot for raw data done\n ")
   
   #create QC plots for normalized data colored by different variables
-  if(!dir.exists("QCnorm")) dir.create("QCnorm")
+  if(!dir.exists("QCnorm")){dir.create("QCnorm")}
   setwd("QCnorm")
   createQCPlots(normlogQC, factors, Table=sampleLabels, normMeth="DESeq", postfix="")
   setwd("..")#go back to main dir

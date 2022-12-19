@@ -94,7 +94,7 @@ server = function(input, output,session) {
   
   
   #***************************************************#
-  # Data preprocessing
+  # Data filtering
   #***************************************************#
   
   
@@ -245,7 +245,7 @@ server = function(input, output,session) {
         outliers <- input$outliersPicker
         
         #remove outliers
-        data <-  removeOutliers( data()[[1]],  data()[[2]], outliers)
+        data1 <-  removeOutliers(data()[[1]], data()[[2]], outliers)
         
         
         showModal(modalDialog(title = h4(strong("Normalization and Quality Control"),
@@ -255,7 +255,7 @@ server = function(input, output,session) {
                                  align = "center")))
         
         #normalize QC plots   
-        normalize_QCplots(data()[[1]], data()[[2]])
+        normalize_QCplots(data1[[1]], data1[[2]])
         
         removeModal()
         
@@ -278,19 +278,27 @@ server = function(input, output,session) {
       cat ("PCA plots will be shown\n")
       WORK_DIR <- getwd()
       
-      path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCraw/PCAanalysis__biopsylocation2.png")
-      cat ("image path =",path,"\n")
       
-      output$pcaPlotRaw <- renderImage({
-        list(src = path, contentType = 'image/png',width = "1000px", height = "800px",
-             alt = "This is alternate text")
+      output$QCplot <- renderImage({
+        req(input$whichQCplot)
+        if (input$whichQCplot == "PCA (Normalized)"){
+          path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCnorm/PCAanalysis__biopsylocation2.png")
+          cat ("image path =",path,"\n")
+        }
+        if (input$whichQCplot == "PCA (Raw)"){
+          path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCraw/PCAanalysis__biopsylocation2.png")
+          cat ("image path =",path,"\n")
+        }
+        if (input$whichQCplot == "Boxplot (Normalized)"){
+          path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCnorm/Boxplot__biopsylocation.png")
+          cat ("image path =",path,"\n")
+        }
+        if (input$whichQCplot == "Boxplot (Raw)"){
+          path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCraw/Boxplot__biopsylocation.png")
+          cat ("image path =",path,"\n")
+        }
         
-      }, deleteFile=FALSE)
-      path2 <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCnorm/PCAanalysis__biopsylocation2.png")
-      cat ("image path =",path,"\n")
-      
-      output$pcaPlotNorm <- renderImage({
-        list(src = path2, contentType = 'image/png',width = "500px", height = "500px",
+        list(src = path, contentType = 'image/png',width = "700px", height = "auto",
              alt = "This is alternate text")
         
       }, deleteFile=FALSE)
@@ -325,6 +333,14 @@ server = function(input, output,session) {
   })
   
 
+  topTable <- eventReactive(input$DEGButton, {
+    WORK_DIR <- getwd()
+    topTable <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Ileum_vs_nonIBD_Ileum.tab"))
+    return(topTable)
+  })
+  
+  output$topTable <- DT::renderDataTable(topTable(), server=TRUE,
+                                                 options = list(pageLength = 5))
   
   observeEvent(input$DEGButton, {
     
@@ -336,12 +352,12 @@ server = function(input, output,session) {
     
     
     
-    showModal(modalDialog(
-      title = "Process status",
-      paste0("Samples and genes were filtered"),
-      easyClose = TRUE,
-      footer = NULL
-    ))
+    removeModal()
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "DEG analysis is finished!",
+      type = "success")
     
   })#eof observeEvent
   

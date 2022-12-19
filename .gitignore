@@ -1,7 +1,9 @@
-.Rproj.user/
-.Rproj.user
-.Rhistory
-#ignore .csv files
-*.csv
-*.bridge
-*.log
+# Ignore png images
+*.png
+
+# Ignore .Rhistory files
+*.Rhistory
+
+#Ignore .gz files
+*.gz
+

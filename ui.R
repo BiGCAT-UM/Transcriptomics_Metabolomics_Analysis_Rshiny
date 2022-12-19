@@ -120,7 +120,7 @@ ui <- tagList(
                                              #==========================================#
                                              sidebarPanel(
                                                # Title + description
-                                               h3(strong("Pre-processing")),
+                                               h3(strong("Filtering")),
                                                hr(),
                                                h4(strong("Sample and gene filtering")),
                                                h5("1. Samples with all zero values across all genes will be filtered."),
@@ -221,9 +221,17 @@ ui <- tagList(
                                              # main Panel
                                              #==========================================#
                                              mainPanel(
-                                               imageOutput("pcaPlotNorm",
-                                                           width = "1000px",
-                                                           height = "800px"),
+                                               selectInput(inputId = "whichQCplot",
+                                                           label = NULL,
+                                                           choices = c("PCA (Normalized)",
+                                                                       "PCA (Raw)",
+                                                                       "Boxplot (Normalized)",
+                                                                       "Boxplot (Raw)"),
+                                                           selected = "PCA (Normalized)"),
+                                               
+                                               imageOutput("QCplot",
+                                                           width = "700px",
+                                                           height = "auto"),
                                                
                                                
                                                  
@@ -288,7 +296,8 @@ ui <- tagList(
                                                fluidPage(
                                                  
                                                  #output from DE analysis
-                                                 tableOutput("outTable"),
+                                                 DT::dataTableOutput("topTable")%>% 
+                                                   withSpinner(color="#0dc5c1"),
                                                  
                                                  #outputs from volcano plots
                                                  fluidRow(
