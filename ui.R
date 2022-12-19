@@ -381,6 +381,80 @@ ui <- tagList(
                         tabsetPanel(id="tabs_mets",
                                     
                                     #***************************************************#
+                                    # Data Upload
+                                    #***************************************************#
+                                    
+                                    tabPanel("Data Upload", value = "upload_mets",
+                                             br(),
+                                             #==========================================#
+                                             # Side bar
+                                             #==========================================#
+                                             sidebarPanel(
+                                               
+                                               # Header
+                                               h3(strong("Meta data")),
+                                               
+                                               # Upload meta data
+                                               fileInput(inputId = "metaFile", 
+                                                         label = NULL,
+                                                         multiple = FALSE,
+                                                         accept = c("text/csv",
+                                                                    "text/comma-separated-values,text/plain",
+                                                                    ".csv")),
+                                               
+                                               # Input: Checkbox if file has header
+                                               checkboxInput("headerMet", "Header", TRUE),
+                                               
+                                               # Input: Checkbox if file has row names
+                                               checkboxInput("rowNamesMet", "Rownames", TRUE),
+                                               
+                                               # Input: Select separator
+                                               radioButtons("sepMet", "Separator",
+                                                            choices = c(Comma = ",",
+                                                                        Semicolon = ";",
+                                                                        Tab = "\t"),
+                                                            selected = ","),
+                                               # Horizontal line
+                                               tags$hr(),
+                                               
+                                               #Metabolomics data upload button
+                                               actionBttn(inputId ="metDownload", label ="Download Data", style = "jelly",
+                                                          btn_type = "button", type = "primary"),
+                                               
+                                               # Horizontal line ----
+                                               tags$hr(),
+                                               
+                                               #Go forward
+                                               actionBttn(inputId ="metUpload_NEXT", 
+                                                          label ="Next", 
+                                                          style = "jelly",
+                                                          btn_type = "button", 
+                                                          color = "danger",
+                                                          icon = icon("arrow-right")
+                                                          )
+                                               
+                                             ),
+                                             
+                                             #==========================================#
+                                             # Main panel
+                                             #==========================================#
+                                             mainPanel(
+                                               # Output: Data file-1 ----
+                                               uiOutput("mbxMetaText"),
+                                               DT::dataTableOutput("mbxMetaPreprocessed")%>% 
+                                                 withSpinner(color="#0dc5c1"),
+                                               
+                                               uiOutput("mbxcDataText"),
+                                               # Output: Data file-2 ----
+                                               DT::dataTableOutput("mbxDataPreprocessed")%>% 
+                                                 withSpinner(color="#0dc5c1")
+                                               
+                                             )
+                                             
+                                    ),
+                                    
+                                    
+                                    #***************************************************#
                                     # Preprocessing
                                     #***************************************************#
                                     tabPanel("Preprocessing",value = "filtering_mets"),
@@ -402,7 +476,7 @@ ui <- tagList(
                                     
                         )
                         
-               ),
+               ),#tabPanel
                ################################################################
                
                # Multi-omics
