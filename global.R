@@ -14,6 +14,8 @@ if(!"ggplot2" %in% installed.packages()){install.packages("ggplot2")}
 if(!"limma" %in% installed.packages()){install.packages("limma")}
 if(!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager",repos = "http://cran.us.r-project.org")
 if(!"readxl" %in% installed.packages()) BiocManager::install("readxl")
+if(!"downloader" %in% installed.packages()) BiocManager::install("downloader")
+if(!"R.utils" %in% installed.packages()){install.packages("R.utils")}
 
 library(rstudioapi)
 library(readxl)
@@ -34,6 +36,8 @@ library(shinydashboardPlus)
 library(DT)
 library(shinyBS)
 library(shinycssloaders)
+library(downloader)
+library(R.utils)
 
 source("functions_ArrayAnalysis_v2.R")
 
@@ -358,6 +362,97 @@ createHeatmap <- function(){
 }
 
 networkAnalysis <- function(){
+  
+}
+
+
+#############################################Metabolomics analysis functions ###################################################
+#preprocessing metabolomics data 
+preprocessMets <- function(metaData ){
+  
+  #read metadata file
+  # metaData <- read.csv("data/hmp2_metadata.csv")
+  #filter out by data type and week number
+  metaDataMBX <- subset(metaData, metaData$data_type == "metabolomics" )
+  #we need to have the samples which has same visit number
+  metaDataMBX<- subset(metaDataMBX, metaDataMBX$visit_num == 4)
+  print("Samples filtered data type and visit number")
+  metaDataMBX <- metaDataMBX %>% dplyr::select(External.ID,Participant.ID,diagnosis)
+  #rename columns of metaDataMBX
+  colnames(metaDataMBX) <- c("ExternalID","ParticipantID","disease" )
+  
+  #Note: if the URL download does not work, the zipped file is located on GitHub to continue the rest of this script.
+  if(file.exists("data/metabolomics.csv")){print("Unzipped Metabolomics data already exist\n")}
+  else{
+    gunzip("data/metabolomics.csv.gz", remove=FALSE)
+    print("Metabolomics data unzipped\n")
+  }
+  #if the data already downloaded then read it
+  mbxData <- read.csv("data/metabolomics.csv")
+  print("Metabolomics data was read")
+  #delete not used columns
+  mbxData = subset(mbxData, select = -c(1,2,3,4,7) )
+  
+  ### row (metabolite) filtering ###
+  #delete metabolite or row if it has NA or empty value for hmdbID
+  mbxData<- mbxData[!(is.na(mbxData$HMDB...Representative.ID.) | mbxData$HMDB...Representative.ID.=="") , ]
+  #remove rows which has hmdb as "redundant ion"
+  mbxData<- mbxData[!(mbxData$HMDB...Representative.ID.=="redundant ion") , ]
+  #remove character (asterisk) in some hmdb column values
+  mbxData$HMDB...Representative.ID.<- stringr::str_replace(mbxData$HMDB...Representative.ID., '\\*', '')
+  #Update HMDB IDs to new data structure
+  mbxData$HMDB...Representative.ID.<- stringr::str_replace(mbxData$HMDB...Representative.ID., 'HMDB', 'HMDB00')
+  #back up original mbxdata
+  mbxData.b <- mbxData
+  
+  ### modify mbxData based on sample names given in metaData file (created with the criteria visit_num=4 )###
+  #filter out mbxData columns (samples) based metaDataMBX externalIDs
+  names.use <- names(mbxData)[ names(mbxData) %in% metaDataMBX$ExternalID]
+  #update mbx data with used names
+  mbxData <- mbxData [ ,names.use]
+  #order data based on col names
+  mbxData <- mbxData[ , order(names(mbxData))]
+  
+  #order metadata based on externalID
+  metaDataMBX <- metaDataMBX[order(metaDataMBX$ExternalID),]
+  
+  #add HMDBID and Compound Name column to the mbx data
+  mbxData <- cbind(mbxData.b$HMDB...Representative.ID., mbxData.b$Metabolite,mbxData)
+  colnames(mbxData)[1] <- "HMDB.ID"
+  colnames(mbxData)[2] <- "Compound.Name"
+  
+  #add disease labels to the mbx data
+  diseaseLabels <- metaDataMBX$disease
+  ##Add two empty strings to macth with additional column data.
+  diseaseLabels <- append(diseaseLabels, "NA",after = 0)
+  diseaseLabels <- append(diseaseLabels, "NA",after = 0)
+  mbxData <- rbind(diseaseLabels, mbxData)
+  
+  WORK.DIR <- getwd()
+  setwd(paste0(WORK.DIR,"/7-metabolite_data_preprocessing"))
+  if(!dir.exists("output"))#if dir not exist then create
+    dir.create("output")
+  
+  # split up the data for UC and CD, include the control data nonIBD, and save this data to an output folder.
+  #write only UC versus nonIBD comparison
+  mbxDataUC <- mbxData[ ,(mbxData[1, ] == "UC" | mbxData[1, ] == "nonIBD")]
+  #add hmdb id again
+  mbxDataUC <- cbind(mbxData[,1:2],mbxDataUC)
+  colnames(mbxDataUC)[1]="HMBDB.ID"
+  colnames(mbxDataUC)[2] <- "Compound.Name"
+  write.table(mbxDataUC, "output/mbxDataUC_nonIBD.csv", sep =",", row.names = FALSE)
+  
+  #write only CD_healthy comparison
+  mbxDataCD <- mbxData[ ,(mbxData[1, ] == "CD" | mbxData[1, ] == "nonIBD")]
+  mbxDataCD <- cbind(mbxData[,1:2],mbxDataCD)
+  colnames(mbxDataCD)[1]="HMBDB.ID"
+  colnames(mbxDataCD)[2] <- "Compound.Name"
+  write.table(mbxDataCD, "output/mbxDataCD_nonIBD.csv", sep =",", row.names = FALSE)
+  
+  print("Samples and metabolites filtering process finished")  
+  
+  return(list((metaData),(mbxData)))
+  
   
 }
 
