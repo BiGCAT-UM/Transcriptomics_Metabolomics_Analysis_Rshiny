@@ -384,7 +384,7 @@ ui <- tagList(
                                     # Data Upload
                                     #***************************************************#
                                     
-                                    tabPanel("Data Upload", value = "upload_trans",
+                                    tabPanel("Data Upload", value = "upload_mets",
                                              br(),
                                              #==========================================#
                                              # Side bar
