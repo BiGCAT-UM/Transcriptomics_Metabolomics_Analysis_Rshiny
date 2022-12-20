@@ -426,7 +426,7 @@ ui <- tagList(
                                                # Horizontal line
                                                tags$hr(),
                                               
-                                               h3(strong("Metabolomics count data")),
+                                               h3(strong("Metabolomics data")),
                                                hr(),
                                                h5("The peak intensity value data will be downloaded,"),
                                                h5("If you already downloaded it, the count data will be uploaded"),
