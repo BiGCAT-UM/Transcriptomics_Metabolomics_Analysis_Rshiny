@@ -480,12 +480,12 @@ server = function(input, output,session) {
   #*
   # Metabolomics Sample/Gene filtering
   data2 <- eventReactive(input$metsFiltering, {
-    # sendSweetAlert(
-    #   session = session,
-    #   title = "Message",
-    #   text = "Filtering process started! It might take time please be patient.",
-    #   type = "info"
-    #   )
+    sendSweetAlert(
+      session = session,
+      title = "Message",
+      text = "Filtering process started! It might take time please be patient.",
+      type = "info"
+      )
     preprocessMets(mbxMeta())
     
   })#eventReactive
@@ -527,6 +527,23 @@ server = function(input, output,session) {
 
   })#eof observeEvent
   
+  
+  
+  # Go the next step
+  observeEvent(if ((length(data2()[[1]])> 0) && (length(data2()[[2]])> 0)){input$metPre_NEXT}, {
+
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "Data successfully preprocessed! You can now start with statistical analysis!",
+      type = "success")
+
+    updateTabsetPanel(session, "tabs_mets",
+                      selected = "stat_mets")
+
+    showTab("tabs_mets", target = "stat_mets")
+
+  })#eof observeEvent
   
   
   

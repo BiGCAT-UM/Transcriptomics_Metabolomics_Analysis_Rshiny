@@ -109,11 +109,11 @@ removeOutliers <- function (sampleLabels, htxCount,outliers){
 #Filtering sample and genes with all zero values
 sample_gene_filtering<-function(htxMeta,htxOrj){
   
-  #to get current working directory
-  WORK.DIR <- getwd()  
-  
-  # set working environment to the location where current source file is saved into.
-  setwd(paste0(WORK.DIR,"/1-data_preprocessing")) 
+  # #to get current working directory
+  # WORK.DIR <- getwd()  
+  # 
+  # # set working environment to the location where current source file is saved into.
+  # setwd(paste0(WORK.DIR,"/1-data_preprocessing")) 
   
   #filter out samples by data type as host_transcriptomics
   htxMeta <- htxMeta  %>% filter(htxMeta$data_type == "host_transcriptomics")
@@ -162,7 +162,7 @@ sample_gene_filtering<-function(htxMeta,htxOrj){
   nonzero <- rowSums(htxCount) > 0
   htxCount %<>% .[nonzero,]
   
-setwd('..')
+# setwd('..')
 
 return(list((htxMeta),(htxCount)))
        

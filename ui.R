@@ -488,7 +488,17 @@ ui <- tagList(
                                                # Apply filtering
                                                actionBttn(inputId ="metsFiltering", label ="Apply", style = "jelly",
                                                           btn_type = "button", type = "primary", color = "primary"),
-                                               tags$hr()
+                                               tags$hr(),
+                                               
+                                              
+                                               #Go forward
+                                               actionBttn(inputId ="metPre_NEXT", 
+                                                          label ="Next", 
+                                                          style = "jelly",
+                                                          btn_type = "button", 
+                                                          color = "danger",
+                                                          icon = icon("arrow-right")
+                                               )
                                              
                                              ),#sidebarPanel
                                              mainPanel(
