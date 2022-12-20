@@ -170,8 +170,6 @@ return(list((htxMeta),(htxCount)))
 
 #Filtering applying CPM method
 cpm_filter<-function(htxMeta, htxCount, filter_threshold){
-#############################CPM FILTERING#############################################
-  
 #selected threshold should be converted to numeric value
 filter_threshold <- as.numeric(filter_threshold)
 #aveLogCPM function computes average log2 counts-per-million for each row of counts.
