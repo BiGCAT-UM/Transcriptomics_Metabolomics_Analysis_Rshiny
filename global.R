@@ -212,6 +212,23 @@ return (histogram_tmp)
 
 }
 
+#Filtering applying CPM method
+cpm_filter_output <- function(htxMeta, htxCount, filter_threshold){
+  
+  #selected threshold should be converted to numeric value
+  filter_threshold <- as.numeric(filter_threshold)
+  
+  #aveLogCPM function computes average log2 counts-per-million for each row of counts.
+  #the below function is similar to log2(rowMeans(cpm(y, ...)))  
+  mean_log_cpm <- aveLogCPM(htxCount)
+  
+  #Having chosen our threshold, lets pick the subset of genes whose average expression passes that threshold.
+  keep_genes <- mean_log_cpm >= filter_threshold 
+  htxCount <- htxCount[keep_genes,]
+  output <- list(htxMeta, htxCount)
+  return(output)
+}
+
 #Differential Gene Expression Analysis   
 DE_analysis <- function (sampleLabels, htxCount, FC_threshold){
 

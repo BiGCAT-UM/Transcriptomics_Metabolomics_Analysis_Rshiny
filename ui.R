@@ -37,7 +37,8 @@ ui <- tagList(
                                                          multiple = FALSE,
                                                          accept = c("text/csv",
                                                                     "text/comma-separated-values,text/plain",
-                                                                    ".csv")),
+                                                                    ".csv",
+                                                                    ".tsv")),
                                                
                                                # Input: Checkbox if file has header
                                                checkboxInput("header1", "Header", TRUE),
@@ -63,7 +64,8 @@ ui <- tagList(
                                                          multiple = FALSE,
                                                          accept = c("text/csv",
                                                                     "text/comma-separated-values,text/plain",
-                                                                    ".csv")),
+                                                                    ".csv",
+                                                                    ".tsv")),
                                                
                                                # Input: Checkbox if file has header
                                                checkboxInput("header2", "Header", TRUE),
@@ -231,7 +233,7 @@ ui <- tagList(
                                                
                                                imageOutput("QCplot",
                                                            width = "700px",
-                                                           height = "auto"),
+                                                           height = "auto")
                                                
                                                
                                                  
@@ -261,23 +263,17 @@ ui <- tagList(
                                                                         "Raw"),
                                                             selected = "Adjusted"),
                                                br(),
-                                               sliderInput(
+                                               numericInput(
                                                  inputId = "pthreshold",
                                                  label = "P-value threshold",
-                                                 value = 0.05,
-                                                 min = 0,
-                                                 max = 0.5,
-                                                 step = 0.01
+                                                 value = 0.05
                                                ),
                                                br(),
                                                
-                                               sliderInput(
+                                               numericInput(
                                                  inputId = "FCthreshold",
-                                                 label = "log2FC threshold",
-                                                 value = 0,
-                                                 min = -5,
-                                                 max = 5,
-                                                 step = 0.5
+                                                 label = "FC threshold",
+                                                 value = 0
                                                ),
                                                actionBttn(inputId ="DEGButton", label ="Apply", style = "jelly",
                                                           btn_type = "button", type = "primary", color = "primary"),
@@ -293,26 +289,19 @@ ui <- tagList(
                                              #==========================================#
                                              mainPanel(
                                                
-                                               fluidPage(
-                                                 
-                                                 #output from DE analysis
-                                                 DT::dataTableOutput("topTable")%>% 
-                                                   withSpinner(color="#0dc5c1"),
-                                                 
-                                                 #outputs from volcano plots
-                                                 fluidRow(
-                                                   column(3,DTOutput("compList")),
-                                                   br(),
-                                                   verbatimTextOutput('selected'),
-                                                   column(9,imageOutput("volcanoPlot"))
-                                                 )
-                                                 
-                                               )#End of fluidPage
+                                               selectInput(inputId = "Comparison",
+                                                           label = NULL,
+                                                           choices = c("Ileum: CD vs non-IBD",
+                                                                       "Rectum: CD vs non-IBD",
+                                                                       "Ileum: UC vs non-IBD",
+                                                                       "Rectum: UC vs non-IBD"),
+                                                           selected = "Ileum: CD vs non-IBD"),
                                                
-                                             ),#End of mainPanel
-                                             
-                                             height = "1000px",
-                                             width = "1000px"
+                                               #output from DE analysis
+                                               DT::dataTableOutput("topTable")%>% 
+                                                 withSpinner(color="#0dc5c1")
+                                                 
+                                             )#End of mainPanel
                                              
                                     ),
                                     
@@ -549,7 +538,7 @@ ui <- tagList(
                                              # main Panel
                                              #==========================================#
                                              mainPanel(
-                                               selectInput(inputId = "whichQCplot",
+                                               selectInput(inputId = "whichQCplot_met",
                                                            label = NULL,
                                                            choices = c("PCA (Normalized)",
                                                                        "PCA (Raw)",
@@ -557,7 +546,7 @@ ui <- tagList(
                                                                        "Boxplot (Raw)"),
                                                            selected = "PCA (Normalized)"),
                                                
-                                               imageOutput("QCplot",
+                                               imageOutput("QCplot_met",
                                                            width = "700px",
                                                            height = "auto"),
                                                
