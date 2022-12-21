@@ -354,30 +354,68 @@ server = function(input, output,session) {
     input$FCthreshold
   })
   
+  P_threshold <- reactive({
+    input$pthreshold
+  })
+  
   # Read top table
   topTable <- eventReactive(input$DEGButton, {
-   topTable <- list()
+    req(input$AdjOrRaw)
+    topTable <- list()
     WORK_DIR <- getwd()
-
-      topTable[[1]] <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Ileum_vs_nonIBD_Ileum.tab"))
-
-      topTable[[2]] <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Rectum_vs_nonIBD_Rectum.tab"))
- 
-      topTable[[3]] <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_UC_Ileum_vs_nonIBD_Ileum.tab"))
-   
-      topTable[[4]] <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_UC_Rectum_vs_nonIBD_Rectum.tab"))
     
-      names(topTable) <- c("Ileum: CD vs non-IBD",
-                           "Rectum: CD vs non-IBD",
-                           "Ileum: UC vs non-IBD",
-                           "Rectum: UC vs non-IBD")
+    if (input$AdjOrRaw == "Raw") {
+      temp <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Ileum_vs_nonIBD_Ileum.tab"))
+      topTable[[1]] <- temp[(abs(temp$FoldChange) > FC_threshold()) &
+                              (temp$pvalue < P_threshold()),]
+      
+      temp <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Rectum_vs_nonIBD_Rectum.tab"))
+      topTable[[2]] <- temp[(abs(temp$FoldChange) > FC_threshold()) &
+                              (temp$pvalue < P_threshold()),]
+      
+      temp <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_UC_Ileum_vs_nonIBD_Ileum.tab"))
+      topTable[[3]] <- temp[(abs(temp$FoldChange) > FC_threshold()) &
+                              (temp$pvalue < P_threshold()),]
+      
+      
+      temp<- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_UC_Rectum_vs_nonIBD_Rectum.tab"))
+      topTable[[4]] <- temp[(abs(temp$FoldChange) > FC_threshold()) &
+                              (temp$pvalue < P_threshold()),]
+    }
+    if (input$AdjOrRaw == "Adjusted") {
+      temp <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Ileum_vs_nonIBD_Ileum.tab"))
+      topTable[[1]] <- temp[(abs(temp$FoldChange) > FC_threshold()) &
+                              (temp$padj < P_threshold()),]
+      
+      temp <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Rectum_vs_nonIBD_Rectum.tab"))
+      topTable[[2]] <- temp[(abs(temp$FoldChange) > FC_threshold()) &
+                              (temp$padj < P_threshold()),]
+      
+      temp <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_UC_Ileum_vs_nonIBD_Ileum.tab"))
+      topTable[[3]] <- temp[(abs(temp$FoldChange) > FC_threshold()) &
+                              (temp$padj < P_threshold()),]
+      
+      
+      temp<- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_UC_Rectum_vs_nonIBD_Rectum.tab"))
+      topTable[[4]] <- temp[(abs(temp$FoldChange) > FC_threshold()) &
+                              (temp$padj < P_threshold()),]
+    }
+    
+
+    
+    names(topTable) <- c("Ileum: CD vs non-IBD",
+                         "Rectum: CD vs non-IBD",
+                         "Ileum: UC vs non-IBD",
+                         "Rectum: UC vs non-IBD")
     
     return(topTable)
   })
   
   output$topTable <- DT::renderDataTable({
     req(input$Comparison)
-    return(topTable()[[input$Comparison]])
+    output <- topTable()[[input$Comparison]]
+    output <- arrange(output, pvalue)
+    return(output)
   }, server=TRUE,
   options = list(pageLength = 5))
   

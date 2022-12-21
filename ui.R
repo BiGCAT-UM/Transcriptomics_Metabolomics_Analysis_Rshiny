@@ -263,23 +263,17 @@ ui <- tagList(
                                                                         "Raw"),
                                                             selected = "Adjusted"),
                                                br(),
-                                               sliderInput(
+                                               numericInput(
                                                  inputId = "pthreshold",
                                                  label = "P-value threshold",
-                                                 value = 0.05,
-                                                 min = 0,
-                                                 max = 0.5,
-                                                 step = 0.01
+                                                 value = 0.05
                                                ),
                                                br(),
                                                
-                                               sliderInput(
+                                               numericInput(
                                                  inputId = "FCthreshold",
-                                                 label = "log2FC threshold",
-                                                 value = 0,
-                                                 min = -5,
-                                                 max = 5,
-                                                 step = 0.5
+                                                 label = "FC threshold",
+                                                 value = 0
                                                ),
                                                actionBttn(inputId ="DEGButton", label ="Apply", style = "jelly",
                                                           btn_type = "button", type = "primary", color = "primary"),
