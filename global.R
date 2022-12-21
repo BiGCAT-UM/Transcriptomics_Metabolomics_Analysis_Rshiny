@@ -448,6 +448,35 @@ preprocessMets <- function(metaData ){
   write.table(mbxDataCD, "output/mbxDataCD_nonIBD.csv", sep =",", row.names = FALSE)
   
   print("Samples and metabolites filtering process finished")  
+ 
+  #Metabolites with >50% NA values will be filtered
+  print("Filtering metabolites with NA values started")
+  #Merge column headers: disorder_patientID
+  # names(mSet) <- paste(mSet [1, ], names(mSet), sep = "_")
+  # mSet <- mSet [-1,]
+  
+  
+  
+  #Remove metabolites with > 50% data (located in columns 8-553)
+  #this process should be performed in splitted up for both diseases CD and UC since statistical analysis will
+  #be performed separately for each disease
+  
+  #for CD disease
+  columns <- ncol(mbxDataCD)
+  rowsData <- nrow(mbxDataCD)
+  removeLines <- rowSums(is.na(mbxDataCD[,3-columns])) #HERE WE DELETE A COLUMN WHICH SHOULD NOT BE LIKE THAT -it should be like-> mSet[,3:columns]
+  fifty_percent <- floor((columns)/2)
+  
+  mSet_MissingDataCounted <- cbind(mbxDataCD, removeLines)
+  mSet_NoMissingData <- subset(mSet_MissingDataCounted, removeLines <= fifty_percent)
+  #Remove last column for further processing.
+  mSet_NoMissingData <- subset(mSet_NoMissingData, select=-c(removeLines))
+  
+  #Convert intensity data to numeric values                         
+  mSet_NoMissingData[, c(3:columns)] <- apply(mSet_NoMissingData[, c(3:columns)],2, function(x) as.numeric(as.character(x)))
+  
+  
+  
   
   return(list((metaData),(mbxData)))
   
