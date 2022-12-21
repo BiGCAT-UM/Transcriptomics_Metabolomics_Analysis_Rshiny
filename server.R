@@ -28,23 +28,27 @@ server = function(input, output,session) {
   hideTab("tabs_mets", target = "pathway_mets")
   hideTab("tabs_mets", target = "mapping_mets")
 
+  #**************************************************************************************************************#
+  #                      Transcriptomics Data Operations
+  #**************************************************************************************************************#
   
   #***************************************************#
   # Data Upload
   #***************************************************#
   
-  # Output of meta data
+  # Load meta data
   metaData1 <- reactive({
     req(input$file1)
     metaData1 <- read.csv(input$file1$datapath,sep = input$sep1)
     return (metaData1)
   })
   
+  # Return table with meta data
   output$fileContent1 <- DT::renderDataTable({
     metaData1()
   }, server=TRUE, options = list(pageLength = 5), rownames= FALSE)
   
-  
+  # Return header for meta data
   observeEvent((length(metaData1())> 0),{
     output$metaText <- renderUI({
       tagList(
@@ -54,18 +58,19 @@ server = function(input, output,session) {
   })
   
   
-  # Output of transcriptomics data
+  # Load transcriptomics count data
   countData1 <- reactive({
     req(input$file2)
     countData1 <- read.csv(input$file2$datapath,sep = input$sep2)
     return (countData1)
   })
   
+  # Return table with transcriptomics data
   output$fileContent2 <- DT::renderDataTable({
     countData1()
-  }, server = TRUE, options = list(pageLength = 5), rownames= FALSE)
+  }, server = TRUE, options = list(pageLength = 5), rownames= TRUE)
   
-  
+  # Return header for transcriptomics data
   observeEvent((length(countData1())> 0),{
     output$countText <- renderUI({
       tagList(
@@ -79,31 +84,39 @@ server = function(input, output,session) {
   # Go the next step
   observeEvent(if ((length(countData1())> 0) && (length(metaData1())> 0)){input$upload_NEXT}, {
     
+    # Success message
     sendSweetAlert(
       session = session,
       title = "Success!",
       text = "Data successfully selected! You can now start with the pre-processing!",
       type = "success")
     
+    # Go to next tab
     updateTabsetPanel(session, "tabs_trans",
                       selected = "filtering_trans")
     
+    # Show next tab
     showTab("tabs_trans", target = "filtering_trans")
     
-  })#eof observeEvent
+  })
   
   
   #***************************************************#
   # Data filtering
   #***************************************************#
   
-  
-  # Sample/Gene filtering
+  # Perform Sample/Gene filtering
   data <- eventReactive(input$filtering, {
-    sample_gene_filtering(metaData1(), countData1())
-  })#eventReactive
+    data <- sample_gene_filtering(metaData1(), countData1())
+    return(data)
+  })
   
-  # Filtered meta data
+  # Return table with filtered meta data
+  output$metaPreprocessed <- DT::renderDataTable(data()[[1]], server=TRUE,
+                                                 options = list(pageLength = 5))
+  
+  
+  # Return header for meta data
   observeEvent((length(data())> 0),{
     output$metaText1 <- renderUI({
       tagList(
@@ -112,10 +125,12 @@ server = function(input, output,session) {
     })
   })
   
-  output$metaPreprocessed <- DT::renderDataTable(data()[[1]], server=TRUE,
-                                                 options = list(pageLength = 5))
   
-  # Filtered transcriptomics data
+  # Return table for transcriptomics data
+  output$countPreprocessed <- DT::renderDataTable(data()[[2]], server=TRUE,
+                                                  options = list(pageLength = 5))
+  
+  # Return header for transcriptomics data
   observeEvent((length(data())> 0),{
     output$countText1 <- renderUI({
       tagList(
@@ -126,9 +141,7 @@ server = function(input, output,session) {
     })
   })
   
-  output$countPreprocessed <- DT::renderDataTable(data()[[2]], server=TRUE,
-                                                  options = list(pageLength = 5))
-  
+  # Send success message
   observeEvent(input$filtering, {
     
     sendSweetAlert(
@@ -137,13 +150,21 @@ server = function(input, output,session) {
       text = "Samples and genes were successfully filtered!",
       type = "success")
     
-  })#eof observeEvent
+  })
   
+  # Render no plot
   output$plot <- renderPlot({
     NULL     
   })
   
-  # Log CPM filtering   
+  
+  # Perform logCPM filtering
+  data_filtered <- eventReactive(input$filtering, {
+    data_filtered <- cpm_filter_output(data()[[1]],data()[[2]], input$threshold) 
+    return(data_filtered)
+  })
+  
+  # Header for Log CPM filtering   
   observeEvent(input$cpm_filtering, {
     observeEvent(if (length(data())> 0){input$cpm_filtering},{
       output$histText <- renderUI({
@@ -155,6 +176,7 @@ server = function(input, output,session) {
       })
     })
     
+    # Plot log CPM giltering
     output$plot <- renderPlot({
       cpm_filter(data()[[1]],data()[[2]], input$threshold)       
     })
@@ -168,7 +190,7 @@ server = function(input, output,session) {
   })
   
   # Go the next step
-  observeEvent(if (length(data())> 0){input$preprocess_NEXT}, {
+  observeEvent(if (length(data_filtered())> 0){input$preprocess_NEXT}, {
     
     sendSweetAlert(
       session = session,
@@ -222,7 +244,7 @@ server = function(input, output,session) {
                                align = "center")))
       
       #the preprocessed data will be normalized
-      normalize_QCplots(data()[[1]], data()[[2]])
+      normalize_QCplots(data_filtered()[[1]], data_filtered()[[2]])
       
       removeModal()
       
@@ -245,7 +267,7 @@ server = function(input, output,session) {
         outliers <- input$outliersPicker
         
         #remove outliers
-        data1 <-  removeOutliers(data()[[1]], data()[[2]], outliers)
+        data1 <-  removeOutliers(data_filtered()[[1]], data_filtered()[[2]], outliers)
         
         
         showModal(modalDialog(title = h4(strong("Normalization and Quality Control"),
@@ -298,7 +320,7 @@ server = function(input, output,session) {
           cat ("image path =",path,"\n")
         }
         
-        list(src = path, contentType = 'image/png',width = "700px", height = "auto",
+        list(src = path, contentType = 'image/png',width = "800px", height = "auto",
              alt = "This is alternate text")
         
       }, deleteFile=FALSE)
@@ -332,15 +354,32 @@ server = function(input, output,session) {
     input$FCthreshold
   })
   
-
+  # Read top table
   topTable <- eventReactive(input$DEGButton, {
+   topTable <- list()
     WORK_DIR <- getwd()
-    topTable <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Ileum_vs_nonIBD_Ileum.tab"))
+
+      topTable[[1]] <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Ileum_vs_nonIBD_Ileum.tab"))
+
+      topTable[[2]] <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Rectum_vs_nonIBD_Rectum.tab"))
+ 
+      topTable[[3]] <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_UC_Ileum_vs_nonIBD_Ileum.tab"))
+   
+      topTable[[4]] <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_UC_Rectum_vs_nonIBD_Rectum.tab"))
+    
+      names(topTable) <- c("Ileum: CD vs non-IBD",
+                           "Rectum: CD vs non-IBD",
+                           "Ileum: UC vs non-IBD",
+                           "Rectum: UC vs non-IBD")
+    
     return(topTable)
   })
   
-  output$topTable <- DT::renderDataTable(topTable(), server=TRUE,
-                                                 options = list(pageLength = 5))
+  output$topTable <- DT::renderDataTable({
+    req(input$Comparison)
+    return(topTable()[[input$Comparison]])
+  }, server=TRUE,
+  options = list(pageLength = 5))
   
   observeEvent(input$DEGButton, {
     
