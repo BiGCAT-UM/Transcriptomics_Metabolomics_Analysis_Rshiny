@@ -470,7 +470,7 @@ ui <- tagList(
                                     #***************************************************#
                                     # Preprocessing
                                     #***************************************************#
-                                    tabPanel("Filtering",value = "filtering_mets",
+                                    tabPanel("Preprocessing",value = "filtering_mets",
                                              
                                              br(),
                                              #==========================================#
@@ -483,7 +483,6 @@ ui <- tagList(
                                                h4(strong("Sample and gene filtering")),
                                                h5("1. Samples based on visit number and data type will be filtered."),
                                                h5("2. Metabolites with all zero values across all samples will be filtered."),
-                                               h5("3. Metabolites having >50% missing values will be filtered."),
                                                br(),
 
                                                # Apply filtering
@@ -516,60 +515,6 @@ ui <- tagList(
                                              )#mainPanel
                                              
                                     ),#tabPanel
-                                    
-                                    #***************************************************#
-                                    # Normalization & QC for metabolomics
-                                    #***************************************************#
-                                    
-                                    tabPanel("Normalization" , value = "norm_mets",
-                                             br(),
-                                             #==========================================#
-                                             # Side bar
-                                             #==========================================#
-                                             sidebarPanel(
-                                               
-                                               # Title + description
-                                               h3(strong("Normalization & QC")),
-                                               hr(),
-                                               
-                                               # Normalization and QC
-                                               h4(strong("Normalization")),
-                                               h5("Normalization using the DESeq package will be performed."),
-                                               actionBttn(inputId ="outlierButton", label ="Apply", style = "jelly",
-                                                          btn_type = "button", type = "primary", color = "primary"),
-                                               hr(),
-                                               
-                                               #Go forward
-                                               actionBttn(inputId ="norm_NEXT", label ="Next", style = "jelly",
-                                                          btn_type = "button", type = "primary", color = "danger",
-                                                          icon = icon("arrow-right"))
-                                             ),
-                                             
-                                             #==========================================#
-                                             # main Panel
-                                             #==========================================#
-                                             mainPanel(
-                                               selectInput(inputId = "whichQCplot",
-                                                           label = NULL,
-                                                           choices = c("PCA (Normalized)",
-                                                                       "PCA (Raw)",
-                                                                       "Boxplot (Normalized)",
-                                                                       "Boxplot (Raw)"),
-                                                           selected = "PCA (Normalized)"),
-                                               
-                                               imageOutput("QCplot",
-                                                           width = "700px",
-                                                           height = "auto"),
-                                               
-                                               
-                                               
-                                               
-                                               
-                                             )#End of mainPanel
-                                             
-                                    ),
-                                    
-                                    
                                     
                                     #***************************************************#
                                     #Statistical Analysis
