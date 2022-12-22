@@ -106,80 +106,53 @@ server = function(input, output,session) {
   # Data filtering
   #***************************************************#
   
-  # Perform Sample/Gene filtering
-  data <- eventReactive(input$filtering, {
+  # Perform Sample/Gene filtering and logCPM filtering
+  data <- eventReactive(input$cpm_filtering, {
     data <- sample_gene_filtering(metaData1(), countData1())
     return(data)
   })
   
-  # Return table with filtered meta data
-  output$metaPreprocessed <- DT::renderDataTable(data()[[1]], server=TRUE,
-                                                 options = list(pageLength = 5))
-  
-  
-  # Return header for meta data
-  observeEvent((length(data())> 0),{
-    output$metaText1 <- renderUI({
-      tagList(
-        h3(strong("Meta data"))
-      )
-    })
-  })
-  
-  
-  # Return table for transcriptomics data
-  output$countPreprocessed <- DT::renderDataTable(data()[[2]], server=TRUE,
-                                                  options = list(pageLength = 5))
-  
-  # Return header for transcriptomics data
-  observeEvent((length(data())> 0),{
-    output$countText1 <- renderUI({
-      tagList(
-        br(),
-        hr(),
-        h3(strong("Transcriptomics data"))
-      )
-    })
-  })
-  
-  # Send success message
-  observeEvent(input$filtering, {
-    
-    sendSweetAlert(
-      session = session,
-      title = "Success!",
-      text = "Samples and genes were successfully filtered!",
-      type = "success")
-    
-  })
-  
-  # Render no plot
-  output$plot <- renderPlot({
-    NULL     
-  })
-  
-  
-  # Perform logCPM filtering
-  data_filtered <- eventReactive(input$cpm_filtering, {
+  data_filtered <- reactive({
+    req(data())
     data_filtered <- cpm_filter_output(data()[[1]],data()[[2]], input$threshold) 
     return(data_filtered)
   })
   
+  output$plot_prefiltering <- renderPlot(NULL)
+  output$plot_postfiltering <- renderPlot(NULL)
+  
   # Header for Log CPM filtering   
   observeEvent(input$cpm_filtering, {
+    
     observeEvent(if (length(data())> 0){input$cpm_filtering},{
-      output$histText <- renderUI({
+      output$histText_pre <- renderUI({
         tagList(
           br(),
           hr(),
-          h3(strong("Histogram of Mean Expression Values"))
+          h3(strong("Histogram of Mean Expression Values (Pre-filtering)"))
+        )
+      })
+    })
+    
+    # Plot log CPM filtering
+    output$plot_prefiltering <- renderPlot({
+      cpm_filter(data()[[1]],data()[[2]], input$threshold)       
+    })
+    
+    # Header for Log CPM filtering   
+    observeEvent(if (length(data())> 0){input$cpm_filtering},{
+      output$histText_post <- renderUI({
+        tagList(
+          br(),
+          hr(),
+          h3(strong("Histogram of Mean Expression Values (Post-filtering)"))
         )
       })
     })
     
     # Plot log CPM giltering
-    output$plot <- renderPlot({
-      cpm_filter(data()[[1]],data()[[2]], input$threshold)       
+    output$plot_postfiltering <- renderPlot({
+      cpm_filter(data_filtered()[[1]],data_filtered()[[2]], NULL)       
     })
     
     sendSweetAlert(
@@ -351,10 +324,12 @@ server = function(input, output,session) {
   # DEG analysis
   #***************************************************#
   
+  # FC threshold
   FC_threshold <- reactive({
     input$FCthreshold
   })
   
+  # P value threshold
   P_threshold <- reactive({
     input$pthreshold
   })
@@ -411,17 +386,45 @@ server = function(input, output,session) {
     
     return(topTable)
   })
-  
+
+  # Return top table
   output$topTable <- DT::renderDataTable({
     req(input$Comparison)
     output <- topTable()[[input$Comparison]]
     output <- arrange(output, pvalue)
+    output <- output[,c(1,2,3,4,7,8)]
+    colnames(output) <- c("Gene Name", "Avg Expr", "log2 FC", "FC", "p-value", "adj. p-value")
     return(output)
   }, server=TRUE,
-  options = list(pageLength = 5))
+  options = list(pageLength = 5), rownames= FALSE)
+  
+  output$VolcanoPlot <- renderPlot(NULL)
   
   observeEvent(input$DEGButton, {
     
+    # Make plot
+    output$VolcanoPlot <- renderPlot({
+      req(input$AdjOrRaw)
+      req(input$Comparison)
+      topTable <- topTable()[[input$Comparison]]
+      if (input$AdjOrRaw == "Adjusted") {
+        p<-EnhancedVolcano(topTable, lab = topTable$X, labSize = 3, title = NULL, 
+                           x = 'log2FoldChange',
+                           y = 'pvalue', 
+                           pCutoff = P_threshold(), 
+                           FCcutoff = log2(FC_threshold()))
+      }
+      if (input$AdjOrRaw == "Raw") {
+        p<-EnhancedVolcano(topTable, lab = topTable$X, labSize = 3, title = NULL, 
+                           x = 'log2FoldChange',
+                           y = 'padj', 
+                           pCutoff = P_threshold(), 
+                           FCcutoff = log2(FC_threshold()))
+      }
+      return(p)
+    })
+    
+    # Loading message
     showModal(modalDialog(title = h4(strong("Statistical Analysis"),
                                      align = "center"), 
                           footer = NULL,
@@ -431,6 +434,8 @@ server = function(input, output,session) {
     
     
     removeModal()
+    
+    # Success message
     sendSweetAlert(
       session = session,
       title = "Success!",
@@ -439,54 +444,10 @@ server = function(input, output,session) {
     
   })#eof observeEvent
   
-  
-  selectedValue <- reactiveVal()
-  
-  
-  selectedRow <- eventReactive(input$compList,{
-    print("compList_rows_selected")
-    
-  })
+
   
   
-  ############################################################################
   
-  
-  observeEvent(input$volcanoButton, {
-    
-    showModal(modalDialog(title = h4("volcano plot started. Please wait...",
-                                     align = "center"), 
-                          footer = NULL,
-                          easyClose = TRUE,
-                          br())
-    )
-    
-    #call the function for list showing
-    df <- showFileList()
-    
-    # browser()
-    
-    output$compList   <- DT::renderDataTable (
-      #df,selection = "single", 
-      df, server = TRUE
-    )
-    
-    #show selected file name
-    output$selected <- renderText({
-      selectedValue(" textOutput(, )")
-      
-    })
-    
-    
-    
-    showModal(modalDialog(title = h4("volcano plot finished\n
-                                    You can find all plots under 2-differential_gene_expression_analysis",
-                                     align = "center"), 
-                          footer = NULL,
-                          easyClose = TRUE,
-                          br()))
-    
-  })#
   
   #**************************************************************************************************************#
   #                      Metabolomics Data Operations

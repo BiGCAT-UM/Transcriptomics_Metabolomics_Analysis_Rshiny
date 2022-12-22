@@ -129,11 +129,6 @@ ui <- tagList(
                                                h5("2. Genes with all zero values across all samples will be filtered."),
                                                br(),
                                                
-                                               # Apply filtering
-                                               actionBttn(inputId ="filtering", label ="Apply", style = "jelly",
-                                                          btn_type = "button", type = "primary", color = "primary"),
-                                               tags$hr(),
-                                               
                                                # Title + description
                                                h4(strong("Average log CPM filtering")),
                                                h5("This filtering step will be performed to remove lowly expressed genes."),
@@ -143,13 +138,12 @@ ui <- tagList(
                                                             label = "Log CPM threshold", 
                                                             value = 1),
                                                
+                                               hr(),
                                                actionBttn(inputId ="cpm_filtering", label ="Apply", style = "jelly",
                                                           btn_type = "button", type = "primary", color = "primary"),
                                                
                                                #Go forward
-                                               tags$br(),
-                                               tags$br(),
-                                               tags$hr(),
+                                               hr(),
                                                actionBttn(inputId ="preprocess_NEXT", 
                                                           label ="Next", 
                                                           style = "jelly",
@@ -163,18 +157,12 @@ ui <- tagList(
                                              # Main panel
                                              #==========================================#
                                              mainPanel(
-                                               # Output: Data file-1 ----
-                                               uiOutput("metaText1"),
-                                               DT::dataTableOutput("metaPreprocessed")%>% 
+                                               # Histogram
+                                               uiOutput("histText_pre"),
+                                               plotOutput("plot_prefiltering")%>% 
                                                  withSpinner(color="#0dc5c1"),
-                                               br(),
-                                               # Output: Data file-2 ----
-                                               uiOutput("countText1"),
-                                               DT::dataTableOutput("countPreprocessed")%>% 
-                                                 withSpinner(color="#0dc5c1"),
-                                               br(),
-                                               uiOutput("histText"),
-                                               plotOutput("plot")%>% 
+                                               uiOutput("histText_post"),
+                                               plotOutput("plot_postfiltering")%>% 
                                                  withSpinner(color="#0dc5c1")
                                              )
                                     ),
@@ -299,6 +287,9 @@ ui <- tagList(
                                                
                                                #output from DE analysis
                                                DT::dataTableOutput("topTable")%>% 
+                                                 withSpinner(color="#0dc5c1"),
+                                               
+                                               plotOutput("VolcanoPlot")%>% 
                                                  withSpinner(color="#0dc5c1")
                                                  
                                              )#End of mainPanel
