@@ -588,51 +588,73 @@ server = function(input, output,session) {
   #***************************************************#
   # Data normalization
   #***************************************************#
-  selected <- eventReactive(input$normButton,{
-  input$whichNormMethod
- })
+ 
+  selectedMethod <- reactive({
+    input$whichNormMethod
+  })
   
   observeEvent( input$normButton,{
-     
-    showModal(modalDialog(title = h4(strong("Normalization and Quality Control"),
-                                     align = "center"), 
-                          footer = NULL,
-                          h5("Normalization started!", 
-                             align = "center")))
+    
+    #normalization process is done with the function below
+    normalizeMets(selectedMethod())
+    
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "Normalization and QC plots done. 
+        You can find all QC plots in 7-metabolite",
+      type = "success")
+    
+    cat ("Histograms will be shown\n")
+    WORK_DIR <- getwd()
+       
+        observe({
+         output$CDhistogram <- renderText({
+           "CD histogram"
+         })
+          
+          output$histPlotCD <- renderImage({
+           req(input$whichHistCD)
+           if (input$whichHistCD == "Normalized"){
+             path <- paste0(WORK_DIR,"/7-metabolite_data_preprocessing/normalized/CD_histogram_norm.png")
+             cat ("image path =",path,"\n")
+           }
+           if (input$whichHistCD == "Raw"){
+             path <- paste0(WORK_DIR,"/7-metabolite_data_preprocessing/normalized/CD_histogram_raw.png")
+             cat ("image path =",path,"\n")
+           }
+           
+           list(src = path, contentType = 'image/png',width = "500px", height = "auto",
+                alt = "This is alternate text")
+           
+         } ,deleteFile=FALSE)
+      
+          output$UChistogram <- renderText({
+            "UC histogram"
+          })
+          
+         output$histPlotUC <- renderImage({
+           req(input$whichHistUC)
+           if (input$whichHistUC == "Normalized"){
+             path <- paste0(WORK_DIR,"/7-metabolite_data_preprocessing/normalized/UC_histogram_norm.png")
+             cat ("image path =",path,"\n")
+           }
+           if (input$whichHistUC == "Raw"){
+             path <- paste0(WORK_DIR,"/7-metabolite_data_preprocessing/normalized/UC_histogram_raw.png")
+             cat ("image path =",path,"\n")
+           }
+           
+           list(src = path, contentType = 'image/png',width = "500px", height = "auto",
+                alt = "This is alternate text")
+           
+         } ,deleteFile=FALSE)
 
-    normalizeMets(selected())
+        })#observe 
     
-    
-    observe({
-      
-      cat ("Histograms will be shown\n")
-      WORK_DIR <- getwd()
-      
-      
-      output$histPlotCD <- renderImage({
-        req(input$whichHistCD)
-        if (input$whichHistCD == "Normalized"){
-          path <- paste0(WORK_DIR,"/7-metabolite_data_preprocessing/normalized/CD_histogram_norm.png")
-          cat ("image path =",path,"\n")
-        }
-        if (input$whichHistCD == "Raw"){
-          path <- paste0(WORK_DIR,"/7-metabolite_data_preprocessing/normalized/CD_histogram_raw.png")
-          cat ("image path =",path,"\n")
-        }
-        
-        list(src = path, contentType = 'image/png',width = "800px", height = "auto",
-             alt = "This is alternate text")
-        
-      }, deleteFile=FALSE)
-      
-      
-    })#observe
-    
-})#observeEvent
-
+  })#observeEvent
   
   
   
   
-  
+ 
 }#eof server

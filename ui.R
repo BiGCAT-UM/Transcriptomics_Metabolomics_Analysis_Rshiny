@@ -558,7 +558,7 @@ ui <- tagList(
                                              #==========================================#
                                              mainPanel(
                                                
-                                               uiOutput("CD histogram"),
+                                               uiOutput("CDhistogram"),
                                                selectInput(inputId = "whichHistCD",
                                                            label = NULL,
                                                            choices = c("Normalized",
@@ -569,12 +569,13 @@ ui <- tagList(
                                                            width = "800px",
                                                            height = "auto"),
                                               
-                                               uiOutput("UC histogram"),
+                                               uiOutput("UChistogram"),
                                                selectInput(inputId = "whichHistUC",
                                                            label = NULL,
                                                            choices = c("Normalized",
                                                                        "Raw"),
                                                            selected = "Normalized"),
+                                               
                                                imageOutput("histPlotUC",
                                                            width = "800px",
                                                            height = "auto")

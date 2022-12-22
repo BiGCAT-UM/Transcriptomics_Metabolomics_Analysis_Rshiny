@@ -530,16 +530,16 @@ normalizeMets <- function(selected = "log2 transformation"){
   
   ## Visualize the data after the transformation (for one sample to get an idea of suitability of transformation:
   #create histogram for original distribution for first column with data
-  png(paste("7-metabolite_data_preprocessing/normalized/CD_histogram_raw",".png"),width=1000,height=1000)
+  png(paste0("7-metabolite_data_preprocessing/normalized/CD_histogram_raw",".png"),width=1000,height=1000)
   hist(mSet_CD[,3], col='steelblue', main='Original')
   dev.off()
-  cat("raw CD histogram created")
+  cat("raw CD histogram created\n")
   
   #create histogram for log-transformed distribution 
-  png(paste("7-metabolite_data_preprocessing/normalized/CD_histogram_norm",".png"),width=1000,height=1000)
+  png(paste0("7-metabolite_data_preprocessing/normalized/CD_histogram_norm",".png"),width=1000,height=1000)
   hist(mSet_transformed[,3], col='steelblue', main='Original')
   dev.off()
-  cat("norm CD histogram created")
+  cat("norm CD histogram created\n")
   
   
   ############################# for UC disease #########################
@@ -559,16 +559,16 @@ normalizeMets <- function(selected = "log2 transformation"){
   
   ## Visualize the data after the transformation (for one sample to get an idea of suitability of transformation:
   #create histogram for original distribution for first column with data
-  png(paste("7-metabolite_data_preprocessing/normalized/UC_histogram_raw",".png"),width=1000,height=1000)
+  png(paste0("7-metabolite_data_preprocessing/normalized/UC_histogram_raw",".png"),width=800,height=800)
   hist(mSet_UC[,3], col='steelblue', main='Original')
   dev.off()
-  cat("raw UC histogram created")
+  cat("raw UC histogram created\n")
   
   #create histogram for log-transformed distribution 
-  png(paste("7-metabolite_data_preprocessing/normalized/UC_histogram_norm",".png"),width=1000,height=1000)
+  png(paste0("7-metabolite_data_preprocessing/normalized/UC_histogram_norm",".png"),width=800,height=800)
   hist(mSet_transformed[,3], col='steelblue', main='Original')
   dev.off()
-  cat("norm UC histogram created")
+  cat("norm UC histogram created\n")
   
   
   
