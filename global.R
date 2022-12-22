@@ -433,18 +433,18 @@ filteringMets <- function(metaData,mbxData){
   mbxData <- rbind(diseaseLabels, mbxData)
   
   # split up the data for UC and CD, include the control data nonIBD
+  #write only CD_healthy comparison
+  mbxDataCD <- mbxData[ ,(mbxData[1, ] == "CD" | mbxData[1, ] == "nonIBD")]
+  mbxDataCD <- cbind(mbxData[,1:2],mbxDataCD)
+  colnames(mbxDataCD)[1]="HMBDB.ID"
+  colnames(mbxDataCD)[2] <- "Compound.Name"
+  
   #write only UC versus nonIBD comparison
   mbxDataUC <- mbxData[ ,(mbxData[1, ] == "UC" | mbxData[1, ] == "nonIBD")]
   #add hmdb id again
   mbxDataUC <- cbind(mbxData[,1:2],mbxDataUC)
   colnames(mbxDataUC)[1]="HMBDB.ID"
   colnames(mbxDataUC)[2] <- "Compound.Name"
-  
-  #write only CD_healthy comparison
-  mbxDataCD <- mbxData[ ,(mbxData[1, ] == "CD" | mbxData[1, ] == "nonIBD")]
-  mbxDataCD <- cbind(mbxData[,1:2],mbxDataCD)
-  colnames(mbxDataCD)[1]="HMBDB.ID"
-  colnames(mbxDataCD)[2] <- "Compound.Name"
   
   print("Samples and metabolites filtering process finished")  
  
@@ -458,7 +458,7 @@ filteringMets <- function(metaData,mbxData){
 
   columns <- ncol(mbxDataCD)
   rowsData <- nrow(mbxDataCD)
-  removeLines <- rowSums(is.na(mbxDataCD[,3-columns])) #HERE WE DELETE A COLUMN WHICH SHOULD NOT BE LIKE THAT -it should be like-> mSet[,3:columns]
+  removeLines <- rowSums(is.na(mbxDataCD[,3:columns]))
   fifty_percent <- floor((columns)/2)
   
   CD_MissingDataCounted <- cbind(mbxDataCD, removeLines)
@@ -477,7 +477,7 @@ filteringMets <- function(metaData,mbxData){
   
   columns <- ncol(mbxDataUC)
   rowsData <- nrow(mbxDataUC)
-  removeLines <- rowSums(is.na(mbxDataUC[,3-columns])) #HERE WE DELETE A COLUMN WHICH SHOULD NOT BE LIKE THAT -it should be like-> mSet[,3:columns]
+  removeLines <- rowSums(is.na(mbxDataUC[,3:columns])) #HERE WE DELETE A COLUMN WHICH SHOULD NOT BE LIKE THAT -it should be like-> mSet[,3:columns]
   fifty_percent <- floor((columns)/2)
   
   UC_MissingDataCounted <- cbind(mbxDataUC, removeLines)
@@ -497,31 +497,45 @@ filteringMets <- function(metaData,mbxData){
 
 
 #normalization metabolomics data 
-normalizeMets <- function(transformation = "log_2"){
+normalizeMets <- function(){
+browser()
+  splitted <- strsplit("selected thing", " ")
+  transformation <- splitted [[1]][1]
+  cat("Selected transformation ", trans3d())
   
   #data will be read from filtered folder
   mSet_CD <- read.csv("7-metabolite_data_preprocessing/filtered/mbxDataCD_nonIBD.csv", na.strings=c("", "NA"))
   mSet_UC <- read.csv("7-metabolite_data_preprocessing/filtered/mbxDataUC_nonIBD.csv", na.strings=c("", "NA"))
-  
+#browser() 
   ######## for CD disease ########
-  if(transformation == "cube_root"){
+  if(transformation == "cube"){
     mSet_transformed <- cbind(mSet_CD[,c(1,2)], mSet_CD[,3:columns]^(1/3))
-  }else if(transformation == "square_root"){
+  }else if(transformation == "square"){
     mSet_transformed <- cbind(mSet_CD[,c(1,2)], mSet_CD[,3:columns]^(1/2))
-  }else if(transformation == "log_2"){
+  }else if(transformation == "log2"){
     mSet_transformed <- cbind(mSet_CD[,c(1,2)], log2(mSet_CD[,3:columns]))
-  }else if(transformation == "log_10"){
+  }else if(transformation == "log10"){
     mSet_transformed <- cbind(mSet_CD[,c(1,2)], log10(mSet_CD[,3:columns]))
   }else{print("Warning: name for transformation not recognized")}
   
   colnames(mSet_transformed)[1]="HMDB.ID"
   colnames(mSet_transformed)[2]="Compound.Name"
   
+  
+  # png(paste("FC_hist_",colnames(design)[i],"_",postfix,".png",sep=""),width=1000,height=1000)
+  # hist(toptab[,"Fold Change"],main=paste("adapted fold change histogram for",colnames(design)[i]),
+  #      xlab="adapted fold changes",col="green3",breaks=120,cex.axis=1.2,cex.lab=1.2)
+  # dev.off()
+  
   ## Visualize the data after the transformation (for one sample to get an idea of suitability of transformation:
   #create histogram for original distribution for first column with data
+  png(paste("7-metabolite_data_preprocessing/normalized/CD_histogram_raw",".png"),width=1000,height=1000)
   hist(mSet_CD[,3], col='steelblue', main='Original')
+  dev.off()
+  cat("raw CD histogram created")
+  
   #create histogram for log-transformed distribution 
-  hist(mSet_transformed[,3], col='coral2', main=transformation)
+ # hist(mSet_transformed[,3], col='coral2', main=transformation)
   
   
 }

@@ -24,7 +24,7 @@ server = function(input, output,session) {
   # ################################################################
   # 
   hideTab("tabs_mets", target = "filtering_mets")
-  hideTab("tabs_mets", target = "norm_mets")
+  #hideTab("tabs_mets", target = "norm_mets")
   hideTab("tabs_mets", target = "stat_mets")
   hideTab("tabs_mets", target = "pathway_mets")
   hideTab("tabs_mets", target = "mapping_mets")
@@ -160,7 +160,7 @@ server = function(input, output,session) {
   
   
   # Perform logCPM filtering
-  data_filtered <- eventReactive(input$filtering, {
+  data_filtered <- eventReactive(input$cpm_filtering, {
     data_filtered <- cpm_filter_output(data()[[1]],data()[[2]], input$threshold) 
     return(data_filtered)
   })
@@ -627,9 +627,25 @@ server = function(input, output,session) {
   #***************************************************#
   # Data normalization
   #***************************************************#
+  selectedMethod <- reactive({
+    input$whichNormMethod
+  })
   
-  
-  
+  observeEvent( input$normButton,{
+     
+    showModal(modalDialog(title = h4(strong("Normalization and Quality Control"),
+                                     align = "center"), 
+                          footer = NULL,
+                          h5("Normalization started!", 
+                             align = "center")))
+    browser()
+    normalizeMets()
+    
+    
+   }
+    
+  )#observeEvent
+
   
   
   
