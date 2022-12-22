@@ -627,9 +627,9 @@ server = function(input, output,session) {
   #***************************************************#
   # Data normalization
   #***************************************************#
-  selectedMethod <- reactive({
-    input$whichNormMethod
-  })
+  selected <- eventReactive(input$normButton,{
+  input$whichNormMethod
+ })
   
   observeEvent( input$normButton,{
      
@@ -638,14 +638,39 @@ server = function(input, output,session) {
                           footer = NULL,
                           h5("Normalization started!", 
                              align = "center")))
-    browser()
-    normalizeMets()
-    
-    
-   }
-    
-  )#observeEvent
 
+    normalizeMets(selected())
+    
+    
+    observe({
+      
+      cat ("Histograms will be shown\n")
+      WORK_DIR <- getwd()
+      
+      
+      output$histPlotCD <- renderImage({
+        req(input$whichHistCD)
+        if (input$whichHistCD == "Normalized"){
+          path <- paste0(WORK_DIR,"/7-metabolite_data_preprocessing/normalized/CD_histogram_norm.png")
+          cat ("image path =",path,"\n")
+        }
+        if (input$whichHistCD == "Raw"){
+          path <- paste0(WORK_DIR,"/7-metabolite_data_preprocessing/normalized/CD_histogram_raw.png")
+          cat ("image path =",path,"\n")
+        }
+        
+        list(src = path, contentType = 'image/png',width = "800px", height = "auto",
+             alt = "This is alternate text")
+        
+      }, deleteFile=FALSE)
+      
+      
+    })#observe
+    
+})#observeEvent
+
+  
+  
   
   
   

@@ -575,7 +575,7 @@ ui <- tagList(
                                                            selected = "Normalized"),
                                                
                                                imageOutput("histPlotCD",
-                                                           width = "700px",
+                                                           width = "800px",
                                                            height = "auto"),
                                               
                                                uiOutput("UC histogram"),
@@ -585,7 +585,7 @@ ui <- tagList(
                                                                        "Raw"),
                                                            selected = "Normalized"),
                                                imageOutput("histPlotUC",
-                                                           width = "700px",
+                                                           width = "800px",
                                                            height = "auto")
                                                
                                                

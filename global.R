@@ -497,17 +497,20 @@ filteringMets <- function(metaData,mbxData){
 
 
 #normalization metabolomics data 
-normalizeMets <- function(){
-browser()
-  splitted <- strsplit("selected thing", " ")
+normalizeMets <- function(selected = "log2 transformation"){
+
+  #browser()
+  splitted <- strsplit(selected, " ")
   transformation <- splitted [[1]][1]
-  cat("Selected transformation ", trans3d())
+  cat("Selected transformation ", transformation)
   
   #data will be read from filtered folder
   mSet_CD <- read.csv("7-metabolite_data_preprocessing/filtered/mbxDataCD_nonIBD.csv", na.strings=c("", "NA"))
   mSet_UC <- read.csv("7-metabolite_data_preprocessing/filtered/mbxDataUC_nonIBD.csv", na.strings=c("", "NA"))
-#browser() 
-  ######## for CD disease ########
+  
+
+  ############################# for CD disease #########################
+  columns <- ncol(mSet_CD)
   if(transformation == "cube"){
     mSet_transformed <- cbind(mSet_CD[,c(1,2)], mSet_CD[,3:columns]^(1/3))
   }else if(transformation == "square"){
@@ -520,7 +523,6 @@ browser()
   
   colnames(mSet_transformed)[1]="HMDB.ID"
   colnames(mSet_transformed)[2]="Compound.Name"
-  
   
   # png(paste("FC_hist_",colnames(design)[i],"_",postfix,".png",sep=""),width=1000,height=1000)
   # hist(toptab[,"Fold Change"],main=paste("adapted fold change histogram for",colnames(design)[i]),
@@ -535,7 +537,40 @@ browser()
   cat("raw CD histogram created")
   
   #create histogram for log-transformed distribution 
- # hist(mSet_transformed[,3], col='coral2', main=transformation)
+  png(paste("7-metabolite_data_preprocessing/normalized/CD_histogram_norm",".png"),width=1000,height=1000)
+  hist(mSet_transformed[,3], col='steelblue', main='Original')
+  dev.off()
+  cat("norm CD histogram created")
+  
+  
+  ############################# for UC disease #########################
+  columns <- ncol(mSet_UC)
+  if(transformation == "cube"){
+    mSet_transformed <- cbind(mSet_UC[,c(1,2)], mSet_UC[,3:columns]^(1/3))
+  }else if(transformation == "square"){
+    mSet_transformed <- cbind(mSet_UC[,c(1,2)], mSet_UC[,3:columns]^(1/2))
+  }else if(transformation == "log2"){
+    mSet_transformed <- cbind(mSet_UC[,c(1,2)], log2(mSet_UC[,3:columns]))
+  }else if(transformation == "log10"){
+    mSet_transformed <- cbind(mSet_UC[,c(1,2)], log10(mSet_UC[,3:columns]))
+  }else{print("Warning: name for transformation not recognized")}
+  
+  colnames(mSet_transformed)[1]="HMDB.ID"
+  colnames(mSet_transformed)[2]="Compound.Name"
+  
+  ## Visualize the data after the transformation (for one sample to get an idea of suitability of transformation:
+  #create histogram for original distribution for first column with data
+  png(paste("7-metabolite_data_preprocessing/normalized/UC_histogram_raw",".png"),width=1000,height=1000)
+  hist(mSet_UC[,3], col='steelblue', main='Original')
+  dev.off()
+  cat("raw UC histogram created")
+  
+  #create histogram for log-transformed distribution 
+  png(paste("7-metabolite_data_preprocessing/normalized/UC_histogram_norm",".png"),width=1000,height=1000)
+  hist(mSet_transformed[,3], col='steelblue', main='Original')
+  dev.off()
+  cat("norm UC histogram created")
+  
   
   
 }
