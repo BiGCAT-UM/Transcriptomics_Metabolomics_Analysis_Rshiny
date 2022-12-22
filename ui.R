@@ -520,7 +520,7 @@ ui <- tagList(
                                                  withSpinner(color="#0dc5c1"),
                                                br(),
                                                # Output: Data file-2 ----
-                                               uiOutput("UCPreprocessText"),
+                                               uiOutput("UCpreprocessText"),
                                                DT::dataTableOutput("mbxUCPreprocessed")%>%
                                                  withSpinner(color="#0dc5c1"),
                                                

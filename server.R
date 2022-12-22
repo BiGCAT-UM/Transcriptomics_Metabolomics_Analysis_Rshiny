@@ -587,8 +587,6 @@ server = function(input, output,session) {
   observeEvent((length(data2())> 0),{
     output$UCpreprocessText <- renderUI({
       tagList(
-        br(),
-        hr(),
         h3(strong("UC preprocessed metabolomics data"))
       )
     })
@@ -604,7 +602,7 @@ server = function(input, output,session) {
       session = session,
       title = "Success!",
       text = "Data successfully filtered!",
-      type = "success")s
+      type = "success")
 
   })#eof observeEvent
   

@@ -439,14 +439,12 @@ preprocessMets <- function(metaData,mbxData){
   mbxDataUC <- cbind(mbxData[,1:2],mbxDataUC)
   colnames(mbxDataUC)[1]="HMBDB.ID"
   colnames(mbxDataUC)[2] <- "Compound.Name"
- # write.table(mbxDataUC, "output/mbxDataUC_nonIBD.csv", sep =",", row.names = FALSE)
   
   #write only CD_healthy comparison
   mbxDataCD <- mbxData[ ,(mbxData[1, ] == "CD" | mbxData[1, ] == "nonIBD")]
   mbxDataCD <- cbind(mbxData[,1:2],mbxDataCD)
   colnames(mbxDataCD)[1]="HMBDB.ID"
   colnames(mbxDataCD)[2] <- "Compound.Name"
- # write.table(mbxDataCD, "output/mbxDataCD_nonIBD.csv", sep =",", row.names = FALSE)
   
   print("Samples and metabolites filtering process finished")  
  
@@ -470,7 +468,7 @@ preprocessMets <- function(metaData,mbxData){
   
   #Convert intensity data to numeric values                         
   CD_NoMissingData[, c(3:columns)] <- apply(CD_NoMissingData[, c(3:columns)],2, function(x) as.numeric(as.character(x)))
-  write.table(CD_NoMissingData, "7-metabolite_data_preprocessing/mbxDataCD_nonIBD.csv", sep =",", row.names = FALSE)
+  write.table(CD_NoMissingData, "7-metabolite_data_preprocessing/filtered/mbxDataCD_nonIBD.csv", sep =",", row.names = FALSE)
   
   ############# for UC disease ################
   #Merge column headers: disorder_patientID
@@ -489,7 +487,7 @@ preprocessMets <- function(metaData,mbxData){
   
   #Convert intensity data to numeric values                         
   UC_NoMissingData[, c(3:columns)] <- apply(UC_NoMissingData[, c(3:columns)],2, function(x) as.numeric(as.character(x)))
-  write.table(UC_NoMissingData, "7-metabolite_data_preprocessing/mbxDataUC_nonIBD.csv", sep =",", row.names = FALSE)
+  write.table(UC_NoMissingData, "7-metabolite_data_preprocessing/filtered/mbxDataUC_nonIBD.csv", sep =",", row.names = FALSE)
   
   
   return(list((CD_NoMissingData),(UC_NoMissingData)))
