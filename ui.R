@@ -479,7 +479,7 @@ ui <- tagList(
                                     
                                     
                                     #***************************************************#
-                                    # Preprocessing
+                                    # Filtering
                                     #***************************************************#
                                     tabPanel("Filtering",value = "filtering_mets",
                                              
@@ -515,13 +515,13 @@ ui <- tagList(
                                              ),#sidebarPanel
                                              mainPanel(
                                                # Output: Data file-1 ----
-                                               uiOutput("metaPreprocessText"),
-                                               DT::dataTableOutput("mbxMetaPreprocessed")%>%
+                                               uiOutput("CDpreprocessText"),
+                                               DT::dataTableOutput("mbxCDPreprocessed")%>%
                                                  withSpinner(color="#0dc5c1"),
                                                br(),
                                                # Output: Data file-2 ----
-                                               uiOutput("mbxCountText"),
-                                               DT::dataTableOutput("mbxCountPreprocessed")%>%
+                                               uiOutput("UCPreprocessText"),
+                                               DT::dataTableOutput("mbxUCPreprocessed")%>%
                                                  withSpinner(color="#0dc5c1"),
                                                
                                              )#mainPanel

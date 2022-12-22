@@ -554,9 +554,9 @@ server = function(input, output,session) {
   })#eof observeEvent
  
   #***************************************************#
-  # Data preprocessing
+  # Data filtering
   #***************************************************#
-  #*
+  
   # Metabolomics Sample/Gene filtering
   data2 <- eventReactive(input$metsFiltering, {
     sendSweetAlert(
@@ -565,35 +565,37 @@ server = function(input, output,session) {
       text = "Filtering process started! It might take time please be patient.",
       type = "info"
       )
-    preprocessMets(mbxMeta())
-    
+    data2 <- preprocessMets(mbxMeta(),mbxData())
+  return (data2)
   })#eventReactive
 
 
-  # Filtered meta data
+  # Header for filtered meta data
   observeEvent((length(data2())> 0),{
-    output$metaPreprocessText <- renderUI({
+    output$CDpreprocessText <- renderUI({
       tagList(
-        h3(strong("Meta data"))
+        h3(strong("CD preprocessed metabolomics data"))
       )
     })
   })
 
-  output$mbxMetaPreprocessed <- DT::renderDataTable(data2()[[1]], server=TRUE,
+  #Table for filtered meta-data
+  output$mbxCDPreprocessed <- DT::renderDataTable(data2()[[1]], server=TRUE,
                                                  options = list(pageLength = 5))
 
-  # Filtered  data
+  # Header for filtered metabolomics data
   observeEvent((length(data2())> 0),{
-    output$mbxCountText <- renderUI({
+    output$UCpreprocessText <- renderUI({
       tagList(
         br(),
         hr(),
-        h3(strong("Metabolomics data"))
+        h3(strong("UC preprocessed metabolomics data"))
       )
     })
   })
   
-  output$mbxCountPreprocessed <- DT::renderDataTable(data2()[[2]], server=TRUE,
+  #Table for filtered metabolomics data
+  output$mbxUCPreprocessed <- DT::renderDataTable(data2()[[2]], server=TRUE,
                                                   options = list(pageLength = 5))
 
   observeEvent(input$metsFiltering, {
@@ -601,12 +603,12 @@ server = function(input, output,session) {
     sendSweetAlert(
       session = session,
       title = "Success!",
-      text = "Samples and genes were successfully filtered!",
-      type = "success")
+      text = "Data successfully filtered!",
+      type = "success")s
 
   })#eof observeEvent
   
-  
+#####################################################################################  
   
   # Go the next step
   observeEvent(if ((length(data2()[[1]])> 0) && (length(data2()[[2]])> 0)){input$metPre_NEXT}, {
@@ -614,13 +616,13 @@ server = function(input, output,session) {
     sendSweetAlert(
       session = session,
       title = "Success!",
-      text = "Data successfully preprocessed! You can now start with statistical analysis!",
+      text = "Data successfully filtered! You can now start with normalization process!",
       type = "success")
 
     updateTabsetPanel(session, "tabs_mets",
-                      selected = "stat_mets")
+                      selected = "norm_mets")
 
-    showTab("tabs_mets", target = "stat_mets")
+    showTab("tabs_mets", target = "norm_mets")
 
   })#eof observeEvent
   

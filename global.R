@@ -383,10 +383,8 @@ networkAnalysis <- function(){
 
 #############################################Metabolomics analysis functions ###################################################
 #preprocessing metabolomics data 
-preprocessMets <- function(metaData ){
+preprocessMets <- function(metaData,mbxData){
   
-  #read metadata file
-  # metaData <- read.csv("data/hmp2_metadata.csv")
   #filter out by data type and week number
   metaDataMBX <- subset(metaData, metaData$data_type == "metabolomics" )
   #we need to have the samples which has same visit number
@@ -396,15 +394,6 @@ preprocessMets <- function(metaData ){
   #rename columns of metaDataMBX
   colnames(metaDataMBX) <- c("ExternalID","ParticipantID","disease" )
   
-  #Note: if the URL download does not work, the zipped file is located on GitHub to continue the rest of this script.
-  if(file.exists("data/metabolomics.csv")){print("Unzipped Metabolomics data already exist\n")}
-  else{
-    gunzip("data/metabolomics.csv.gz", remove=FALSE)
-    print("Metabolomics data unzipped\n")
-  }
-  #if the data already downloaded then read it
-  mbxData <- read.csv("data/metabolomics.csv")
-  print("Metabolomics data was read")
   #delete not used columns
   mbxData = subset(mbxData, select = -c(1,2,3,4,7) )
   
@@ -443,59 +432,67 @@ preprocessMets <- function(metaData ){
   diseaseLabels <- append(diseaseLabels, "NA",after = 0)
   mbxData <- rbind(diseaseLabels, mbxData)
   
-  WORK.DIR <- getwd()
-  setwd(paste0(WORK.DIR,"/7-metabolite_data_preprocessing"))
-  if(!dir.exists("output"))#if dir not exist then create
-    dir.create("output")
-  
-  # split up the data for UC and CD, include the control data nonIBD, and save this data to an output folder.
+  # split up the data for UC and CD, include the control data nonIBD
   #write only UC versus nonIBD comparison
   mbxDataUC <- mbxData[ ,(mbxData[1, ] == "UC" | mbxData[1, ] == "nonIBD")]
   #add hmdb id again
   mbxDataUC <- cbind(mbxData[,1:2],mbxDataUC)
   colnames(mbxDataUC)[1]="HMBDB.ID"
   colnames(mbxDataUC)[2] <- "Compound.Name"
-  write.table(mbxDataUC, "output/mbxDataUC_nonIBD.csv", sep =",", row.names = FALSE)
+ # write.table(mbxDataUC, "output/mbxDataUC_nonIBD.csv", sep =",", row.names = FALSE)
   
   #write only CD_healthy comparison
   mbxDataCD <- mbxData[ ,(mbxData[1, ] == "CD" | mbxData[1, ] == "nonIBD")]
   mbxDataCD <- cbind(mbxData[,1:2],mbxDataCD)
   colnames(mbxDataCD)[1]="HMBDB.ID"
   colnames(mbxDataCD)[2] <- "Compound.Name"
-  write.table(mbxDataCD, "output/mbxDataCD_nonIBD.csv", sep =",", row.names = FALSE)
+ # write.table(mbxDataCD, "output/mbxDataCD_nonIBD.csv", sep =",", row.names = FALSE)
   
   print("Samples and metabolites filtering process finished")  
  
   #Metabolites with >50% NA values will be filtered
   print("Filtering metabolites with NA values started")
+  
+  ################# for CD disease #########
   #Merge column headers: disorder_patientID
-  # names(mSet) <- paste(mSet [1, ], names(mSet), sep = "_")
-  # mSet <- mSet [-1,]
-  
-  
-  
-  #Remove metabolites with > 50% data (located in columns 8-553)
-  #this process should be performed in splitted up for both diseases CD and UC since statistical analysis will
-  #be performed separately for each disease
-  
-  #for CD disease
+  names(mbxDataCD) <- paste(mbxDataCD [1, ], names(mbxDataCD), sep = "_")
+  mbxDataCD <- mbxDataCD [-1,]
+
   columns <- ncol(mbxDataCD)
   rowsData <- nrow(mbxDataCD)
   removeLines <- rowSums(is.na(mbxDataCD[,3-columns])) #HERE WE DELETE A COLUMN WHICH SHOULD NOT BE LIKE THAT -it should be like-> mSet[,3:columns]
   fifty_percent <- floor((columns)/2)
   
-  mSet_MissingDataCounted <- cbind(mbxDataCD, removeLines)
-  mSet_NoMissingData <- subset(mSet_MissingDataCounted, removeLines <= fifty_percent)
+  CD_MissingDataCounted <- cbind(mbxDataCD, removeLines)
+  CD_NoMissingData <- subset(CD_MissingDataCounted, removeLines <= fifty_percent)
   #Remove last column for further processing.
-  mSet_NoMissingData <- subset(mSet_NoMissingData, select=-c(removeLines))
+  CD_NoMissingData <- subset(CD_NoMissingData, select=-c(removeLines))
   
   #Convert intensity data to numeric values                         
-  mSet_NoMissingData[, c(3:columns)] <- apply(mSet_NoMissingData[, c(3:columns)],2, function(x) as.numeric(as.character(x)))
+  CD_NoMissingData[, c(3:columns)] <- apply(CD_NoMissingData[, c(3:columns)],2, function(x) as.numeric(as.character(x)))
+  write.table(CD_NoMissingData, "7-metabolite_data_preprocessing/mbxDataCD_nonIBD.csv", sep =",", row.names = FALSE)
+  
+  ############# for UC disease ################
+  #Merge column headers: disorder_patientID
+  names(mbxDataUC) <- paste(mbxDataUC [1, ], names(mbxDataUC), sep = "_")
+  mbxDataUC <- mbxDataUC [-1,]
+  
+  columns <- ncol(mbxDataUC)
+  rowsData <- nrow(mbxDataUC)
+  removeLines <- rowSums(is.na(mbxDataUC[,3-columns])) #HERE WE DELETE A COLUMN WHICH SHOULD NOT BE LIKE THAT -it should be like-> mSet[,3:columns]
+  fifty_percent <- floor((columns)/2)
+  
+  UC_MissingDataCounted <- cbind(mbxDataUC, removeLines)
+  UC_NoMissingData <- subset(UC_MissingDataCounted, removeLines <= fifty_percent)
+  #Remove last column for further processing.
+  UC_NoMissingData <- subset(UC_NoMissingData, select=-c(removeLines))
+  
+  #Convert intensity data to numeric values                         
+  UC_NoMissingData[, c(3:columns)] <- apply(UC_NoMissingData[, c(3:columns)],2, function(x) as.numeric(as.character(x)))
+  write.table(UC_NoMissingData, "7-metabolite_data_preprocessing/mbxDataUC_nonIBD.csv", sep =",", row.names = FALSE)
   
   
-  
-  
-  return(list((metaData),(mbxData)))
+  return(list((CD_NoMissingData),(UC_NoMissingData)))
   
   
 }
