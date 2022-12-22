@@ -382,8 +382,8 @@ networkAnalysis <- function(){
 
 
 #############################################Metabolomics analysis functions ###################################################
-#preprocessing metabolomics data 
-preprocessMets <- function(metaData,mbxData){
+#filtering metabolomics data 
+filteringMets <- function(metaData,mbxData){
   
   #filter out by data type and week number
   metaDataMBX <- subset(metaData, metaData$data_type == "metabolomics" )
@@ -495,6 +495,36 @@ preprocessMets <- function(metaData,mbxData){
   
 }
 
+
+#normalization metabolomics data 
+normalizeMets <- function(transformation = "log_2"){
+  
+  #data will be read from filtered folder
+  mSet_CD <- read.csv("7-metabolite_data_preprocessing/filtered/mbxDataCD_nonIBD.csv", na.strings=c("", "NA"))
+  mSet_UC <- read.csv("7-metabolite_data_preprocessing/filtered/mbxDataUC_nonIBD.csv", na.strings=c("", "NA"))
+  
+  ######## for CD disease ########
+  if(transformation == "cube_root"){
+    mSet_transformed <- cbind(mSet_CD[,c(1,2)], mSet_CD[,3:columns]^(1/3))
+  }else if(transformation == "square_root"){
+    mSet_transformed <- cbind(mSet_CD[,c(1,2)], mSet_CD[,3:columns]^(1/2))
+  }else if(transformation == "log_2"){
+    mSet_transformed <- cbind(mSet_CD[,c(1,2)], log2(mSet_CD[,3:columns]))
+  }else if(transformation == "log_10"){
+    mSet_transformed <- cbind(mSet_CD[,c(1,2)], log10(mSet_CD[,3:columns]))
+  }else{print("Warning: name for transformation not recognized")}
+  
+  colnames(mSet_transformed)[1]="HMDB.ID"
+  colnames(mSet_transformed)[2]="Compound.Name"
+  
+  ## Visualize the data after the transformation (for one sample to get an idea of suitability of transformation:
+  #create histogram for original distribution for first column with data
+  hist(mSet_CD[,3], col='steelblue', main='Original')
+  #create histogram for log-transformed distribution 
+  hist(mSet_transformed[,3], col='coral2', main=transformation)
+  
+  
+}
 
 ####################################################STATISTICAL ANALYSIS FUNCTIONS  #########################################
 

@@ -565,7 +565,7 @@ server = function(input, output,session) {
       text = "Filtering process started! It might take time please be patient.",
       type = "info"
       )
-    data2 <- preprocessMets(mbxMeta(),mbxData())
+    data2 <- filteringMets(mbxMeta(),mbxData())
   return (data2)
   })#eventReactive
 
@@ -606,8 +606,6 @@ server = function(input, output,session) {
 
   })#eof observeEvent
   
-#####################################################################################  
-  
   # Go the next step
   observeEvent(if ((length(data2()[[1]])> 0) && (length(data2()[[2]])> 0)){input$metPre_NEXT}, {
 
@@ -623,6 +621,14 @@ server = function(input, output,session) {
     showTab("tabs_mets", target = "norm_mets")
 
   })#eof observeEvent
+  
+  #####################################################################################    
+  
+  #***************************************************#
+  # Data normalization
+  #***************************************************#
+  
+  
   
   
   

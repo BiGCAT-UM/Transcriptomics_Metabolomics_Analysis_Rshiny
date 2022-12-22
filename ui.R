@@ -542,8 +542,20 @@ ui <- tagList(
                                                # Title + description
                                                h3(strong("Normalization & QC")),
                                                hr(),
+                                               h3(strong("Normalization" )),
+                                               h4("Please select a normalization method to be applied:"),
+                                               selectInput(inputId = "whichNormMethod",
+                                                           label = NULL,
+                                                           choices = c("log2 transformation",
+                                                                       "log10 transformation",
+                                                                       "cube root transformation",
+                                                                       "square root transformation"),
+                                                           selected = "log2 transformation"),
                                                
-                                              
+                                               actionBttn(inputId ="normButton", label ="Apply", style = "jelly",
+                                                          btn_type = "button", type = "primary", color = "primary"),
+                                               hr(),
+                                               
                                                #Go forward
                                                actionBttn(inputId ="metNorm_NEXT", label ="Next", style = "jelly",
                                                           btn_type = "button", type = "primary", color = "danger",
@@ -555,7 +567,26 @@ ui <- tagList(
                                              #==========================================#
                                              mainPanel(
                                                
+                                               uiOutput("CD histogram"),
+                                               selectInput(inputId = "whichHistCD",
+                                                           label = NULL,
+                                                           choices = c("Normalized",
+                                                                       "Raw"),
+                                                           selected = "Normalized"),
                                                
+                                               imageOutput("histPlotCD",
+                                                           width = "700px",
+                                                           height = "auto"),
+                                              
+                                               uiOutput("UC histogram"),
+                                               selectInput(inputId = "whichHistUC",
+                                                           label = NULL,
+                                                           choices = c("Normalized",
+                                                                       "Raw"),
+                                                           selected = "Normalized"),
+                                               imageOutput("histPlotUC",
+                                                           width = "700px",
+                                                           height = "auto")
                                                
                                                
                                                
