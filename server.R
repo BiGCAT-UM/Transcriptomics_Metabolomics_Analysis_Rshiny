@@ -1,7 +1,7 @@
 server = function(input, output,session) { 
   
   #to limit file size
-  options(shiny.maxRequestSize = 125*1024^2)
+  options(shiny.maxRequestSize = 500*1024^2)
   
   ################################################################
   
@@ -24,6 +24,7 @@ server = function(input, output,session) {
   # ################################################################
   # 
   hideTab("tabs_mets", target = "filtering_mets")
+  hideTab("tabs_mets", target = "norm_mets")
   hideTab("tabs_mets", target = "stat_mets")
   hideTab("tabs_mets", target = "pathway_mets")
   hideTab("tabs_mets", target = "mapping_mets")
@@ -515,25 +516,26 @@ server = function(input, output,session) {
     })
   })
   
+  # Output of metabolomics original data
+  mbxData <- reactive({
+    req(input$metsData)
+    mbxData <- read.csv(input$metsData$datapath,sep = input$sepMet2)
+    return (mbxData)
+  })
+  
+  output$mbxDataFile <- DT::renderDataTable({
+    mbxData()
+  }, server=TRUE, options = list(pageLength = 5), rownames= FALSE)
   
   
-  #output of metabolite intensity data
-  observeEvent( input$metDownload,{
-    
-    #download and read metabolomics peak intensity data
-    if(file.exists("data/metabolomics.csv.gz"))
-      {print("Metabolomics zipped data already downloaded")}
-    else{
-      fileUrl <- "https://ibdmdb.org/tunnel/products/HMP2/Metabolites/1723/HMP2_metabolomics.csv.gz?accessType=DOWNLOAD"
-      download(fileUrl, "data/metabolomics.csv.gz", mode = "wb")
-    }
-    sendSweetAlert(
-      session = session,
-      title = "Success!",
-      text = "You now have metabolomics count data! You can now start analysis!",
-      type = "success")
-   
-  })#observeEvent
+  observeEvent((length(mbxData())> 0),{
+    output$mbxDataFileText <- renderUI({
+      tagList(
+        h3(strong("Metabolomics data"))
+      )
+    })
+  })
+   ##################################################################
 
   #go to next step
   observeEvent(if ((length(mbxMeta())> 0)){input$metUpload_NEXT}, {

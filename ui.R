@@ -415,17 +415,36 @@ ui <- tagList(
                                                # Horizontal line
                                                tags$hr(),
                                               
+                                               
+                                               
                                                h3(strong("Metabolomics data")),
                                                hr(),
-                                               h5("The peak intensity value data will be downloaded,"),
-                                               h5("If you already downloaded it, the count data will be uploaded"),
+                                               h5("The peak intensity value data will be uploaded,"),
                                               
-                                               #Metabolomics data download button
-                                               actionBttn(inputId ="metDownload", 
-                                                          label ="Download Data", 
-                                                          style = "jelly",
-                                                          btn_type = "button", 
-                                                          type = "primary"),
+                                               # Upload file
+                                               fileInput(inputId = "metsData", 
+                                                         label = NULL,
+                                                         multiple = FALSE,
+                                                         accept = c("text/csv",
+                                                                    "text/comma-separated-values,text/plain",
+                                                                    ".csv",
+                                                                    ".tsv")),
+                                               
+                                               # Input: Checkbox if file has header
+                                               checkboxInput("headMet", "Header", TRUE),
+                                               
+                                               # Input: Checkbox if file has row names
+                                               checkboxInput("rowsMet", "RowNames", TRUE),
+                                               
+                                               # Input: Select separator
+                                               radioButtons("sepMet2", "Separator",
+                                                            choices = c(Comma = ",",
+                                                                        Semicolon = ";",
+                                                                        Tab = "\t"),
+                                                            selected = "\t"),
+                                               
+                                               # Horizontal line
+                                               tags$hr(),
                                                
                                                # Horizontal line ----
                                                tags$hr(),
@@ -448,6 +467,9 @@ ui <- tagList(
                                                # Output: Data file-1 ----
                                                uiOutput("mbxMetaText"),
                                                DT::dataTableOutput("mbxMetaFile")%>% 
+                                                 withSpinner(color="#0dc5c1"),
+                                               uiOutput("mbxDataFileText"),
+                                               DT::dataTableOutput("mbxDataFile")%>% 
                                                  withSpinner(color="#0dc5c1")
                                             
                                                
@@ -467,7 +489,7 @@ ui <- tagList(
                                              #==========================================#
                                              sidebarPanel(
                                                # Title + description
-                                               h3(strong("Pre-processing")),
+                                               h3(strong("Filtering")),
                                                hr(),
                                                h4(strong("Sample and gene filtering")),
                                                h5("1. Samples based on visit number and data type will be filtered."),
@@ -521,15 +543,9 @@ ui <- tagList(
                                                h3(strong("Normalization & QC")),
                                                hr(),
                                                
-                                               # Normalization and QC
-                                               h4(strong("Normalization")),
-                                               h5("Normalization using the DESeq package will be performed."),
-                                               actionBttn(inputId ="outlierButton", label ="Apply", style = "jelly",
-                                                          btn_type = "button", type = "primary", color = "primary"),
-                                               hr(),
-                                               
+                                              
                                                #Go forward
-                                               actionBttn(inputId ="norm_NEXT", label ="Next", style = "jelly",
+                                               actionBttn(inputId ="metNorm_NEXT", label ="Next", style = "jelly",
                                                           btn_type = "button", type = "primary", color = "danger",
                                                           icon = icon("arrow-right"))
                                              ),
@@ -538,17 +554,7 @@ ui <- tagList(
                                              # main Panel
                                              #==========================================#
                                              mainPanel(
-                                               selectInput(inputId = "whichQCplot_met",
-                                                           label = NULL,
-                                                           choices = c("PCA (Normalized)",
-                                                                       "PCA (Raw)",
-                                                                       "Boxplot (Normalized)",
-                                                                       "Boxplot (Raw)"),
-                                                           selected = "PCA (Normalized)"),
                                                
-                                               imageOutput("QCplot_met",
-                                                           width = "700px",
-                                                           height = "auto"),
                                                
                                                
                                                
