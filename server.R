@@ -325,60 +325,76 @@ server = function(input, output,session) {
   #***************************************************#
   
   # FC threshold
-  FC_threshold <- reactive({
+  FC_threshold <- eventReactive(input$DEGButton, {
     input$FCthreshold
   })
   
   # P value threshold
-  P_threshold <- reactive({
+  P_threshold <- eventReactive(input$DEGButton, {
     input$pthreshold
   })
   
   # Read top table
-  topTable <- eventReactive(input$DEGButton, {
+  topTable_all <- eventReactive(input$DEGButton, {
+    req(input$AdjOrRaw)
+    topTable <- list()
+    WORK_DIR <- getwd()
+    
+    topTable[[1]] <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Ileum_vs_nonIBD_Ileum.tab"))
+    topTable[[2]] <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Rectum_vs_nonIBD_Rectum.tab"))
+    topTable[[3]]<- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_UC_Ileum_vs_nonIBD_Ileum.tab"))
+    topTable[[4]] <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_UC_Rectum_vs_nonIBD_Rectum.tab"))
+    
+    names(topTable) <- c("Ileum: CD vs non-IBD",
+                         "Rectum: CD vs non-IBD",
+                         "Ileum: UC vs non-IBD",
+                         "Rectum: UC vs non-IBD")
+    
+    return(topTable)
+  })
+  
+  # Filter top table
+  topTable_filtered <- eventReactive(input$DEGButton, {
     req(input$AdjOrRaw)
     topTable <- list()
     WORK_DIR <- getwd()
     
     if (input$AdjOrRaw == "Raw") {
-      temp <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Ileum_vs_nonIBD_Ileum.tab"))
+      temp <- topTable_all()[[1]]
       topTable[[1]] <- temp[(abs(temp$FoldChange) > FC_threshold()) &
                               (temp$pvalue < P_threshold()),]
       
-      temp <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Rectum_vs_nonIBD_Rectum.tab"))
+      temp <- topTable_all()[[2]]
       topTable[[2]] <- temp[(abs(temp$FoldChange) > FC_threshold()) &
                               (temp$pvalue < P_threshold()),]
       
-      temp <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_UC_Ileum_vs_nonIBD_Ileum.tab"))
+      temp <- topTable_all()[[3]]
       topTable[[3]] <- temp[(abs(temp$FoldChange) > FC_threshold()) &
                               (temp$pvalue < P_threshold()),]
       
       
-      temp<- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_UC_Rectum_vs_nonIBD_Rectum.tab"))
+      temp <- topTable_all()[[4]]      
       topTable[[4]] <- temp[(abs(temp$FoldChange) > FC_threshold()) &
                               (temp$pvalue < P_threshold()),]
     }
     if (input$AdjOrRaw == "Adjusted") {
-      temp <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Ileum_vs_nonIBD_Ileum.tab"))
+      temp <- topTable_all()[[1]]
       topTable[[1]] <- temp[(abs(temp$FoldChange) > FC_threshold()) &
                               (temp$padj < P_threshold()),]
       
-      temp <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Rectum_vs_nonIBD_Rectum.tab"))
+      temp <- topTable_all()[[1]]
       topTable[[2]] <- temp[(abs(temp$FoldChange) > FC_threshold()) &
                               (temp$padj < P_threshold()),]
       
-      temp <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_UC_Ileum_vs_nonIBD_Ileum.tab"))
+      temp <- topTable_all()[[1]]
       topTable[[3]] <- temp[(abs(temp$FoldChange) > FC_threshold()) &
                               (temp$padj < P_threshold()),]
       
-      
-      temp<- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_UC_Rectum_vs_nonIBD_Rectum.tab"))
+      temp <- topTable_all()[[1]]
       topTable[[4]] <- temp[(abs(temp$FoldChange) > FC_threshold()) &
                               (temp$padj < P_threshold()),]
     }
-    
 
-    
     names(topTable) <- c("Ileum: CD vs non-IBD",
                          "Rectum: CD vs non-IBD",
                          "Ileum: UC vs non-IBD",
@@ -390,7 +406,7 @@ server = function(input, output,session) {
   # Return top table
   output$topTable <- DT::renderDataTable({
     req(input$Comparison)
-    output <- topTable()[[input$Comparison]]
+    output <- topTable_filtered()[[input$Comparison]]
     output <- arrange(output, pvalue)
     output <- output[,c(1,2,3,4,7,8)]
     colnames(output) <- c("Gene Name", "Avg Expr", "log2 FC", "FC", "p-value", "adj. p-value")
@@ -406,7 +422,7 @@ server = function(input, output,session) {
     output$VolcanoPlot <- renderPlot({
       req(input$AdjOrRaw)
       req(input$Comparison)
-      topTable <- topTable()[[input$Comparison]]
+      topTable <- topTable_all()[[input$Comparison]]
       if (input$AdjOrRaw == "Adjusted") {
         p<-EnhancedVolcano(topTable, lab = topTable$X, labSize = 3, title = NULL, 
                            x = 'log2FoldChange',
@@ -445,7 +461,25 @@ server = function(input, output,session) {
   })#eof observeEvent
   
 
+  # Go the next step
+  observeEvent(input$deg_NEXT, {
+    
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "DEG analysis successfully completed! Now you can begin with the identifier mapping!",
+      type = "success")
+    
+    updateTabsetPanel(session, "tabs_trans",
+                      selected = "mapping_trans")
+    
+    showTab("tabs_trans", target = "mapping_trans")
+    
+  })
   
+  #***************************************************#
+  # Identifier mapping
+  #***************************************************#
   
   
   
