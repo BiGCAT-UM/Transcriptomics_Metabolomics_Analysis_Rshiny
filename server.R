@@ -593,67 +593,50 @@ server = function(input, output,session) {
     input$whichNormMethod
   })
   
-  observeEvent( input$normButton,{
+  shapiroResults <- eventReactive (input$normButton,{ 
     
-    #normalization process is done with the function below
-    normalizeMets(selectedMethod())
-    
+    #call function     
+    shapiroResults <- normalizeMets(selectedMethod())
+#browser()    
     sendSweetAlert(
       session = session,
       title = "Success!",
       text = "Normalization and QC plots done. 
-        You can find all QC plots in 7-metabolite",
+        You can find all QC plots in 7-metabolite_data_preprocessing",
       type = "success")
-    
-    cat ("Histograms will be shown\n")
-    WORK_DIR <- getwd()
-       
-        observe({
-         output$CDhistogram <- renderText({
-           "CD histogram"
-         })
-          
-          output$histPlotCD <- renderImage({
-           req(input$whichHistCD)
-           if (input$whichHistCD == "Normalized"){
-             path <- paste0(WORK_DIR,"/7-metabolite_data_preprocessing/normalized/CD_histogram_norm.png")
-             cat ("image path =",path,"\n")
-           }
-           if (input$whichHistCD == "Raw"){
-             path <- paste0(WORK_DIR,"/7-metabolite_data_preprocessing/normalized/CD_histogram_raw.png")
-             cat ("image path =",path,"\n")
-           }
-           
-           list(src = path, contentType = 'image/png',width = "500px", height = "auto",
-                alt = "This is alternate text")
-           
-         } ,deleteFile=FALSE)
+  return (shapiroResults)  
+  })#eventReactive
+  
+  observeEvent (length(shapiroResults())>0,{
+     
+      output$CDhistogram <- renderUI({
+        tagList(
+          h3(strong("CD histogram"))
+        )
+      })
       
-          output$UChistogram <- renderText({
-            "UC histogram"
-          })
-          
-         output$histPlotUC <- renderImage({
-           req(input$whichHistUC)
-           if (input$whichHistUC == "Normalized"){
-             path <- paste0(WORK_DIR,"/7-metabolite_data_preprocessing/normalized/UC_histogram_norm.png")
-             cat ("image path =",path,"\n")
-           }
-           if (input$whichHistUC == "Raw"){
-             path <- paste0(WORK_DIR,"/7-metabolite_data_preprocessing/normalized/UC_histogram_raw.png")
-             cat ("image path =",path,"\n")
-           }
-           
-           list(src = path, contentType = 'image/png',width = "500px", height = "auto",
-                alt = "This is alternate text")
-           
-         } ,deleteFile=FALSE)
-
-        })#observe 
+      output$CD_shapiro_result <- renderText({
+        if(shapiroResults()[[1]] == TRUE){
+          paste0("Data after transformation seems to follow a normal distribution for more then 80% of your data")}
+        else{
+          "Advised to select a different data transformation procedure"
+        }
+      })#renderText
+# browser()     
+      WORK_DIR <- getwd()
+      output$histPlotCD <- renderImage({
+        req(input$whichHistCD)
+        if (input$whichHistCD == "Normalized"){
+          path <- paste0(WORK_DIR,"/7-metabolite_data_preprocessing/normalized/CD_histogram_norm.png")
+          cat ("image path =",path,"\n")
+        }
+        list(src = path, contentType = 'image/png',width = "500px", height = "auto",
+             alt = "This is alternate text")
+        
+      } ,deleteFile=FALSE)
+    
     
   })#observeEvent
-  
-  
   
   
  

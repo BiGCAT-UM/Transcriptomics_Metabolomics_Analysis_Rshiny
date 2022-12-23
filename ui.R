@@ -559,6 +559,7 @@ ui <- tagList(
                                              mainPanel(
                                                
                                                uiOutput("CDhistogram"),
+                                               verbatimTextOutput("CD_shapiro_result",placeholder = TRUE),
                                                selectInput(inputId = "whichHistCD",
                                                            label = NULL,
                                                            choices = c("Normalized",
@@ -570,6 +571,7 @@ ui <- tagList(
                                                            height = "auto"),
                                               
                                                uiOutput("UChistogram"),
+                                               verbatimTextOutput("UC_shapiro_result",placeholder = TRUE),
                                                selectInput(inputId = "whichHistUC",
                                                            label = NULL,
                                                            choices = c("Normalized",
@@ -579,7 +581,6 @@ ui <- tagList(
                                                imageOutput("histPlotUC",
                                                            width = "800px",
                                                            height = "auto")
-                                               
                                                
                                                
                                                

@@ -488,10 +488,7 @@ filteringMets <- function(metaData,mbxData){
   UC_NoMissingData[, c(3:columns)] <- apply(UC_NoMissingData[, c(3:columns)],2, function(x) as.numeric(as.character(x)))
   write.table(UC_NoMissingData, "7-metabolite_data_preprocessing/filtered/mbxDataUC_nonIBD.csv", sep =",", row.names = FALSE)
   
-  
   return(list((CD_NoMissingData),(UC_NoMissingData)))
-  
-  
 }
 
 
@@ -507,7 +504,6 @@ normalizeMets <- function(selected = "log2 transformation"){
   mSet_CD <- read.csv("7-metabolite_data_preprocessing/filtered/mbxDataCD_nonIBD.csv", na.strings=c("", "NA"))
   mSet_UC <- read.csv("7-metabolite_data_preprocessing/filtered/mbxDataUC_nonIBD.csv", na.strings=c("", "NA"))
   
-
   ############################# for CD disease #########################
   columns <- ncol(mSet_CD)
   if(transformation == "cube"){
@@ -522,12 +518,7 @@ normalizeMets <- function(selected = "log2 transformation"){
   
   colnames(mSet_transformed)[1]="HMDB.ID"
   colnames(mSet_transformed)[2]="Compound.Name"
-  
-  # png(paste("FC_hist_",colnames(design)[i],"_",postfix,".png",sep=""),width=1000,height=1000)
-  # hist(toptab[,"Fold Change"],main=paste("adapted fold change histogram for",colnames(design)[i]),
-  #      xlab="adapted fold changes",col="green3",breaks=120,cex.axis=1.2,cex.lab=1.2)
-  # dev.off()
-  
+ 
   ## Visualize the data after the transformation (for one sample to get an idea of suitability of transformation:
   #create histogram for original distribution for first column with data
   png(paste0("7-metabolite_data_preprocessing/normalized/CD_histogram_raw",".png"),width=1000,height=1000)
@@ -540,6 +531,33 @@ normalizeMets <- function(selected = "log2 transformation"){
   hist(mSet_transformed[,3], col='steelblue', main='Original')
   dev.off()
   cat("norm CD histogram created\n")
+  
+  ########### Testing if the transformation creates a normally distributed dataset (alpha >= 0.05)
+  ##Calculate all Shapiro values for raw and transformed data:
+  mSet_NoMissingData_Shapiro <- lapply(mSet_CD[,3:columns], shapiro.test)
+  mSet_transformed_Shapiro <- lapply(mSet_transformed[,3:columns], shapiro.test)
+  
+  #Obtain the p-values for raw and transformed data
+  mSet_NoMissingData_Shapiro_pvalues <- do.call(rbind, mSet_NoMissingData_Shapiro)
+  mSet_transformed_Shapiro_pvalues <- do.call(rbind, mSet_transformed_Shapiro)
+  
+  ## Count how often the p-value is above 0.05, to obtain an estimate of achieved normality due to transformation
+  mSet_NoMissingData_Shapiro_pvalues_sum <- sum(mSet_NoMissingData_Shapiro_pvalues[,2] >= 0.05, na.rm=TRUE)
+  mSet_transformed_Shapiro_pvalues_sum <- sum(mSet_transformed_Shapiro_pvalues[,2] >= 0.05, na.rm=TRUE)
+  
+  eighty_percent <- floor(((columns)/10)*8)
+  
+  CD_shapiro <- FALSE
+  #Print relevant information:
+  if(mSet_transformed_Shapiro_pvalues_sum[1] > eighty_percent )
+  {
+    paste0("Data after ", transformation ," transformation seems to follow a normal distribution for more then 80% of your data")
+    CD_shapiro <- TRUE
+  } 
+  else{
+    print("Advised to select a different data transformation procedure")
+  }
+  
   
   
   ############################# for UC disease #########################
@@ -570,8 +588,33 @@ normalizeMets <- function(selected = "log2 transformation"){
   dev.off()
   cat("norm UC histogram created\n")
   
+  ########### Testing if the transformation creates a normally distributed dataset (alpha >= 0.05)
+  ##Calculate all Shapiro values for raw and transformed data:
+  mSet_NoMissingData_Shapiro <- lapply(mSet_UC[,3:columns], shapiro.test)
+  mSet_transformed_Shapiro <- lapply(mSet_transformed[,3:columns], shapiro.test)
   
+  #Obtain the p-values for raw and transformed data
+  mSet_NoMissingData_Shapiro_pvalues <- do.call(rbind, mSet_NoMissingData_Shapiro)
+  mSet_transformed_Shapiro_pvalues <- do.call(rbind, mSet_transformed_Shapiro)
   
+  ## Count how often the p-value is above 0.05, to obtain an estimate of achieved normality due to transformation
+  mSet_NoMissingData_Shapiro_pvalues_sum <- sum(mSet_NoMissingData_Shapiro_pvalues[,2] >= 0.05, na.rm=TRUE)
+  mSet_transformed_Shapiro_pvalues_sum <- sum(mSet_transformed_Shapiro_pvalues[,2] >= 0.05, na.rm=TRUE)
+  
+  eighty_percent <- floor(((columns)/10)*8)
+  
+  UC_shapiro <- FALSE
+  #Print relevant information:
+  if(mSet_transformed_Shapiro_pvalues_sum[1] > eighty_percent )
+  {
+    paste0("Data after ", transformation ," transformation seems to follow a normal distribution for more then 80% of your data")
+    UC_shapiro <- TRUE
+  } 
+  else{
+    print("Advised to select a different data transformation procedure")
+  }
+  
+  return (list(CD_shapiro, UC_shapiro))
 }
 
 ####################################################STATISTICAL ANALYSIS FUNCTIONS  #########################################
