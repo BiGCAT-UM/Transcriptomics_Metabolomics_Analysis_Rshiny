@@ -289,7 +289,7 @@ ui <- tagList(
                                                DT::dataTableOutput("topTable")%>% 
                                                  withSpinner(color="#0dc5c1"),
                                                
-                                               plotOutput("VolcanoPlot")%>% 
+                                               plotOutput("VolcanoPlot", width = "800px", height = "700px")%>% 
                                                  withSpinner(color="#0dc5c1")
                                                  
                                              )#End of mainPanel
