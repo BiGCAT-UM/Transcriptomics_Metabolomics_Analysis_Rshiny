@@ -362,7 +362,7 @@ volcanoPlots <- function (selected = ""){
 }
 #identifier mapping of transcriptomics data 
 ###################Identifier Mapping for DE analysed data#############################
-mappingTranscriptomics <- function (){
+mappingTranscriptomics <- function (RawOrAdj){
   
   #input data is all files starts with "table" under the folder 2-differential_gene_expression_analysis/statsmodel/
   #output files will be in "3-identifier_mapping" folder with the same structure IDMapping_CD OR IDMapping_UC
@@ -377,17 +377,33 @@ mappingTranscriptomics <- function (){
   disease <- c("CD", "UC")
   
   for (d in disease){
-    if (d == "CD") {
-      #filter out  unused columns, we select geneSymbol, log2FC and pvalue
-      dataset_ileum<- subset( dataset3, select = c(1,3,7))
-      dataset_rectum<- subset( dataset4, select = c(1,3,7))
-      print("Selected disorder is Crohn's disease")
-    }else if(d == "UC"){ 
-      #filter out  unused columns, we select geneSymbol, log2FC and pvalue
-      dataset_ileum<- subset( dataset1, select = c(1,3,7))
-      dataset_rectum<- subset( dataset2, select = c(1,3,7))
-      print("Selected disorder is Ulcerative Colitis")}else{print("Disorder not Recognised")
-      }
+    if (RawOrAdj == "Raw"){
+      if (d == "CD") {
+        #filter out  unused columns, we select geneSymbol, log2FC and pvalue
+        dataset_ileum<- subset( dataset3, select = c(1,3,7))
+        dataset_rectum<- subset( dataset4, select = c(1,3,7))
+        print("Selected disorder is Crohn's disease")
+      }else if(d == "UC"){ 
+        #filter out  unused columns, we select geneSymbol, log2FC and pvalue
+        dataset_ileum<- subset( dataset1, select = c(1,3,7))
+        dataset_rectum<- subset( dataset2, select = c(1,3,7))
+        print("Selected disorder is Ulcerative Colitis")}else{print("Disorder not Recognised")
+        }
+    }
+    if (RawOrAdj == "Adjusted"){
+      if (d == "CD") {
+        #filter out  unused columns, we select geneSymbol, log2FC and pvalue
+        dataset_ileum<- subset( dataset3, select = c(1,3,7))
+        dataset_rectum<- subset( dataset4, select = c(1,3,7))
+        print("Selected disorder is Crohn's disease")
+      }else if(d == "UC"){ 
+        #filter out  unused columns, we select geneSymbol, log2FC and pvalue
+        dataset_ileum<- subset( dataset1, select = c(1,3,7))
+        dataset_rectum<- subset( dataset2, select = c(1,3,7))
+        print("Selected disorder is Ulcerative Colitis")}else{print("Disorder not Recognised")
+        }
+    }
+    
     #merge two dataset of two locations into one data 
     dataset <- merge(dataset_ileum, dataset_rectum,by.x="X", by.y="X",sort = TRUE, all.x = TRUE, all.y = TRUE)
     
@@ -433,8 +449,108 @@ mappingTranscriptomics <- function (){
   
 }
 
-pathwayAnalysisTranscriptomics <- function(){
-  
+# Pathway analysis
+pathwayAnalysisTranscriptomics <- function(logFCtheshold, Pthreshold, Pthreshold_pathway, Qthreshold_pathway){
+  setwd(work_DIR)
+  for (disorder in c("CD", "UC")){
+    # Load data
+    if (disorder == "CD") {
+      dataset_CD <- read.delim("3-identifier_mapping/IDMapping_CD.tsv")
+      #filter out  unused columns, we select Entrez.ID, log2FC and pvalue, remove NA values: #background genes to be used in enrichment analysis
+      dataset <- na.omit(subset( dataset_CD, select = c(3,2,4:7)))
+      print("Selected disorder is Crohn's disease")
+    }else if(disorder == "UC"){ 
+      dataset_UC <- read.delim("3-identifier_mapping/IDMapping_UC.tsv")
+      #filter out  unused columns, we select Entrez.ID, log2FC and pvalue
+      dataset <- na.omit(subset( dataset_UC, select = c(3,2,4:7)))
+      print("Selected disorder is Ulcerative Colitis")}else{print("Disorder not Recognised")
+      }
+    
+    
+    if(!dir.exists("4-pathway_analysis")) dir.create("4-pathway_analysis")
+    #we will use selection criteria as Fold change=1.5,log2FC=0.58 and p.value < 0.05
+    #for ileum location
+    up.genes.ileum   <- dataset[dataset$log2FC_ileum >= logFCtheshold & dataset$pvalue_ileum < Pthreshold, 2] 
+    down.genes.ileum <- dataset[dataset$log2FC_ileum <= -1*logFCtheshold & dataset$pvalue_ileum < Pthreshold, 2] 
+    deg.ileum <- unique(dataset[!is.na(dataset$ENTREZ.ID) & !is.na(dataset$pvalue_ileum) & dataset$pvalue_ileum < Pthreshold & abs(dataset$log2FC_ileum) > logFCtheshold,c(1:4)])
+    write.table(deg.ileum,file = paste0("4-pathway_analysis/DEGs_",disorder,"_ileum.tsv"),sep="\t", quote=FALSE, row.names = FALSE)
+    #for rectum location
+    up.genes.rectum   <- dataset[dataset$log2FC_rectum >= logFCtheshold & dataset$pvalue_rectum < Pthreshold, 2] 
+    down.genes.rectum <- dataset[dataset$log2FC_rectum <= -1*logFCtheshold & dataset$pvalue_rectum < Pthreshold, 2] 
+    deg.rectum <- unique(dataset[!is.na(dataset$ENTREZ.ID) & !is.na(dataset$pvalue_rectum) & dataset$pvalue_rectum < Pthreshold & abs(dataset$log2FC_rectum) > logFCtheshold,c(1,2,5,6)])
+    write.table(deg.rectum, file=paste0("4-pathway_analysis/DEGs_",disorder,"_rectum.tsv"),sep="\t", quote=FALSE, row.names = FALSE)
+    
+    pathway_data <- "local" #Options: local, new
+    if (pathway_data == "local") {
+      wp.hs.gmt <-list.files(work_DIR, pattern="wikipathways", full.names=FALSE)
+      paste0("Using local file, from: ", wp.hs.gmt )
+    }else if(pathway_data == "new"){ 
+      #below code should be performed first to handle the ssl certificate error while downloading pathways 
+      options(RCurlOptions = list(cainfo = paste0( tempdir() , "/cacert.pem" ), ssl.verifypeer = FALSE))
+      #downloading latest pathway gmt files for human 
+      wp.hs.gmt <- rWikiPathways::downloadPathwayArchive(organism="Homo sapiens", format = "gmt")
+      paste0("Using new data, from: ", wp.hs.gmt)}else{print("Pathway data type not recognized")
+      }
+    
+    wp2gene   <- rWikiPathways::readPathwayGMT(wp.hs.gmt)
+    wpid2gene <- wp2gene %>% dplyr::select(wpid,gene) #TERM2GENE
+    wpid2name <- wp2gene %>% dplyr::select(wpid,name) #TERM2NAME
+    ewp.ileum <- clusterProfiler::enricher(
+      deg.ileum$ENTREZ.ID,# a vector of gene IDs
+      universe = as.character(dataset$ENTREZ.ID), #background genes to be used in enrichment analysis
+      pAdjustMethod = "fdr",#you can change this to hochberg, bonferronni or none etc.
+      pvalueCutoff = 1, #adjusted pvalue cutoff on enrichment tests to report, we set it a wider criteria then we will filter out
+      #results based on padjust and qvalue in next section which is enrichment result visualization
+      qvalueCutoff = 1, #qvalue cutoff on enrichment tests to report as significant, 
+      #multiple hypothesis testing
+      TERM2GENE = wpid2gene, #user input annotation of TERM TO GENE mapping
+      TERM2NAME = wpid2name) #user input of TERM TO NAME mapping
+    ewp.ileum.res <- as.data.frame(ewp.ileum) 
+    #Count all significant pathways that have p.adjust value lower than 0.05 and qvalue<0.02
+    ileum.sign <- ewp.ileum.res[(ewp.ileum.res$p.adjust<Pthreshold_pathway)&(ewp.ileum.res$qvalue<Qthreshold_pathway),]
+    #interpretation of the output: 
+    #     BgRatio   = (number of genes measured in the current pathway) / (number of genes measured in all pathways)
+    #     geneRatio = (number of DEGs in the current pathway) / (total number of DEGs in all pathways)
+    ##Print location:
+    paste0("Pathways enrichment results for disorder: ", disorder , ", location: ILEUM")
+    # number of genes measured in all pathways
+    paste0("The number of genes measured in all pathways is: ", length(ewp.ileum@universe))
+    # number of DEGs in all pathways
+    paste0("The number of DEGs measured in all pathways is: ", length(deg.ileum$ENTREZ.ID[deg.ileum$ENTREZ.ID %in% unique(wp2gene$gene)]))
+    #number of enriched pathways
+    paste0("The number of enriched pathways is: ", num.pathways.ileum <- dim(ewp.ileum.res)[1])
+    #number of significantly enriched pathways
+    paste0("The number of significantly enriched pathways is: ", num.pathways.ileum.sign <- dim(ileum.sign)[1])
+    #exporting results to the file
+    write.table(ewp.ileum.res, file=paste0("4-pathway_analysis/enrichResults_ORA_",disorder,"_ileum.tsv"),
+                sep = "\t" ,quote = FALSE, row.names = FALSE)
+    ##################RECTUM location#######################
+    ewp.rectum <- clusterProfiler::enricher(
+      deg.rectum$ENTREZ.ID, # a vector of gene IDs; options
+      universe = as.character(dataset$ENTREZ.ID), #background genes to be used in enrichment analysis
+      pAdjustMethod = "fdr",#you can change it as BH, bonferronni etc.
+      pvalueCutoff = 1, #padjust cutoff
+      qvalueCutoff = 1, #q value cutoff 
+      TERM2GENE = wpid2gene,
+      TERM2NAME = wpid2name)
+    ewp.rectum.res <- as.data.frame(ewp.rectum) 
+    #Count all significant pathways that have p.adjust value lower than 0.05 and qvalue<0.02
+    rectum.sign <- ewp.rectum.res[(ewp.rectum.res$p.adjust<Pthreshold_pathway)&(ewp.rectum.res$qvalue<Qthreshold_pathway),]
+    ##Print location:
+    paste0("Pathways enrichment results for disorder: ", disorder , ", location: RECTUM")
+    # number of genes measured in all pathways
+    paste0("The number of genes measured in all pathways is: ", length(ewp.rectum@universe))
+    # number of DEGs in all pathways
+    paste0("The number of DEGs measured in all pathways is: ", length(deg.rectum$ENTREZ.ID[deg.rectum$ENTREZ.ID %in% unique(wp2gene$gene)]))
+    #number of enriched pathways
+    paste0("The number of enriched pathways is: ", num.pathways.rectum <- dim(ewp.rectum.res)[1])
+    #number of significantly enriched pathways
+    paste0("The number of significantly enriched pathways is: ", num.pathways.rectum.sign <- dim(rectum.sign)[1])
+    #exporting results to the file
+    write.table(ewp.rectum.res, file=paste0("4-pathway_analysis/enrichResults_ORA_",disorder,"_rectum.tsv"),
+                sep = "\t" ,quote = FALSE, row.names = FALSE)
+    
+  }
 }
 
 createHeatmap <- function(){

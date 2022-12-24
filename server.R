@@ -430,6 +430,11 @@ server = function(input, output,session) {
     return(input$Comparison)
   })
   
+  RawOrAdj_DEG <- reactive({
+    req(input$AdjOrRaw)
+    return(input$AdjOrRaw)
+  })
+  
   # Return top table
   observe({
     output$topTable <- DT::renderDataTable({
@@ -494,15 +499,21 @@ server = function(input, output,session) {
   #***************************************************#
   observeEvent(input$mappingButton,{
     # Loading message
-    showModal(modalDialog(title = h4(strong("ID Mapping"),
+    showModal(modalDialog(title = h4(strong("Identifier Mapping"),
                                      align = "center"), 
                           footer = NULL,
                           h5("This might take a while. Please be patient.", 
                              align = "center")))
     
-    mappingTranscriptomics()
+    mappingTranscriptomics(RawOrAdj_DEG())
     
     removeModal()
+    
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "Identifiers have been successfully mapped!",
+      type = "success")
     
     output$mappingTable <- DT::renderDataTable({
       output <- read.delim(paste0(work_DIR, "/3-identifier_mapping/IDMapping_",input$mappingDisease, ".tsv"))
@@ -512,6 +523,71 @@ server = function(input, output,session) {
     
   })
   
+  # Go the next step
+  observeEvent(input$mapping_NEXT, {
+    
+    updateTabsetPanel(session, "tabs_trans",
+                      selected = "pathway_trans")
+    
+    showTab("tabs_trans", target = "pathway_trans")
+    
+  })
+  #***************************************************#
+  # Pathway analysis
+  #***************************************************#
+
+  observeEvent(input$pathwayButton,{
+    
+    showModal(modalDialog(title = h4(strong("Pathway Analysis"),
+                                     align = "center"), 
+                          footer = NULL,
+                          h5("This might take a while. Please be patient.", 
+                             align = "center")))
+    
+    # Perform pathway analysis
+    pathwayAnalysisTranscriptomics(P_threshold(), log2(FC_threshold()), 0.05,0.02)
+    
+    removeModal()
+    
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "Pathway analysis has been performed successfully!",
+      type = "success")
+    
+    # rectum table
+    output$pathwayTable_rectum <- DT::renderDataTable({
+      req(input$pathwayDisease)
+      output <- read.delim(paste0(work_DIR,"/4-pathway_analysis/enrichResults_ORA_",input$pathwayDisease,"_rectum.tsv"))
+      return(output)
+    }, server=TRUE,
+    options = list(pageLength = 5), rownames= FALSE)
+    
+    output$pathway_rectum_text <- renderUI({
+      tagList(
+        br(),
+        hr(),
+        h3(strong("Rectum"))
+      )
+    })
+    
+    # Ileum table
+    output$pathwayTable_ileum <- DT::renderDataTable({
+      req(input$pathwayDisease)
+      output <- read.delim(paste0(work_DIR,"/4-pathway_analysis/enrichResults_ORA_",input$pathwayDisease,"_ileum.tsv"))
+      return(output)
+    }, server=TRUE,
+    options = list(pageLength = 5), rownames= FALSE)
+    
+    output$pathway_ileum_text <- renderUI({
+      tagList(
+        h3(strong("Ileum"))
+      )
+    })
+  })
+  
+  
+
   
   #**************************************************************************************************************#
   #                      Metabolomics Data Operations

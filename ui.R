@@ -247,9 +247,9 @@ ui <- tagList(
                                                hr(),
                                                radioButtons(inputId = "AdjOrRaw", 
                                                             label = "Adjusted or raw p-value",
-                                                            choices = c("Adjusted",
-                                                                        "Raw"),
-                                                            selected = "Adjusted"),
+                                                            choices = c("Raw",
+                                                                        "Adjusted"),
+                                                            selected = "Raw"),
                                                br(),
                                                numericInput(
                                                  inputId = "pthreshold",
@@ -261,7 +261,7 @@ ui <- tagList(
                                                numericInput(
                                                  inputId = "FCthreshold",
                                                  label = "FC threshold",
-                                                 value = 0
+                                                 value = 1.5
                                                ),
                                                actionBttn(inputId ="DEGButton", label ="Apply", style = "jelly",
                                                           btn_type = "button", type = "primary", color = "primary"),
@@ -312,15 +312,12 @@ ui <- tagList(
                                                #******************************************************#
                                                
                                                h3(strong("Identifier Mapping")),
-                                               h5("HGNC gene symbols will be transformed into ENTREZ IDs"),
+                                               h5("HGNC gene symbols will be mapped to ENTREZ and ENSEMBL IDs"),
                                                br(),
                                                
                                                actionBttn(inputId ="mappingButton", label ="Apply", style = "jelly",
                                                           btn_type = "button", type = "primary", color = "primary"),
-                                              
-                                               #Go forward
-                                               tags$br(),
-                                               tags$br(),
+
                                                # Horizontal line ----
                                                tags$hr(),
                                                actionBttn(inputId ="mapping_NEXT", label ="Next", style = "jelly",
@@ -348,7 +345,44 @@ ui <- tagList(
                                     # Pathway Analysis
                                     #***************************************************#
                                     
-                                    tabPanel("Pathway Analysis", value = "pathway_trans"),
+                                    tabPanel("Pathway Analysis", value = "pathway_trans",
+                                             br(),
+                                             sidebarPanel(
+                                               #==========================================#
+                                               # side panel
+                                               #==========================================#
+                                               h3(strong("Pathway Analysis")),
+                                               h5("WikiPathways Overrepresentation Analysis will be performed"),
+                                               br(),
+                                               
+                                               actionBttn(inputId ="pathwayButton", label ="Apply", style = "jelly",
+                                                          btn_type = "button", type = "primary", color = "primary"),
+                                               
+                                               # Horizontal line ----
+                                               tags$hr(),
+                                               actionBttn(inputId ="pathway_NEXT", label ="Next", style = "jelly",
+                                                          btn_type = "button", type = "primary", color = "danger",
+                                                          icon = icon("arrow-right"))
+                                               
+                                             ),
+                                             
+                                             #==========================================#
+                                             # main Panel
+                                             #==========================================#
+                                             mainPanel(
+                                               selectInput(inputId = "pathwayDisease",
+                                                           label = NULL,
+                                                           choices = c("CD", "UC"),
+                                                           selected = "CD"),
+                                               
+                                               #output from DE analysis
+                                               uiOutput("pathway_ileum_text"),
+                                               DT::dataTableOutput("pathwayTable_ileum"),
+                                               uiOutput("pathway_rectum_text"),
+                                               DT::dataTableOutput("pathwayTable_rectum")
+                                             )
+                                             
+                                    ),
                                     
                                     #***************************************************#
                                     # Heatmap
