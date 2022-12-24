@@ -340,6 +340,17 @@ server = function(input, output,session) {
     topTable <- list()
     WORK_DIR <- getwd()
     
+    # Loading message
+    showModal(modalDialog(title = h4(strong("Statistical Analysis"),
+                                     align = "center"), 
+                          footer = NULL,
+                          h5("This might take a while. Please be patient.", 
+                             align = "center")))
+    
+    # perform DE analysis
+    DE_analysis(data_filtered()[[1]], data_filtered()[[2]], 0)
+      
+    # Read tables
     topTable[[1]] <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Ileum_vs_nonIBD_Ileum.tab"))
     topTable[[2]] <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Rectum_vs_nonIBD_Rectum.tab"))
     topTable[[3]]<- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_UC_Ileum_vs_nonIBD_Ileum.tab"))
@@ -349,6 +360,15 @@ server = function(input, output,session) {
                          "Rectum: CD vs non-IBD",
                          "Ileum: UC vs non-IBD",
                          "Rectum: UC vs non-IBD")
+    
+    removeModal()
+    
+    # Success message
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "DEG analysis is finished!",
+      type = "success")
     
     return(topTable)
   })
@@ -382,15 +402,15 @@ server = function(input, output,session) {
       topTable[[1]] <- temp[(abs(temp$FoldChange) > FC_threshold()) &
                               (temp$padj < P_threshold()),]
       
-      temp <- topTable_all()[[1]]
+      temp <- topTable_all()[[2]]
       topTable[[2]] <- temp[(abs(temp$FoldChange) > FC_threshold()) &
                               (temp$padj < P_threshold()),]
       
-      temp <- topTable_all()[[1]]
+      temp <- topTable_all()[[3]]
       topTable[[3]] <- temp[(abs(temp$FoldChange) > FC_threshold()) &
                               (temp$padj < P_threshold()),]
       
-      temp <- topTable_all()[[1]]
+      temp <- topTable_all()[[4]]
       topTable[[4]] <- temp[(abs(temp$FoldChange) > FC_threshold()) &
                               (temp$padj < P_threshold()),]
     }
@@ -403,17 +423,27 @@ server = function(input, output,session) {
     return(topTable)
   })
 
-  # Return top table
-  output$topTable <- DT::renderDataTable({
-    req(input$Comparison)
-    output <- topTable_filtered()[[input$Comparison]]
-    output <- arrange(output, pvalue)
-    output <- output[,c(1,2,3,4,7,8)]
-    colnames(output) <- c("Gene Name", "Avg Expr", "log2 FC", "FC", "p-value", "adj. p-value")
-    return(output)
-  }, server=TRUE,
-  options = list(pageLength = 5), rownames= FALSE)
   
+  # P value threshold
+  Comparison_DEG <- reactive({
+    req(input$Comparison)
+    return(input$Comparison)
+  })
+  
+  # Return top table
+  observe({
+    output$topTable <- DT::renderDataTable({
+      req(input$Comparison)
+      output <- topTable_filtered()[[Comparison_DEG()]]
+      output <- arrange(output, pvalue)
+      output <- output[,c(1,2,3,4,7,8)]
+      colnames(output) <- c("Gene Name", "Avg Expr", "log2 FC", "FC", "p-value", "adj. p-value")
+      return(output)
+    }, server=TRUE,
+    options = list(pageLength = 5), rownames= FALSE)
+    
+  })
+
   output$VolcanoPlot <- renderPlot(NULL)
   
   observeEvent(input$DEGButton, {
@@ -422,7 +452,7 @@ server = function(input, output,session) {
     output$VolcanoPlot <- renderPlot({
       req(input$AdjOrRaw)
       req(input$Comparison)
-      topTable <- topTable_all()[[input$Comparison]]
+      topTable <- topTable_all()[[Comparison_DEG()]]
       if (input$AdjOrRaw == "Adjusted") {
         p<-EnhancedVolcano(topTable, lab = topTable$X, labSize = 3, title = NULL, 
                            x = 'log2FoldChange',
@@ -439,24 +469,6 @@ server = function(input, output,session) {
       }
       return(p)
     })
-    
-    # Loading message
-    showModal(modalDialog(title = h4(strong("Statistical Analysis"),
-                                     align = "center"), 
-                          footer = NULL,
-                          h5("This might take a while. Please be patient.", 
-                             align = "center")))
-    
-    
-    
-    removeModal()
-    
-    # Success message
-    sendSweetAlert(
-      session = session,
-      title = "Success!",
-      text = "DEG analysis is finished!",
-      type = "success")
     
   })#eof observeEvent
   
@@ -480,7 +492,25 @@ server = function(input, output,session) {
   #***************************************************#
   # Identifier mapping
   #***************************************************#
-  
+  observeEvent(input$mappingButton,{
+    # Loading message
+    showModal(modalDialog(title = h4(strong("ID Mapping"),
+                                     align = "center"), 
+                          footer = NULL,
+                          h5("This might take a while. Please be patient.", 
+                             align = "center")))
+    
+    mappingTranscriptomics()
+    
+    removeModal()
+    
+    output$mappingTable <- DT::renderDataTable({
+      output <- read.delim(paste0(work_DIR, "/3-identifier_mapping/IDMapping_",input$mappingDisease, ".tsv"))
+      return(output)
+    }, server=TRUE,
+    options = list(pageLength = 5), rownames= FALSE)
+    
+  })
   
   
   #**************************************************************************************************************#
