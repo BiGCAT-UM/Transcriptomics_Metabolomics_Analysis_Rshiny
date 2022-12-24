@@ -1,4 +1,4 @@
-
+work_DIR <- getwd()
 # check if BioCmanager libraries are already installed > otherwise install it
 if(!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager",repos = "http://cran.us.r-project.org")
 if(!"rstudioapi" %in% installed.packages()) BiocManager::install("rstudioapi")
@@ -38,6 +38,7 @@ library(shinyBS)
 library(shinycssloaders)
 library(downloader)
 library(R.utils)
+library(org.Hs.eg.db)
 
 source("functions_ArrayAnalysis_v2.R")
 
@@ -69,7 +70,8 @@ normalize_QCplots <- function (sampleLabels, htxCount){
   cat ("Normalization done\n ")
   
   WORK.DIR <- getwd()  
-  setwd(paste0(WORK.DIR,"/2-differential_gene_expression_analysis"))  
+  setwd(paste0(WORK.DIR,"/2-differential_gene_expression_analysis")) 
+  #write.table(normlogQC, "normExpression.csv", sep=",",quote=FALSE,row.names = TRUE)
 
   #create QC plots for raw data, colored by different variables
   factors <- c("disease","biopsy_location","group")
@@ -235,8 +237,8 @@ DE_analysis <- function (sampleLabels, htxCount, FC_threshold){
 WORK.DIR <- getwd()
 #browser()
 #this line of code can be removed
-htxCount <- read.csv(paste0(WORK.DIR,"/1-data_preprocessing/htxCount.csv"))
-sampleLabels <- read.csv(paste0(WORK.DIR,"/1-data_preprocessing/sampleLabels.csv"),row.names = 1 )
+#htxCount <- read.csv(paste0(WORK.DIR,"/1-data_preprocessing/htxCount.csv"))
+#sampleLabels <- read.csv(paste0(WORK.DIR,"/1-data_preprocessing/sampleLabels.csv"),row.names = 1 )
 
 setwd(paste0(WORK.DIR,"/2-differential_gene_expression_analysis"))
 sampleLabels$disease <- relevel(factor(sampleLabels$disease),ref="nonIBD")
@@ -364,6 +366,70 @@ mappingTranscriptomics <- function (){
   
   #input data is all files starts with "table" under the folder 2-differential_gene_expression_analysis/statsmodel/
   #output files will be in "3-identifier_mapping" folder with the same structure IDMapping_CD OR IDMapping_UC
+  
+  # Read top tables
+  setwd(work_DIR)
+  dataset1 <- read.delim("2-differential_gene_expression_analysis/statsmodel/table_UC_Ileum_vs_nonIBD_Ileum.tab")
+  dataset2 <- read.delim("2-differential_gene_expression_analysis/statsmodel/table_UC_Rectum_vs_nonIBD_Rectum.tab")
+  dataset3 <- read.delim("2-differential_gene_expression_analysis/statsmodel/table_CD_Ileum_vs_nonIBD_Ileum.tab")
+  dataset4 <- read.delim("2-differential_gene_expression_analysis/statsmodel/table_CD_Rectum_vs_nonIBD_Rectum.tab")
+  
+  disease <- c("CD", "UC")
+  
+  for (d in disease){
+    if (d == "CD") {
+      #filter out  unused columns, we select geneSymbol, log2FC and pvalue
+      dataset_ileum<- subset( dataset3, select = c(1,3,7))
+      dataset_rectum<- subset( dataset4, select = c(1,3,7))
+      print("Selected disorder is Crohn's disease")
+    }else if(d == "UC"){ 
+      #filter out  unused columns, we select geneSymbol, log2FC and pvalue
+      dataset_ileum<- subset( dataset1, select = c(1,3,7))
+      dataset_rectum<- subset( dataset2, select = c(1,3,7))
+      print("Selected disorder is Ulcerative Colitis")}else{print("Disorder not Recognised")
+      }
+    #merge two dataset of two locations into one data 
+    dataset <- merge(dataset_ileum, dataset_rectum,by.x="X", by.y="X",sort = TRUE, all.x = TRUE, all.y = TRUE)
+    
+    #change column names
+    colnames(dataset) <- c("GeneSymbol","log2FC_ileum","pvalue_ileum","log2FC_rectum","pvalue_rectum")
+    
+    ####################
+    # HGNC to ENTREZ ID
+    ####################
+    hs <- org.Hs.eg.db #This object is a simple mapping of Entrez Gene identifier
+    entrezID <- AnnotationDbi::select(hs, keys = dataset$GeneSymbol,
+                                      columns = c("ENTREZID", "SYMBOL"),
+                                      keytype = "SYMBOL")
+    #filter out double gene symbols
+    entrezID <- entrezID %>% distinct (entrezID$SYMBOL, .keep_all = TRUE)
+    # add entrezIDs for each gene symbol in the dataset
+    dataset <- cbind(entrezID$ENTREZID,dataset)
+    #change column name
+    colnames(dataset)[1] = "ENTREZ.ID"
+    
+    ####################
+    # HGNC to ENSEMBL ID
+    ####################
+    hs <- org.Hs.eg.db #This object is a simple mapping of Entrez Gene identifier
+    
+    ensemblID <- AnnotationDbi::select(hs, keys = dataset$GeneSymbol,
+                                       columns = c("ENSEMBL", "SYMBOL"),
+                                       keytype = "SYMBOL")
+    #filter out double gene symbols
+    ensemblID <- ensemblID %>% distinct (ensemblID$SYMBOL, .keep_all = TRUE)
+    
+    # add entrezIDs for each gene symbol in the dataset
+    dataset <- cbind(ensemblID$ENSEMBL,dataset)
+    #change column name
+    
+    colnames(dataset)[1] = "Ensembl.ID"
+    
+    # Write output
+    if(!dir.exists("3-identifier_mapping")){dir.create("3-identifier_mapping")}
+    write.table(dataset, file=paste0("3-identifier_mapping/IDMapping_",d, ".tsv"),
+                sep = "\t" ,quote = FALSE, row.names = FALSE)
+  }
   
 }
 

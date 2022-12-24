@@ -315,15 +315,17 @@ ui <- tagList(
                                                h5("HGNC gene symbols will be transformed into ENTREZ IDs"),
                                                br(),
                                                
-                                               actionBttn(inputId ="mapping", label ="Apply", style = "jelly",
-                                                          btn_type = "button", type = "primary"),
+                                               actionBttn(inputId ="mappingButton", label ="Apply", style = "jelly",
+                                                          btn_type = "button", type = "primary", color = "primary"),
+                                              
                                                #Go forward
                                                tags$br(),
                                                tags$br(),
                                                # Horizontal line ----
                                                tags$hr(),
-                                               actionBttn(inputId ="mapping_NEXT", label ="NEXT", style = "jelly",
-                                                          btn_type = "button", type = "primary")
+                                               actionBttn(inputId ="mapping_NEXT", label ="Next", style = "jelly",
+                                                          btn_type = "button", type = "primary", color = "danger",
+                                                          icon = icon("arrow-right"))
                                                
                                              ),
                                              
@@ -331,8 +333,13 @@ ui <- tagList(
                                              # main Panel
                                              #==========================================#
                                              mainPanel(
-                                               # Output: -
+                                               selectInput(inputId = "mappingDisease",
+                                                           label = NULL,
+                                                           choices = c("CD", "UC"),
+                                                           selected = "CD"),
                                                
+                                               #output from DE analysis
+                                               DT::dataTableOutput("mappingTable")
                                              )
                                              
                                     ),
