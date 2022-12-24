@@ -672,6 +672,21 @@ server = function(input, output,session) {
     
   })#observeEvent
   
+  # Go the next step
+  observeEvent(input$metNorm_NEXT, {
+    
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "Normalization successfully completed! Now you can continue with statistical analysis!",
+      type = "success")
+    
+    updateTabsetPanel(session, "tabs_mets",
+                      selected = "stat_mets")
+    
+    showTab("tabs_mets", target = "stat_mets")
+    
+  })
   
  
 }#eof server
