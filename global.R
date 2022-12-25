@@ -16,6 +16,7 @@ if(!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManag
 if(!"readxl" %in% installed.packages()) BiocManager::install("readxl")
 if(!"downloader" %in% installed.packages()) BiocManager::install("downloader")
 if(!"R.utils" %in% installed.packages()){install.packages("R.utils")}
+if(!"pheatmap" %in% installed.packages()) BiocManager::install("pheatmap")
 
 library(rstudioapi)
 library(readxl)
@@ -39,6 +40,8 @@ library(shinycssloaders)
 library(downloader)
 library(R.utils)
 library(org.Hs.eg.db)
+library(pheatmap)
+library(RColorBrewer)
 
 source("functions_ArrayAnalysis_v2.R")
 
@@ -553,8 +556,133 @@ pathwayAnalysisTranscriptomics <- function(logFCtheshold, Pthreshold, Pthreshold
   }
 }
 
-createHeatmap <- function(){
+createHeatmap <- function(p_threshold_pathway, q_threshold_pathway){
+  setwd(work_DIR)
   
+  # Read files
+  CD.ileum <- read.delim("4-pathway_analysis/enrichResults_ORA_CD_ileum.tsv",sep = "\t", header = TRUE)
+  CD.rectum <- read.delim("4-pathway_analysis/enrichResults_ORA_CD_rectum.tsv", sep = "\t",header = TRUE)
+  UC.ileum <- read.delim("4-pathway_analysis/enrichResults_ORA_UC_ileum.tsv",sep = "\t", header = TRUE)
+  UC.rectum <- read.delim("4-pathway_analysis/enrichResults_ORA_UC_rectum.tsv", sep = "\t",header = TRUE)
+
+  #we need to get pathways that has p.adjust value lower than 0.05 and qvalue<0.02
+  #To prevent high false discovery rate (FDR) in multiple testing, q-values are also estimated for FDR control.
+  CD.ileum.f <- CD.ileum[(CD.ileum$p.adjust<p_threshold_pathway)&(CD.ileum$qvalue<q_threshold_pathway),]
+  CD.rectum.f <- CD.rectum[(CD.rectum$p.adjust<p_threshold_pathway)&(CD.rectum$qvalue<q_threshold_pathway),]
+  UC.ileum.f <- UC.ileum[(UC.ileum$p.adjust<p_threshold_pathway)&(UC.ileum$qvalue<q_threshold_pathway),]
+  UC.rectum.f <- UC.rectum[(UC.rectum$p.adjust<p_threshold_pathway)&(UC.rectum$qvalue<q_threshold_pathway),]
+  
+  #Filter out unused columns 
+  CD.ileum.f  <- CD.ileum.f[,c(2,6)]
+  CD.rectum.f <- CD.rectum.f[,c(2,6)]
+  UC.ileum.f  <- UC.ileum.f[,c(2,6)]
+  UC.rectum.f <- UC.rectum.f[,c(2,6)]
+  #first 20 max value of p.adjust pathways for each comparison: Note that if a dataset has less then 20 sign. changed PWs, less rows need to be selected (e.g. adapt c(1:20))
+  cd_ileum_temp <- CD.ileum.f
+  cd_rectum_temp <- CD.rectum.f
+  uc_ileum_temp <- UC.ileum.f
+  uc_rectum_temp <- UC.rectum.f
+  if (nrow(CD.ileum.f) > 20){
+    cd_ileum_temp <- CD.ileum.f[c(1:20),]
+  }
+  if (nrow(CD.rectum.f) > 20){
+    cd_rectum_temp <- CD.rectum.f[c(1:20),]
+  }
+  if (nrow(UC.ileum.f) > 20){
+    uc_ileum_temp <- UC.ileum.f[c(1:20),]
+  }
+  if (nrow(UC.rectum.f) > 20){
+    uc_rectum_temp <- UC.rectum.f[c(1:20),]
+  }
+  all.pathways.1 <- merge(cd_ileum_temp, cd_rectum_temp,by.x="Description", by.y="Description",sort = TRUE, all.x = TRUE, all.y = TRUE)
+  #merge UC pathways
+  all.pathways.2 <- merge(uc_ileum_temp, uc_rectum_temp, by.x="Description", by.y="Description",sort = TRUE, all.x = TRUE, all.y = TRUE)
+  #merge all of them
+  all.pathways <- merge(all.pathways.1 , all.pathways.2 ,by.x="Description", by.y="Description",sort = TRUE, all.x = TRUE, all.y = TRUE)
+  colnames(all.pathways) <- c("Description","CD.ileum.p.adjust","CD.rectum.p.adjust","UC.ileum.p.adjust","UC.rectum.p.adjust")
+  
+  #replace NA values with the values from the whole list
+  #### for CD ileum
+  #find pathways which does not occur in the filtered enriched pathway list of cd.ileum (p.adjust<0.05 & qvalue<0.02 )
+  #because we will not take into account not sig. enriched pathways, we will assign value of 1 for their p.adjust
+  notExist.CDileum <- setdiff(all.pathways$Description,CD.ileum.f$Description)
+  all.pathways[all.pathways$Description %in% notExist.CDileum,]$CD.ileum.p.adjust <- 1
+  #the rest NA values correspond to the sig.enriched pathways but not in the first 20 list.
+  #so we will replace NA values with the p.adjust values from the whole list
+  NA.indices <- which(is.na(all.pathways$CD.ileum.p.adjust), arr.ind = TRUE)
+  allIDs <- all.pathways[NA.indices,]$Description
+  df <- CD.ileum.f[CD.ileum.f$Description %in% allIDs,]
+  df <- df[order(df$Description),]
+  all.pathways[all.pathways$Description %in% df$Description,]$CD.ileum.p.adjust <- df$p.adjust
+  #### for CD rectum
+  #find pathways which does not occur in the filtered enriched pathway list of cd rectum (p.adjust<0.05 & qvalue<0.02 )
+  notExist.CDrectum<- setdiff(all.pathways$Description,CD.rectum.f$Description)
+  all.pathways[all.pathways$Description %in% notExist.CDrectum,]$CD.rectum.p.adjust <- 1
+  #replacing NA values with the values from the whole list
+  NA.indices <- which(is.na(all.pathways$CD.rectum.p.adjust), arr.ind = TRUE)
+  allIDs <- all.pathways[NA.indices,]$Description
+  df <- CD.rectum.f[CD.rectum.f$Description %in% allIDs,]
+  df <- df[order(df$Description),]
+  all.pathways[all.pathways$Description %in% df$Description,]$CD.rectum.p.adjust <- df$p.adjust
+  #### for UC ileum
+  #find pathways which does not occur in the filtered enriched pathway list of UC ileum (p.adjust<0.05 & qvalue<0.02 )
+  notExist.UCileum <- setdiff(all.pathways$Description,UC.ileum.f$Description)
+  all.pathways[all.pathways$Description %in% notExist.UCileum,]$UC.ileum.p.adjust <- 1
+  #### for UC rectum
+  #find pathways which does not occur in the filtered enriched pathway list of UC rectum (p.adjust<0.05 & qvalue<0.02 )
+  notExist.UCrectum<- setdiff(all.pathways$Description,UC.rectum.f$Description)
+  all.pathways[all.pathways$Description %in% notExist.UCrectum,]$UC.rectum.p.adjust <- 1
+  #replacing NA values with the values from the whole list
+  NA.indices <- which(is.na(all.pathways$UC.rectum.p.adjust), arr.ind = TRUE)
+  allIDs <- all.pathways[NA.indices,]$Description
+  df <- UC.rectum.f[UC.rectum.f$Description %in% allIDs,]
+  df <- df[order(df$Description),]
+  all.pathways[all.pathways$Description %in% df$Description,]$UC.rectum.p.adjust <- df$p.adjust
+  
+  row.names(all.pathways) <- all.pathways$Description
+  all.pathways  <- all.pathways[,2:5]
+  colnames(all.pathways) <- c("CD.ileum","CD.rectum","UC.ileum","UC.rectum")
+  
+  #create output folder if not exist
+  if(!dir.exists("5-create_heatmap")){dir.create("5-create_heatmap")}
+  
+  ## Select a size to visualize the heatmap with (options; large or small)
+  size_heatmap <- "large"
+  ##Print labels large for paper, small for notebook:
+  fontsize_row_l = 30 
+  if (size_heatmap == "large") {
+    fontsize_col_l = 30 
+    fontsize_l = 30
+    width_l =2000 
+    height_l =2000 
+    name_heatmap_file <- "5-create_heatmap/heatmap_log10_large.png"
+  }else if(size_heatmap == "small"){ 
+    fontsize_row_l = 10 
+    fontsize_col_l = 10 
+    width_l =1500 
+    height_l =1500 
+    fontsize_l = 10
+    name_heatmap_file <- "5-create_heatmap/heatmap_log10_small.png"
+  }else{print("Size not Recognised")}
+  #normally darker value represent higher values light color represent smaller values
+  #when we use rev function higher ones are represented by light color
+  colMain <- colorRampPalette(rev(brewer.pal(9, "Blues")))(30)
+  my_heatmap <- pheatmap(as.matrix(log10(all.pathways)), scale = "none", color = colMain , 
+                         legend = TRUE , legend_breaks = c(0, -5, -10, -15, min(log10(all.pathways))), 
+                         main = "", 
+                         legend_labels = c("adj. p-values \n", " -5", " -10", " -15", ""),
+                         cellwidth = 80, treeheight_row = 200, fontsize = fontsize_l, fontsize_row= fontsize_row_l, 
+                         fontsize_col = fontsize_col_l, cluster_rows = TRUE, cluster_cols = FALSE)
+  
+  #save obtained heatmap
+  save_pheatmap_png <- function(x, filename, width = width_l, height = height_l) {
+    png(filename, width = width, height = height)
+    grid::grid.newpage()
+    grid::grid.draw(x$gtable)
+    dev.off()
+  }
+  ##p-values are visalized on a log10 scale, to make them more discriminatory.
+  save_pheatmap_png(my_heatmap, name_heatmap_file)
 }
 
 networkAnalysis <- function(){

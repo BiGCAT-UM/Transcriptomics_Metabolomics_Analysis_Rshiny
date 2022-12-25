@@ -254,14 +254,18 @@ ui <- tagList(
                                                numericInput(
                                                  inputId = "pthreshold",
                                                  label = "P-value threshold",
-                                                 value = 0.05
+                                                 value = 0.05,
+                                                 min = 0,
+                                                 max = 1
                                                ),
                                                br(),
                                                
                                                numericInput(
                                                  inputId = "FCthreshold",
                                                  label = "FC threshold",
-                                                 value = 1.5
+                                                 value = 1.5,
+                                                 min = 1,
+                                                 max = 10
                                                ),
                                                actionBttn(inputId ="DEGButton", label ="Apply", style = "jelly",
                                                           btn_type = "button", type = "primary", color = "primary"),
@@ -388,7 +392,51 @@ ui <- tagList(
                                     # Heatmap
                                     #***************************************************#
                                     
-                                    tabPanel("Create Heatmap", value = "heatmap_trans"),
+                                    tabPanel("Create Heatmap", value = "heatmap_trans",
+                                             br(),
+                                             sidebarPanel(
+                                               #==========================================#
+                                               # side panel
+                                               #==========================================#
+                                               h3(strong("Heatmap")),
+                                               h5("Heatmap for the pathway analysis will be created"),
+                                               br(),
+                                               numericInput(
+                                                 inputId = "p_threshold_pathway",
+                                                 label = "p-value threshold",
+                                                 value = 0.05,
+                                                 min = 0,
+                                                 max = 1
+                                               ),
+                                               br(),
+                                               numericInput(
+                                                 inputId = "q_threshold_pathway",
+                                                 label = "q-value threshold",
+                                                 value = 0.02,
+                                                 min = 0,
+                                                 max = 1
+                                               ),
+                                               
+                                               actionBttn(inputId ="heatmapButton", label ="Apply", style = "jelly",
+                                                          btn_type = "button", type = "primary", color = "primary"),
+                                               
+                                               # Horizontal line ----
+                                               tags$hr(),
+                                               actionBttn(inputId ="heatmap_NEXT", label ="Next", style = "jelly",
+                                                          btn_type = "button", type = "primary", color = "danger",
+                                                          icon = icon("arrow-right"))
+                                               
+                                             ),
+                                             
+                                             #==========================================#
+                                             # main Panel
+                                             #==========================================#
+                                             mainPanel(
+                                               imageOutput("HeatmapPlot",
+                                                           width = "700px",
+                                                           height = "auto")
+                                             )
+                                    ),
                                     
                                     #***************************************************#
                                     # Network analysis

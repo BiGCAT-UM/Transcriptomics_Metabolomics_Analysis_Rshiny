@@ -586,6 +586,39 @@ server = function(input, output,session) {
     })
   })
   
+  # Go the next step
+  observeEvent(input$pathway_NEXT, {
+    
+    updateTabsetPanel(session, "tabs_trans",
+                      selected = "heatmap_trans")
+    
+    showTab("tabs_trans", target = "heatmap_trans")
+    
+  })
+  
+  #***************************************************#
+  # Create heatmap
+  #***************************************************#
+  
+  p_threshold_pathway <- eventReactive(input$heatmapButton, {
+    input$p_threshold_pathway
+  })
+  
+  q_threshold_pathway <- eventReactive(input$heatmapButton, {
+    input$q_threshold_pathway
+  })
+  
+  observeEvent(input$heatmapButton, {
+    createHeatmap(p_threshold_pathway(),q_threshold_pathway())
+    
+    output$HeatmapPlot<- renderImage({
+      path <- paste0(work_DIR,"/5-create_heatmap/heatmap_log10_large.png")
+      list(src = path, contentType = 'image/png',width = "800px", height = "auto",
+           alt = "This is alternate text")
+      
+    }, deleteFile=FALSE)
+    
+  })
   
 
   
