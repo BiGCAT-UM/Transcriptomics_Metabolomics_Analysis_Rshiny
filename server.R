@@ -545,7 +545,7 @@ server = function(input, output,session) {
                              align = "center")))
     
     # Perform pathway analysis
-    pathwayAnalysisTranscriptomics(P_threshold(), log2(FC_threshold()), 0.05,0.02)
+    pathwayAnalysisTranscriptomics(log2(FC_threshold()), P_threshold(), 0.05,0.02)
     
     removeModal()
     
@@ -559,6 +559,8 @@ server = function(input, output,session) {
     output$pathwayTable_rectum <- DT::renderDataTable({
       req(input$pathwayDisease)
       output <- read.delim(paste0(work_DIR,"/4-pathway_analysis/enrichResults_ORA_",input$pathwayDisease,"_rectum.tsv"))
+      output <- output[,1:7]
+      colnames(output) <- c("ID", "Description", "Gene ratio", "Bg ratio", "p-value","adj. p-value",  "q-value")
       return(output)
     }, server=TRUE,
     options = list(pageLength = 5), rownames= FALSE)
@@ -575,6 +577,8 @@ server = function(input, output,session) {
     output$pathwayTable_ileum <- DT::renderDataTable({
       req(input$pathwayDisease)
       output <- read.delim(paste0(work_DIR,"/4-pathway_analysis/enrichResults_ORA_",input$pathwayDisease,"_ileum.tsv"))
+      output <- output[,1:7]
+      colnames(output) <- c("ID", "Description", "Gene ratio", "Bg ratio", "p-value","adj. p-value",  "q-value")
       return(output)
     }, server=TRUE,
     options = list(pageLength = 5), rownames= FALSE)
@@ -609,7 +613,16 @@ server = function(input, output,session) {
   })
   
   observeEvent(input$heatmapButton, {
+    
+    showModal(modalDialog(title = h4(strong("Heatmap"),
+                                     align = "center"), 
+                          footer = NULL,
+                          h5("This might take a while. Please be patient.", 
+                             align = "center")))
+    
     createHeatmap(p_threshold_pathway(),q_threshold_pathway())
+    
+    removeModal()
     
     output$HeatmapPlot<- renderImage({
       path <- paste0(work_DIR,"/5-create_heatmap/heatmap_log10_large.png")
@@ -620,7 +633,43 @@ server = function(input, output,session) {
     
   })
   
-
+  # Go the next step
+  observeEvent(input$heatmap_NEXT, {
+    
+    updateTabsetPanel(session, "tabs_trans",
+                      selected = "network_trans")
+    
+    showTab("tabs_trans", target = "network_trans")
+    
+  })
+  
+  #***************************************************#
+  # Network analysis
+  #***************************************************#
+  
+  observeEvent(input$networkButton, {
+    
+    showModal(modalDialog(title = h4(strong("Network Analysis"),
+                                     align = "center"), 
+                          footer = NULL,
+                          h5("This might take a while. Please be patient.", 
+                             align = "center")))
+    networkAnalysis()
+    
+    removeModal()
+    
+    output$NetworkPlot<- renderImage({
+      wp.hs.gmt <- "wikipathways-20220510-gmt-Homo_sapiens.gmt"
+      path <- paste0("6-network_analysis/PPI_Pathway_Network_", wp.hs.gmt, input$location_network,".png")
+      list(src = path, contentType = 'image/png',width = "800px", height = "auto",
+           alt = "This is alternate text")
+      
+    }, deleteFile=FALSE)
+    
+  })
+  
+  
+  
   
   #**************************************************************************************************************#
   #                      Metabolomics Data Operations

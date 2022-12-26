@@ -42,6 +42,7 @@ library(R.utils)
 library(org.Hs.eg.db)
 library(pheatmap)
 library(RColorBrewer)
+library(RCy3)
 
 source("functions_ArrayAnalysis_v2.R")
 
@@ -475,7 +476,7 @@ pathwayAnalysisTranscriptomics <- function(logFCtheshold, Pthreshold, Pthreshold
     #for ileum location
     up.genes.ileum   <- dataset[dataset$log2FC_ileum >= logFCtheshold & dataset$pvalue_ileum < Pthreshold, 2] 
     down.genes.ileum <- dataset[dataset$log2FC_ileum <= -1*logFCtheshold & dataset$pvalue_ileum < Pthreshold, 2] 
-    deg.ileum <- unique(dataset[!is.na(dataset$ENTREZ.ID) & !is.na(dataset$pvalue_ileum) & dataset$pvalue_ileum < Pthreshold & abs(dataset$log2FC_ileum) > logFCtheshold,c(1:4)])
+    deg.ileum <- unique(dataset[(!is.na(dataset$ENTREZ.ID)) & (!is.na(dataset$pvalue_ileum)) & (dataset$pvalue_ileum < Pthreshold) & (abs(dataset$log2FC_ileum) > logFCtheshold),c(1:4)])
     write.table(deg.ileum,file = paste0("4-pathway_analysis/DEGs_",disorder,"_ileum.tsv"),sep="\t", quote=FALSE, row.names = FALSE)
     #for rectum location
     up.genes.rectum   <- dataset[dataset$log2FC_rectum >= logFCtheshold & dataset$pvalue_rectum < Pthreshold, 2] 
@@ -686,6 +687,179 @@ createHeatmap <- function(p_threshold_pathway, q_threshold_pathway){
 }
 
 networkAnalysis <- function(){
+  setwd(work_DIR)
+  #read all DEG data
+  CD.ileum <- read.delim("4-pathway_analysis/DEGs_CD_ileum.tsv",sep = "\t", header = TRUE)
+  CD.rectum <- read.delim("4-pathway_analysis/DEGs_CD_rectum.tsv", sep = "\t",header = TRUE)
+  UC.ileum <- read.delim("4-pathway_analysis/DEGs_UC_ileum.tsv",sep = "\t", header = TRUE)
+  UC.rectum <- read.delim("4-pathway_analysis/DEGs_UC_rectum.tsv", sep = "\t",header = TRUE)
+
+  #Listing all up and down regulated genes separately for CD:
+  CD.up.ileum   <-unique(CD.ileum[CD.ileum$log2FC_ileum > 0,])
+  colnames(CD.up.ileum) <- c ("HGNC_symbol", "ENTREZ", "log2FC_CD", "pvalue_CD")
+  CD.down.ileum <-unique(CD.ileum[CD.ileum$log2FC_ileum < 0,])
+  colnames(CD.down.ileum) <- c ("HGNC_symbol", "ENTREZ", "log2FC_CD", "pvalue_CD")
+  CD.up.rectum   <-unique(CD.rectum[CD.rectum$log2FC_rectum > 0,])
+  colnames(CD.up.rectum) <- c ("HGNC_symbol", "ENTREZ", "log2FC_CD", "pvalue_CD")
+  CD.down.rectum <-unique(CD.rectum[CD.rectum$log2FC_rectum < 0,])
+  colnames(CD.down.rectum) <- c ("HGNC_symbol", "ENTREZ", "log2FC_CD", "pvalue_CD")
+  #Listing all up and down regulated genes separately for UC:
+  UC.up.ileum   <-unique(UC.ileum[UC.ileum$log2FC_ileum > 0,])
+  colnames(UC.up.ileum) <- c ("HGNC_symbol", "ENTREZ", "log2FC_UC", "pvalue_UC")
+  UC.down.ileum <-unique(UC.ileum[UC.ileum$log2FC_ileum < 0,])
+  colnames(UC.down.ileum) <- c ("HGNC_symbol", "ENTREZ", "log2FC_UC", "pvalue_UC")
+  UC.up.rectum   <-unique(UC.rectum[UC.rectum$log2FC_rectum > 0,])
+  colnames(UC.up.rectum) <- c ("HGNC_symbol", "ENTREZ", "log2FC_UC", "pvalue_UC")
+  UC.down.rectum <-unique(UC.rectum[UC.rectum$log2FC_rectum < 0,])
+  colnames(UC.down.rectum) <- c ("HGNC_symbol", "ENTREZ", "log2FC_UC", "pvalue_UC")
+  
+  #OVERLAP ILEUM
+  # overlap genes between CD down and UC down
+  merged.ileum.downCDdownUC <- merge(x=CD.down.ileum, y=UC.down.ileum, by=c('ENTREZ', 'HGNC_symbol'), all.x=FALSE, all.y=FALSE)
+  # overlap genes between CD up and UC down
+  merged.ileum.upCDdownUC <- merge(x=CD.up.ileum,y=UC.down.ileum, by=c('ENTREZ', 'HGNC_symbol'),all.x=FALSE, all.y=FALSE)
+  # overlap genes between CD up and UC up
+  merged.ileum.upCDupUC <- merge(x=CD.up.ileum,y=UC.up.ileum,by=c('ENTREZ', 'HGNC_symbol'), all.x=FALSE, all.y=FALSE)
+  # overlap genes between CD down and UC up
+  merged.ileum.downCDupUC <- merge(x=CD.down.ileum,y=UC.up.ileum,by=c('ENTREZ', 'HGNC_symbol'),all.x=FALSE, all.y=FALSE)
+  #merge all DEG with corresponding logFC for both diseases
+  DEG.overlapped_ileum <- rbind(merged.ileum.downCDdownUC, merged.ileum.upCDdownUC, merged.ileum.upCDupUC, merged.ileum.downCDupUC)
+  if(!dir.exists("6-network_analysis")) dir.create("6-network_analysis")
+  write.table(DEG.overlapped_ileum ,"6-network_analysis/DEG.overlapped_ileum",row.names=FALSE,col.names = TRUE,quote= FALSE, sep = "\t")
+  
+  # OVERLAP RECTUM
+  # overlap genes between CD down and UC down
+  merged.rectum.downCDdownUC <- merge(x=CD.down.rectum,y=UC.down.rectum,by=c('ENTREZ', 'HGNC_symbol'),all.x=FALSE, all.y=FALSE)
+  # overlap genes between CD up and UC down
+  merged.rectum.upCDdownUC <- merge(x=CD.up.rectum,y=UC.down.rectum,by=c('ENTREZ', 'HGNC_symbol'),all.x=FALSE, all.y=FALSE)
+  # overlap genes between CD up and UC up
+  merged.rectum.upCDupUC <- merge(x=CD.up.rectum,y=UC.up.rectum,by=c('ENTREZ', 'HGNC_symbol'),all.x=FALSE, all.y=FALSE)
+  # overlap genes between CD down and UC up
+  merged.rectum.downCDupUC <- merge(x=CD.down.rectum,y=UC.up.rectum,by=c('ENTREZ', 'HGNC_symbol'),all.x=FALSE, all.y=FALSE)
+  #merge all DEG with corresponding logFC for both diseases
+  DEG.overlapped_rectum <- rbind(merged.rectum.downCDdownUC, merged.rectum.upCDdownUC, merged.rectum.upCDupUC, merged.rectum.downCDupUC)
+  write.table(DEG.overlapped_rectum ,"6-network_analysis/DEG.overlapped_rectum",row.names=FALSE,col.names = TRUE,quote= FALSE, sep = "\t")
+  
+  # PPI NETWORK
+  ## Select a location to analyse (options; ileum or rectum)
+  for (location in c("ileum", "rectum")){
+    if (location == "ileum"){deg <- DEG.overlapped_ileum}else if(location == "rectum"){deg <- DEG.overlapped_rectum}else{print("Location not recognized")}
+    #check that cytoscape is connected
+    cytoscapePing()
+    #close session before starting --> this overwrites existing networks!
+    closeSession(FALSE)
+    networkName = paste0("PPI_network_",location)
+    #create a PPI network using overlapped DEGs between CD and UC
+    #first take the deg input list as a query
+    x <- readr::format_csv(as.data.frame(deg$ENTREZ), col_names=F, escape = "double", eol =",")
+    #then use the below function to convert a command string into a CyREST query URL, executes a GET request, 
+    #and parses the result content into an R list object. Same as commandsGET
+    commandsRun(paste0('string protein query cutoff=0.7', ' newNetName=',networkName, ' query=',x,' limit=0'))
+    #get proteins (nodes) from the constructed network: #Query term: entrez IDs, display name: HGNC symbols.
+    proteins <- RCy3::getTableColumns(columns=c("query term", "display name"))
+    #get edges from the network
+    ppis     <- RCy3::getTableColumns(table="edge", columns=c("name"))
+    #split extracted edge information into source-target format
+    ppis     <- data.frame(do.call('rbind', strsplit(as.character(ppis$name),' (pp) ',fixed=TRUE)))
+    #merge obtained nodes and edges to get entrez IDs for each source genes 
+    ppis.2   <- merge(ppis, proteins, by.x="X1", by.y="display name", all.x=T)
+    #change column names
+    colnames(ppis.2) <- c("s", "t", "source")
+    #merge again to add entrez IDs of target genes 
+    ppis.3   <- merge(ppis.2, proteins, by.x="t", by.y="display name", all.x=T)
+    colnames(ppis.3)[4] <-"target"
+    #ppi3 stores interaction between all proteins so add new column represeting type of interaction
+    ppis.3$interaction <- "PPI"
+    #add col names to protein
+    colnames(proteins) <- c("id","label")
+    proteins$type <- "protein"
+    ###############get all pathways from WIKIPATHWAYS #################
+    ##Work with local file (for publication), or new download:
+    pathway_data <- "local" #Options: local, new
+    if (pathway_data == "local") {
+      wp.hs.gmt <-list.files(work_DIR, pattern="wikipathways", full.names=FALSE)
+      paste0("Using local file, from: ", wp.hs.gmt )
+    }else if(pathway_data == "new"){ 
+      #below code should be performed first to handle the ssl certificate error while downloading pathways 
+      options(RCurlOptions = list(cainfo = paste0( tempdir() , "/cacert.pem" ), ssl.verifypeer = FALSE))
+      #downloading latest pathway gmt files for human 
+      wp.hs.gmt <- rWikiPathways::downloadPathwayArchive(organism="Homo sapiens", format = "gmt")
+      paste0("Using new data, from: ", wp.hs.gmt)}else{print("Pathway data type not recognized")
+      }
+    #all wp and gene information stored in wp2gene object
+    wp2gene   <- rWikiPathways::readPathwayGMT(wp.hs.gmt)
+    #filter out  pathways that does not consist of any differentially expressed genes 
+    wp2gene.filtered <- wp2gene [wp2gene$gene %in% deg$ENTREZ,]
+    #change column names 
+    colnames(wp2gene.filtered)[3] <- c("source")
+    colnames(wp2gene.filtered)[5] <- c("target")
+    #add new column for representing interaction type
+    wp2gene.filtered$interaction <- "Pathway-Gene"
+    #store only wp information 
+    pwy.filtered <- unique( wp2gene [wp2gene$gene %in% deg$ENTREZ,c(1,3)])
+    colnames(pwy.filtered) <- c("label", "id")
+    pwy.filtered$type <- "pathway"
+    colnames(pwy.filtered) <- c("label","id", "type")
+    #get genes 
+    genes <- unique(deg[,c(1,2), drop=FALSE])
+    genes$type <- "gene"
+    colnames(genes) <- c("id","label","type")
+    genes$id <- as.character(genes$id)
+    #genes and pathways are separate nodes and they need to be merged
+    nodes.ppi <- dplyr::bind_rows(genes,pwy.filtered)
+    rownames(nodes.ppi) <- NULL
+    edges.ppi <- unique(dplyr::bind_rows(ppis.3[,c(3,4,5)], wp2gene.filtered[,c(3,5,6)]))
+    rownames(edges.ppi) <- NULL
+    
+    networkName = paste0("PPI_Pathway_Network_",location)
+    ###########Create PPI-pathway network###
+    RCy3::createNetworkFromDataFrames(nodes= nodes.ppi, edges = edges.ppi, title=networkName, collection=location)
+    RCy3::loadTableData(nodes.ppi, data.key.column = "label", table="node", table.key.column = "label")
+    RCy3::loadTableData(deg, data.key.column = "ENTREZ", table.key.column = "id")
+    ###########Visual style#################
+    RCy3::copyVisualStyle("default","ppi")#Create a new visual style (ppi) by copying a specified style (default)
+    RCy3::setNodeLabelMapping("label", style.name="ppi")
+    RCy3::lockNodeDimensions(TRUE, style.name="ppi")#Set a boolean value to have node width and height fixed to a single size value.
+    #threshold is set based of differential expressed gene criteria
+    data.values<-c(-0.58,0,0.58) 
+    #red-blue color schema chosen
+    node.colors <- c(brewer.pal(length(data.values), "RdBu"))
+    #nodes are split to show both log2fc values for both diseases 
+    RCy3::setNodeCustomHeatMapChart(c("log2FC_CD","log2FC_UC"), slot = 2, style.name = "ppi", colors = c("#CC3300","#FFFFFF","#6699FF","#CCCCCC"))
+    RCy3::setVisualStyle("ppi")
+    # Saving output
+    outputName = paste0("6-network_analysis/PPI_Pathway_Network_", wp.hs.gmt, location,".png")
+    png.file <- file.path(getwd(), outputName)
+    exportImage(png.file,'PNG', zoom = 500)
+    
+    # CLUSTERING
+    cytoscapePing()
+    #Install the Clustermaker2 app (if not available already)
+    if("Clustermaker2" %in% commandsHelp("")) print("Success: the Clustermaker2 app is installed") else print("Warning: Clustermaker2 app is not installed. Please install the Clustermaker2 app before proceeding.")
+    if(!"Clustermaker2" %in% commandsHelp("")){
+      installApp("Clustermaker2")
+    }
+    networkName = paste0 ("PPI_Pathway_Network_",location)
+    #to get network name of the location 
+    networkSuid = getNetworkSuid(networkName)
+    setCurrentNetwork(network=networkSuid)
+    #create cluster command
+    clustermaker <- paste("cluster mcl createGroups=TRUE showUI=TRUE network=SUID:",networkSuid, sep="")
+    #run the command in cytoscape
+    res <- commandsGET(clustermaker)
+    #total number of clusters 
+    cat("Total number of clusters for",location, as.numeric(gsub("Clusters: ", "", res[1])))
+    #change pathway node visualization
+    pathways <- RCy3::selectNodes(nodes="pathway", by.col = "type")
+    RCy3::setNodeColorBypass(node.names = pathways$nodes, "#D3D3D3")
+    RCy3::setNodeBorderWidthBypass(node.names = pathways$nodes, 10)
+    #export image
+    outputName = paste0 ("6-network_analysis/PPI_Pathway_Network_",location, wp.hs.gmt,"_clustered",".png")
+    png.file <- file.path(getwd(), outputName)
+    exportImage(png.file,'PNG', zoom = 500)
+    #save session
+    cys.file <- file.path(getwd(), "6-network_analysis/PPI_Pathway_Network_",wp.hs.gmt, location,"_clustered",".cys")
+  }
   
 }
 

@@ -256,7 +256,8 @@ ui <- tagList(
                                                  label = "P-value threshold",
                                                  value = 0.05,
                                                  min = 0,
-                                                 max = 1
+                                                 max = 1,
+                                                 step = 0.01
                                                ),
                                                br(),
                                                
@@ -265,7 +266,8 @@ ui <- tagList(
                                                  label = "FC threshold",
                                                  value = 1.5,
                                                  min = 1,
-                                                 max = 10
+                                                 max = 10,
+                                                 step = 0.1
                                                ),
                                                actionBttn(inputId ="DEGButton", label ="Apply", style = "jelly",
                                                           btn_type = "button", type = "primary", color = "primary"),
@@ -406,7 +408,8 @@ ui <- tagList(
                                                  label = "p-value threshold",
                                                  value = 0.05,
                                                  min = 0,
-                                                 max = 1
+                                                 max = 1,
+                                                 step = 0.01
                                                ),
                                                br(),
                                                numericInput(
@@ -414,7 +417,8 @@ ui <- tagList(
                                                  label = "q-value threshold",
                                                  value = 0.02,
                                                  min = 0,
-                                                 max = 1
+                                                 max = 1,
+                                                 step = 0.01
                                                ),
                                                
                                                actionBttn(inputId ="heatmapButton", label ="Apply", style = "jelly",
@@ -442,7 +446,35 @@ ui <- tagList(
                                     # Network analysis
                                     #***************************************************#
                                     
-                                    tabPanel("Network Analysis", value = "network_trans")
+                                    tabPanel("Network Analysis", value = "network_trans",
+                                             br(),
+                                             sidebarPanel(
+                                               #==========================================#
+                                               # side panel
+                                               #==========================================#
+                                               h3(strong("Network Analysis")),
+                                               h5("Network analysis will be performed.  
+                                                  Please make sure to have Cytoscape opened before running 
+                                                  the analysis"),
+                                               br(),
+                                               actionBttn(inputId ="networkButton", label ="Apply", style = "jelly",
+                                                          btn_type = "button", type = "primary", color = "primary")
+                                               
+                                             ),
+                                             
+                                             #==========================================#
+                                             # main Panel
+                                             #==========================================#
+                                             mainPanel(
+                                               selectInput(inputId = "location_network",
+                                                           label = NULL,
+                                                           choices = c("ileum", "rectum"),
+                                                           selected = "ileum"),
+                                               imageOutput("NetworkPlot",
+                                                           width = "700px",
+                                                           height = "auto")
+                                             )
+                                             )
                                     
                         ) # End of tabset pabel
                         
