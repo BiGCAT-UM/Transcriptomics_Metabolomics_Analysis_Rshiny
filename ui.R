@@ -734,14 +734,53 @@ ui <- tagList(
                                                
                                              )#End of mainPanel
                                              
-                                    ),
-                                    
+                                    ),#tabPanel
                                     
                                     
                                     #***************************************************#
                                     #Statistical Analysis
                                     #***************************************************#
-                                    tabPanel("Statistical Analysis", value= "stat_mets"),
+                                    tabPanel("Statistical Analysis", value= "stat_mets",
+                                    
+                                      sidebarPanel(
+
+                                        # Title + description
+                                        h3(strong("Statistical Analysis")),
+                                        h5("Statistical Analysis to identify statistically changed metabolites"),
+                                        hr(), 
+                                        
+                                        numericInput(
+                                          inputId = "pthresholdMet",
+                                          label = "P-value threshold",
+                                          value = 0.05,
+                                          min = 0,
+                                          max = 1,
+                                          step = 0.01
+                                        ),
+                                        br(),
+                                        
+                                        numericInput(
+                                          inputId = "FCthresholdMet",
+                                          label = "FC threshold",
+                                          value = 1.5,
+                                          min = 1,
+                                          max = 10,
+                                          step = 0.1
+                                        ),
+                                        br(),
+                                        
+                                        actionBttn(inputId ="statButton", label ="Apply", style = "jelly",
+                                                   btn_type = "button", type = "primary", color = "primary"),
+                                        
+                                        hr(),
+                                        actionBttn(inputId ="stat_NEXT", label ="Next", style = "jelly",
+                                                   btn_type = "button", type = "primary", color = "danger",
+                                                   icon = icon("arrow-right"))
+                                        
+
+                                      )#sidebarPanel
+                                    
+                                    ),#tabPanel
                                     
                                     #***************************************************#
                                     # Pathway Analysis

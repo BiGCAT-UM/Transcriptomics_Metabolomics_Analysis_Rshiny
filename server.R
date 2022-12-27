@@ -25,7 +25,7 @@ server = function(input, output,session) {
   # 
   hideTab("tabs_mets", target = "filtering_mets")
   #hideTab("tabs_mets", target = "norm_mets")
-  hideTab("tabs_mets", target = "stat_mets")
+  #hideTab("tabs_mets", target = "stat_mets")
   hideTab("tabs_mets", target = "pathway_mets")
   hideTab("tabs_mets", target = "mapping_mets")
 
@@ -177,7 +177,6 @@ server = function(input, output,session) {
   # Normalization and QC
   #***************************************************#
   
-  
   #====================================================#
   # Select outlier(s)
   #====================================================#
@@ -260,7 +259,6 @@ server = function(input, output,session) {
         
       }
     }
-    
     
     #====================================================#
     # Make PCA plots
@@ -857,7 +855,7 @@ server = function(input, output,session) {
     
     #call function     
     shapiroResults <- normalizeMets(selectedMethod())
-#browser()    
+  
     sendSweetAlert(
       session = session,
       title = "Success!",
@@ -865,6 +863,7 @@ server = function(input, output,session) {
         You can find all QC plots in 7-metabolite_data_preprocessing",
       type = "success")
   return (shapiroResults)  
+    
   })#eventReactive
   
   observeEvent (length(shapiroResults())>0,{
@@ -882,7 +881,7 @@ server = function(input, output,session) {
           "Advised to select a different data transformation procedure"
         }
       })#renderText
-# browser()     
+   
       WORK_DIR <- getwd()
       output$histPlotCD <- renderImage({
         req(input$whichHistCD)
@@ -890,11 +889,46 @@ server = function(input, output,session) {
           path <- paste0(WORK_DIR,"/7-metabolite_data_preprocessing/normalized/CD_histogram_norm.png")
           cat ("image path =",path,"\n")
         }
+        if (input$whichHistCD == "Raw"){
+          path <- paste0(WORK_DIR,"/7-metabolite_data_preprocessing/normalized/CD_histogram_raw.png")
+          cat ("image path =",path,"\n")
+        }
+        
         list(src = path, contentType = 'image/png',width = "500px", height = "auto",
              alt = "This is alternate text")
         
       } ,deleteFile=FALSE)
     
+      output$CDhistogram <- renderUI({
+        tagList(
+          h3(strong("CD histogram"))
+        )
+      })
+      
+      output$UC_shapiro_result <- renderText({
+        if(shapiroResults()[[2]] == TRUE){
+          paste0("Data after transformation seems to follow a normal distribution for more then 80% of your data")}
+        else{
+          "Advised to select a different data transformation procedure"
+        }
+      })#renderText
+      
+      WORK_DIR <- getwd()
+      output$histPlotUC <- renderImage({
+        req(input$whichHistUC)
+        if (input$whichHistUC == "Normalized"){
+          path <- paste0(WORK_DIR,"/7-metabolite_data_preprocessing/normalized/UC_histogram_norm.png")
+          cat ("image path =",path,"\n")
+        }
+        if (input$whichHistUC == "Raw"){
+          path <- paste0(WORK_DIR,"/7-metabolite_data_preprocessing/normalized/UC_histogram_raw.png")
+          cat ("image path =",path,"\n")
+        }
+        list(src = path, contentType = 'image/png',width = "500px", height = "auto",
+             alt = "This is alternate text")
+        
+      } ,deleteFile=FALSE)
+      
     
   })#observeEvent
   
@@ -913,6 +947,21 @@ server = function(input, output,session) {
     showTab("tabs_mets", target = "stat_mets")
     
   })
+  
+  #***************************************************#
+  # Statistical Analysis
+  #***************************************************#
+  
+  observeEvent(input$statButton,{
+    
+    mSet_transformedCD <- read.csv("7-metabolite_data_preprocessing/normalized/CD_norm_data.csv", na.strings=c("", "NA"))
+    #mSet_transformedUC <- read.csv("7-metabolite_data_preprocessing/normalized/UC_norm_data.csv", na.strings=c("", "NA"))
+    
+    statAnalysisMets(mSet_transformedCD, "CD", selectedMethod() )
+    #applyFun(mSet_transformedUC, "UC")
+    
+  })
+  
   
  
 }#eof server
