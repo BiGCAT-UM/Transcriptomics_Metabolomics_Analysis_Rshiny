@@ -129,7 +129,7 @@ server = function(input, output,session) {
         tagList(
           br(),
           hr(),
-          h3(strong("Histogram of Mean Expression Values (Pre-filtering)"))
+          h3(strong("Histogram of Mean Expression Values (pre-filtering)"))
         )
       })
     })
@@ -145,7 +145,7 @@ server = function(input, output,session) {
         tagList(
           br(),
           hr(),
-          h3(strong("Histogram of Mean Expression Values (Post-filtering)"))
+          h3(strong("Histogram of Mean Expression Values (post-filtering)"))
         )
       })
     })
@@ -158,19 +158,13 @@ server = function(input, output,session) {
     sendSweetAlert(
       session = session,
       title = "Success!",
-      text = "Log CPM filtering was successfully applied",
+      text = "Data successfully filtered! Please wait for the figures to be rendered.",
       type = "success")
     
   })
   
   # Go the next step
   observeEvent(if (length(data_filtered())> 0){input$preprocess_NEXT}, {
-    
-    sendSweetAlert(
-      session = session,
-      title = "Success!",
-      text = "Data successfully filtered! You can now start with the normalization!",
-      type = "success")
     
     updateTabsetPanel(session, "tabs_trans",
                       selected = "norm_trans")
@@ -211,7 +205,7 @@ server = function(input, output,session) {
       
       outliers <- NULL
       
-      showModal(modalDialog(title = h4(strong("Normalization and Quality Control"),
+      showModal(modalDialog(title = h4(strong("Normalization and Quality Control..."),
                                        align = "center"), 
                             footer = NULL,
                             h5("This might take a while. Please be patient.", 
@@ -225,8 +219,8 @@ server = function(input, output,session) {
       sendSweetAlert(
         session = session,
         title = "Success!",
-        text = "Normalization and QC plots done. 
-        You can find all QC plots in 2-differential_gene_expression_analysis",
+        text = "Normalization and QC successfully performed! 
+        You can now view the generated QC plots.",
         type = "success")
       
     }
@@ -255,12 +249,14 @@ server = function(input, output,session) {
         
         removeModal()
         
+        
         sendSweetAlert(
           session = session,
           title = "Success!",
-          text = "Normalization and QC plots done. 
-          You can find all QC plots in 2-differential_gene_expression_analysis",
+          text = "Normalization and QC successfully performed! 
+        You can now view the generated QC plots.",
           type = "success")
+        
         
       }
     }
@@ -277,21 +273,74 @@ server = function(input, output,session) {
       
       output$QCplot <- renderImage({
         req(input$whichQCplot)
-        if (input$whichQCplot == "PCA (Normalized)"){
-          path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCnorm/PCAanalysis__biopsylocation2.png")
-          cat ("image path =",path,"\n")
+        req(input$normalizedQC)
+        req(input$colorQC)
+        
+        if (input$whichQCplot == "PCA"){
+          if (input$normalizedQC == "Raw"){
+            if (input$colorQC == "Location"){
+              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCraw/PCAanalysis__biopsylocation2.png")
+              cat ("image path =",path,"\n")
+            }
+            if (input$colorQC == "Disease"){
+              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCraw/PCAanalysis__disease2.png")
+              cat ("image path =",path,"\n")
+            }
+          }
+          if (input$normalizedQC == "Normalized"){
+            if (input$colorQC == "Location"){
+              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCnorm/PCAanalysis__biopsylocation2.png")
+              cat ("image path =",path,"\n")
+            }
+            if (input$colorQC == "Disease"){
+              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCnorm/PCAanalysis__disease2.png")
+              cat ("image path =",path,"\n")
+            }
+          }
         }
-        if (input$whichQCplot == "PCA (Raw)"){
-          path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCraw/PCAanalysis__biopsylocation2.png")
-          cat ("image path =",path,"\n")
+        if (input$whichQCplot == "Boxplot"){
+          if (input$normalizedQC == "Raw"){
+            if (input$colorQC == "Location"){
+              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCraw/Boxplot__biopsylocation.png")
+              cat ("image path =",path,"\n")
+            }
+            if (input$colorQC == "Disease"){
+              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCraw/Boxplot__disease.png")
+              cat ("image path =",path,"\n")
+            }
+          }
+          if (input$normalizedQC == "Normalized"){
+            if (input$colorQC == "Location"){
+              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCnorm/Boxplot__biopsylocation.png")
+              cat ("image path =",path,"\n")
+            }
+            if (input$colorQC == "Disease"){
+              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCnorm/Boxplot__disease.png")
+              cat ("image path =",path,"\n")
+            }
+          }
         }
-        if (input$whichQCplot == "Boxplot (Normalized)"){
-          path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCnorm/Boxplot__biopsylocation.png")
-          cat ("image path =",path,"\n")
-        }
-        if (input$whichQCplot == "Boxplot (Raw)"){
-          path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCraw/Boxplot__biopsylocation.png")
-          cat ("image path =",path,"\n")
+        if (input$whichQCplot == "Heatmap"){
+          if (input$normalizedQC == "Raw"){
+            if (input$colorQC == "Location"){
+              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCraw/Correlation__biopsylocation.png")
+              cat ("image path =",path,"\n")
+            }
+            if (input$colorQC == "Disease"){
+              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCraw/Correlation__disease.png")
+              cat ("image path =",path,"\n")
+            }
+          }
+          if (input$normalizedQC == "Normalized"){
+            if (input$colorQC == "Location"){
+              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCnorm/Correlation__biopsylocation.png")
+              cat ("image path =",path,"\n")
+            }
+            if (input$colorQC == "Disease"){
+              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCnorm/Correlation__disease.png")
+              cat ("image path =",path,"\n")
+            }
+          }
         }
         
         list(src = path, contentType = 'image/png',width = "800px", height = "auto",
@@ -341,7 +390,7 @@ server = function(input, output,session) {
     WORK_DIR <- getwd()
     
     # Loading message
-    showModal(modalDialog(title = h4(strong("Statistical Analysis"),
+    showModal(modalDialog(title = h4(strong("Statistical Analysis..."),
                                      align = "center"), 
                           footer = NULL,
                           h5("This might take a while. Please be patient.", 
@@ -499,7 +548,7 @@ server = function(input, output,session) {
   #***************************************************#
   observeEvent(input$mappingButton,{
     # Loading message
-    showModal(modalDialog(title = h4(strong("Identifier Mapping"),
+    showModal(modalDialog(title = h4(strong("Identifier Mapping..."),
                                      align = "center"), 
                           footer = NULL,
                           h5("This might take a while. Please be patient.", 
@@ -519,7 +568,7 @@ server = function(input, output,session) {
       output <- read.delim(paste0(work_DIR, "/3-identifier_mapping/IDMapping_",input$mappingDisease, ".tsv"))
       return(output)
     }, server=TRUE,
-    options = list(pageLength = 5), rownames= FALSE)
+    options = list(pageLength = 10), rownames= FALSE)
     
   })
   
@@ -538,7 +587,7 @@ server = function(input, output,session) {
 
   observeEvent(input$pathwayButton,{
     
-    showModal(modalDialog(title = h4(strong("Pathway Analysis"),
+    showModal(modalDialog(title = h4(strong("Pathway Analysis..."),
                                      align = "center"), 
                           footer = NULL,
                           h5("This might take a while. Please be patient.", 
@@ -555,39 +604,28 @@ server = function(input, output,session) {
       text = "Pathway analysis has been performed successfully!",
       type = "success")
     
-    # rectum table
-    output$pathwayTable_rectum <- DT::renderDataTable({
-      req(input$pathwayDisease)
-      output <- read.delim(paste0(work_DIR,"/4-pathway_analysis/enrichResults_ORA_",input$pathwayDisease,"_rectum.tsv"))
+    # pathway table
+    output$pathwayTable <- DT::renderDataTable({
+      req(input$pathwayComparison)
+      if (input$pathwayComparison == "Ileum: CD vs non-IBD"){
+        output <- read.delim(paste0(work_DIR,"/4-pathway_analysis/enrichResults_ORA_CD_ileum.tsv"))
+      }
+      if (input$pathwayComparison == "Rectum: CD vs non-IBD"){
+        output <- read.delim(paste0(work_DIR,"/4-pathway_analysis/enrichResults_ORA_CD_rectum.tsv"))
+      }
+      if (input$pathwayComparison == "Ileum: UC vs non-IBD"){
+        output <- read.delim(paste0(work_DIR,"/4-pathway_analysis/enrichResults_ORA_UC_ileum.tsv"))
+      }
+      if (input$pathwayComparison == "Rectum: UC vs non-IBD"){
+        output <- read.delim(paste0(work_DIR,"/4-pathway_analysis/enrichResults_ORA_UC_rectum.tsv"))
+      }
+      
       output <- output[,1:7]
       colnames(output) <- c("ID", "Description", "Gene ratio", "Bg ratio", "p-value","adj. p-value",  "q-value")
       return(output)
     }, server=TRUE,
     options = list(pageLength = 5), rownames= FALSE)
-    
-    output$pathway_rectum_text <- renderUI({
-      tagList(
-        br(),
-        hr(),
-        h3(strong("Rectum"))
-      )
-    })
-    
-    # Ileum table
-    output$pathwayTable_ileum <- DT::renderDataTable({
-      req(input$pathwayDisease)
-      output <- read.delim(paste0(work_DIR,"/4-pathway_analysis/enrichResults_ORA_",input$pathwayDisease,"_ileum.tsv"))
-      output <- output[,1:7]
-      colnames(output) <- c("ID", "Description", "Gene ratio", "Bg ratio", "p-value","adj. p-value",  "q-value")
-      return(output)
-    }, server=TRUE,
-    options = list(pageLength = 5), rownames= FALSE)
-    
-    output$pathway_ileum_text <- renderUI({
-      tagList(
-        h3(strong("Ileum"))
-      )
-    })
+
   })
   
   # Go the next step
@@ -614,7 +652,7 @@ server = function(input, output,session) {
   
   observeEvent(input$heatmapButton, {
     
-    showModal(modalDialog(title = h4(strong("Heatmap"),
+    showModal(modalDialog(title = h4(strong("Heatmap..."),
                                      align = "center"), 
                           footer = NULL,
                           h5("This might take a while. Please be patient.", 

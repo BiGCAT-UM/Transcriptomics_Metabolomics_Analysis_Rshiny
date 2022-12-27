@@ -31,6 +31,8 @@ ui <- tagList(
                                                # Header
                                                h3(strong("Meta data")),
                                                
+                                               h5("Upload the ",em("hmp2_metadata.csv"), " file"),
+                                               
                                                # Upload meta data
                                                fileInput(inputId = "file1", 
                                                          label = NULL,
@@ -57,6 +59,8 @@ ui <- tagList(
                                                
                                                # Header
                                                h3(strong("Host transcriptomics")),
+                                               
+                                               h5("Upload the ",em("host_tx_counts.tsv"), " file"),
                                                
                                                # Upload file
                                                fileInput(inputId = "file2", 
@@ -211,13 +215,31 @@ ui <- tagList(
                                              # main Panel
                                              #==========================================#
                                              mainPanel(
-                                               selectInput(inputId = "whichQCplot",
-                                                           label = NULL,
-                                                           choices = c("PCA (Normalized)",
-                                                                       "PCA (Raw)",
-                                                                       "Boxplot (Normalized)",
-                                                                       "Boxplot (Raw)"),
-                                                           selected = "PCA (Normalized)"),
+                                               fluidRow(
+                                                 column(width = 3,
+                                                        selectInput(inputId = "whichQCplot",
+                                                                    label = "QC plot",
+                                                                    choices = c("PCA",
+                                                                                "Boxplot",
+                                                                                "Heatmap"),
+                                                                    selected = "PCA")
+                                                 ),
+                                                 column(width = 3,
+                                                        radioButtons(inputId = "normalizedQC", 
+                                                                     label = "Raw or Normalized Data",
+                                                                     choices = c("Raw",
+                                                                                 "Normalized"),
+                                                                     selected = "Normalized")
+                                                        ),
+                                                 column(width = 3,
+                                                        radioButtons(inputId = "colorQC", 
+                                                                     label = "Color by",
+                                                                     choices = c("Location",
+                                                                                 "Disease"),
+                                                                     selected = "Location")
+                                                        )
+                                               ),
+                                               hr(),
                                                
                                                imageOutput("QCplot",
                                                            width = "700px",
@@ -269,6 +291,10 @@ ui <- tagList(
                                                  max = 10,
                                                  step = 0.1
                                                ),
+                                               br(),
+                                               h5("WARNING: The selected thresholds will also be used for the 
+                                                  pathway and network analysis. So, choose your thresholds carefully!"),
+                                               
                                                actionBttn(inputId ="DEGButton", label ="Apply", style = "jelly",
                                                           btn_type = "button", type = "primary", color = "primary"),
                                               
@@ -318,7 +344,7 @@ ui <- tagList(
                                                #******************************************************#
                                                
                                                h3(strong("Identifier Mapping")),
-                                               h5("HGNC gene symbols will be mapped to ENTREZ and ENSEMBL IDs"),
+                                               h5("HGNC gene symbols will be mapped to ENTREZ and ENSEMBL identifiers."),
                                                br(),
                                                
                                                actionBttn(inputId ="mappingButton", label ="Apply", style = "jelly",
@@ -358,7 +384,8 @@ ui <- tagList(
                                                # side panel
                                                #==========================================#
                                                h3(strong("Pathway Analysis")),
-                                               h5("WikiPathways Overrepresentation Analysis will be performed"),
+                                               h5("WikiPathways Overrepresentation Analysis will be performed. 
+                                                  The logFC and p-value thresholds from the DEG Analysis will be used."),
                                                br(),
                                                
                                                actionBttn(inputId ="pathwayButton", label ="Apply", style = "jelly",
@@ -376,16 +403,16 @@ ui <- tagList(
                                              # main Panel
                                              #==========================================#
                                              mainPanel(
-                                               selectInput(inputId = "pathwayDisease",
+                                               selectInput(inputId = "pathwayComparison",
                                                            label = NULL,
-                                                           choices = c("CD", "UC"),
-                                                           selected = "CD"),
+                                                           choices = c("Ileum: CD vs non-IBD",
+                                                                       "Rectum: CD vs non-IBD",
+                                                                       "Ileum: UC vs non-IBD",
+                                                                       "Rectum: UC vs non-IBD"),
+                                                           selected = "Ileum: CD vs non-IBD"),
                                                
                                                #output from DE analysis
-                                               uiOutput("pathway_ileum_text"),
-                                               DT::dataTableOutput("pathwayTable_ileum"),
-                                               uiOutput("pathway_rectum_text"),
-                                               DT::dataTableOutput("pathwayTable_rectum")
+                                               DT::dataTableOutput("pathwayTable")
                                              )
                                              
                                     ),
