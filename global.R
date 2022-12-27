@@ -1108,6 +1108,9 @@ statAnalysisMets <- function (mSet_transformed,disorder,transformation){
   
   browser()
   
+  #take only first token of the transformation 
+  transformation <- strsplit(transformation, " ")[[1]][1]
+  
   if (disorder == "CD") {
     mSet_FINAL <- mSet_transformed[ , order(names(mSet_transformed))]}
   else{
@@ -1244,9 +1247,6 @@ statAnalysisMets <- function (mSet_transformed,disorder,transformation){
   ## Add title and update axis labels:
   volcanoPlot_disorder <- volcanoPlot_disorder + ggtitle(titleVolcano) + labs(y = "-log10(p-value)", x = verticalAxisTitle)
   
-  # Show the Volcano plot in the notebook output:
-  volcanoPlot_disorder
- 
   ## Export the data and Volcano Plot:
   
   ##Save the data file
