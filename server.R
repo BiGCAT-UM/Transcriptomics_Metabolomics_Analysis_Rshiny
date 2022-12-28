@@ -993,7 +993,7 @@ server = function(input, output,session) {
   #to get all results from statistical analysis
   resTable <- eventReactive(input$statButton,{
     
-    results <- list()
+    allResults <- list()
    
     # Loading message
     showModal(modalDialog(title = h4(strong("Metabolomics statistical analysis started"),
@@ -1008,10 +1008,10 @@ server = function(input, output,session) {
     statAnalysisMets(mSet_transformedCD, "CD", selectedMethod(), FC_met(),pvalue_met())
     statAnalysisMets(mSet_transformedUC, "UC", selectedMethod(), FC_met(),pvalue_met())
  
-    results [[1]] <- read.csv("8-significantly_changed_metabolites_analysis/mbxData_CD.csv")
-    results [[2]] <- read.csv("8-significantly_changed_metabolites_analysis/mbxData_UC.csv")
+    allResults [[1]] <- read.csv("8-significantly_changed_metabolites_analysis/mbxData_CD.csv")
+    allResults [[2]] <- read.csv("8-significantly_changed_metabolites_analysis/mbxData_UC.csv")
     
-    names(results) <- c("CD vs non-IBD",
+    names(allResults) <- c("CD vs non-IBD",
                         "UC vs non-IBD")
     
     removeModal()
@@ -1024,7 +1024,7 @@ server = function(input, output,session) {
       type = "success")
     
     
-    return (results)
+    return (allResults)
   })
   
   filteredResults <- eventReactive(input$statButton, {
@@ -1036,9 +1036,9 @@ server = function(input, output,session) {
       temp <- resTable()[[1]]
       filtered[[1]] <- temp[(abs(temp$foldchange_disorder) > FC_met()) &
                               (temp$p_values_disorder < pvalue_met()),]
-
+#browser()
       temp <- resTable()[[2]]
-      topTable[[2]] <- temp[(abs(temp$foldchange_disorder) > FC_met()) &
+      filtered[[2]] <- temp[(abs(temp$foldchange_disorder) > FC_met()) &
                               (temp$p_values_disorder < pvalue_met()),]
       
     #}
@@ -1055,6 +1055,7 @@ server = function(input, output,session) {
   
   # Show filtered result table for selected comparison
   observe({
+    
     output$metResTable <- DT::renderDataTable({
       req(input$metCompPair)
       output <- filteredResults()[[compPairMet()]]
@@ -1070,23 +1071,29 @@ server = function(input, output,session) {
   output$metVolcanoPlot <- renderPlot(NULL)
   
   #show volcano plot for selected comparison
-  output$metVolcanoPlot <- renderImage({
-    WORK_DIR <- getwd()
-    req(input$metCompPair)
-    if (compPairMet() == "CD vs non-IBD"){
-      path <- paste0(WORK_DIR,"/8-significantly_changed_metabolites_analysis/CD_relevant_labels_VolcanoPlot_absLogFC_0.58_pValue_0.05.png")
-      cat ("image path =",path,"\n")
-    }
-    if (compPairMet() == "UC vs non-IBD"){
-      path <- paste0(WORK_DIR,"/8-significantly_changed_metabolites_analysis/UC_relevant_labels_VolcanoPlot_absLogFC_0.58_pValue_0.05.png")
-      cat ("image path =",path,"\n")
-    }
-    
-    list(src = path, contentType = 'image/png',width = "500px", height = "auto",
-         alt = "This is alternate text")
-    
-  } ,deleteFile=FALSE)
   
+  
+  observeEvent(input$statButton,{
+    
+      output$metVolcanoPlot <- renderImage({
+        WORK_DIR <- getwd()
+        req(input$metCompPair)
+        if (compPairMet() == "CD vs non-IBD"){
+         # path <- paste0(WORK_DIR,"/8-significantly_changed_metabolites_analysis/CD_relevant_labels_VolcanoPlot_absLogFC_0.58_pValue_0.05.png")
+          path <- paste0(WORK_DIR,"/8-significantly_changed_metabolites_analysis/CD_relevant_labels_VolcanoPlot.png")
+          cat ("image path =",path,"\n")
+        }
+        if (compPairMet() == "UC vs non-IBD"){
+         # path <- paste0(WORK_DIR,"/8-significantly_changed_metabolites_analysis/UC_relevant_labels_VolcanoPlot_absLogFC_0.58_pValue_0.05.png")
+          path <- paste0(WORK_DIR,"/8-significantly_changed_metabolites_analysis/UC_relevant_labels_VolcanoPlot.png")
+          cat ("image path =",path,"\n")
+        }
+        
+        list(src = path, contentType = 'image/png',width = "500px", height = "auto",
+             alt = "This is alternate text")
+        
+      } ,deleteFile=FALSE)
+  })
   
   # Go the next step
   observeEvent(input$stat_NEXT, {

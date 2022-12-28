@@ -1260,8 +1260,8 @@ statAnalysisMets <- function (mSet_transformed,disorder,transformation, FC, pval
   
   ##Save the Volcano plot:
   imageType <- "png" ##Options are: svg, png, eps, ps, tex, pdf, jpeg, tiff, png, bmp, svg or wmf
-  nameVolcano <- paste0("8-significantly_changed_metabolites_analysis/", disorder, "_", selectViz, "_VolcanoPlot_absLogFC_", log2FC_max, "_pValue_", p_value_threshold, ".", imageType)
-  
+  #nameVolcano <- paste0("8-significantly_changed_metabolites_analysis/", disorder, "_", selectViz, "_VolcanoPlot_absLogFC_", log2FC_max, "_pValue_", p_value_threshold, ".", imageType)
+  nameVolcano <- paste0("8-significantly_changed_metabolites_analysis/", disorder, "_", selectViz, "_VolcanoPlot.", imageType)
   ggsave(nameVolcano)
   
   
