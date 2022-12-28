@@ -1109,6 +1109,12 @@ server = function(input, output,session) {
     showTab("tabs_mets", target = "pathway_mets")
     
   })
+  #***************************************************#
+  # Identifier Mapping
+  #***************************************************#
+  
+  
+  
   
   #***************************************************#
   # Pathway Analysis

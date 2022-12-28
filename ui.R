@@ -799,6 +799,57 @@ ui <- tagList(
                                     ),#tabPanel-stat
                                     
                                     # #***************************************************#
+                                    # # Identifier mapping
+                                    # #***************************************************#
+                                    tabPanel("Identifier Mapping", value = "mapping_mets",
+                                      
+                                             br(),
+                                             #==========================================#
+                                             # side panel
+                                             #==========================================#
+                                             sidebarPanel(
+                                               #Go forward
+                                               #******************************************************#
+                                               #   Information
+                                               #******************************************************#
+                                               
+                                               h3(strong("Identifier Mapping")),
+                                               h5("To visualize the multi-omics data in CytoScape, data need to be prepared 
+                                               for importing according to the unified database identifiers available.
+                                               Therefor, metabolite data is mapped to ChEBI IDS."),
+                                               br(),
+                                               
+                                               actionBttn(inputId ="mappingButtonMets", label ="Apply", style = "jelly",
+                                                          btn_type = "button", type = "primary", color = "primary"),
+                                               
+                                               # Horizontal line ----
+                                               tags$hr(),
+                                               actionBttn(inputId ="mappingMets_NEXT", label ="Next", style = "jelly",
+                                                          btn_type = "button", type = "primary", color = "danger",
+                                                          icon = icon("arrow-right"))
+                                               
+                                             ),
+                                             
+                                             #==========================================#
+                                             # main Panel
+                                             #==========================================#
+                                             mainPanel(
+                                               selectInput(inputId = "metCompPairMapping",
+                                                           label = NULL,
+                                                           choices = c("CD vs non-IBD",
+                                                                       "UC vs non-IBD"),
+                                                           selected = "CD vs non-IBD"
+                                               ),
+                                               
+                                               #output from identifier mapping
+                                               DT::dataTableOutput("mappingTable")
+                                             )         
+                                             
+                                    ),
+                                    
+                                    
+                                    
+                                    # #***************************************************#
                                     # # Pathway Analysis
                                     # #***************************************************#
                                       tabPanel("Pathway Analysis", value = "pathway_mets",
@@ -836,10 +887,7 @@ ui <- tagList(
                                         )
                                       ),
                                     # 
-                                    # #***************************************************#
-                                    # # Identifier mapping
-                                    # #***************************************************#
-                                    tabPanel("Identifier Mapping", value = "mapping_mets")
+                                 
                                     
                                     
                         )#tabSetPanel-mets
