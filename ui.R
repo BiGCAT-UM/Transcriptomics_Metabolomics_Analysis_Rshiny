@@ -412,6 +412,10 @@ ui <- tagList(
                                                            selected = "Ileum: CD vs non-IBD"),
                                                
                                                #output from DE analysis
+                                               plotOutput("pathwayPlot",
+                                                          width = "1000px",
+                                                          height = "400px"),
+                                               hr(),
                                                DT::dataTableOutput("pathwayTable")
                                              )
                                              
