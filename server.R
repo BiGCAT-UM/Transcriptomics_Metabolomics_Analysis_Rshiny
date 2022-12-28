@@ -471,7 +471,6 @@ server = function(input, output,session) {
   })
 
   
-  # P value threshold
   Comparison_DEG <- reactive({
     req(input$Comparison)
     return(input$Comparison)
@@ -947,21 +946,135 @@ server = function(input, output,session) {
     showTab("tabs_mets", target = "stat_mets")
     
   })
+ 
   
+   
   #***************************************************#
   # Statistical Analysis
   #***************************************************#
   
-  observeEvent(input$statButton,{
+  FC_met <- eventReactive(input$statButton,{
+    input$FCthresholdMet
+  })
+  pvalue_met <- eventReactive(input$statButton,{
+    input$pthresholdMet
+  })
+  
+  
+  #to get all results from statistical analysis
+  resTable <- eventReactive(input$statButton,{
+    
+    results <- list()
+   
+    # Loading message
+    showModal(modalDialog(title = h4(strong("Metabolomics statistical analysis started"),
+                                     align = "center"), 
+                          footer = NULL,
+                          h5("This might take a while. Please be patient.", 
+                             align = "center")))
     
     mSet_transformedCD <- read.csv("7-metabolite_data_preprocessing/normalized/CD_norm_data.csv", na.strings=c("", "NA"))
-    #mSet_transformedUC <- read.csv("7-metabolite_data_preprocessing/normalized/UC_norm_data.csv", na.strings=c("", "NA"))
+    mSet_transformedUC <- read.csv("7-metabolite_data_preprocessing/normalized/UC_norm_data.csv", na.strings=c("", "NA"))
     
-    statAnalysisMets(mSet_transformedCD, "CD", selectedMethod() )
-    #applyFun(mSet_transformedUC, "UC")
+    statAnalysisMets(mSet_transformedCD, "CD", selectedMethod(), FC_met(),pvalue_met())
+    statAnalysisMets(mSet_transformedUC, "UC", selectedMethod(), FC_met(),pvalue_met())
+ 
+    results [[1]] <- read.csv("8-significantly_changed_metabolites_analysis/mbxData_CD.csv")
+    results [[2]] <- read.csv("8-significantly_changed_metabolites_analysis/mbxData_UC.csv")
+    
+    names(results) <- c("CD vs non-IBD",
+                        "UC vs non-IBD")
+    
+    removeModal()
+    
+    # Success message
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "Statistical analysis finished!",
+      type = "success")
+    
+    
+    return (results)
+  })
+  
+  filteredResults <- eventReactive(input$statButton, {
+    
+    filtered <- list()
+    #WORK_DIR <- getwd()
+    
+    #if (input$AdjOrRaw == "Raw") {
+      temp <- resTable()[[1]]
+      filtered[[1]] <- temp[(abs(temp$foldchange_disorder) > FC_met()) &
+                              (temp$p_values_disorder < pvalue_met()),]
+
+      temp <- resTable()[[2]]
+      topTable[[2]] <- temp[(abs(temp$foldchange_disorder) > FC_met()) &
+                              (temp$p_values_disorder < pvalue_met()),]
+      
+    #}
+      names(filtered) <- c("CD vs non-IBD",
+                          "UC vs non-IBD")
+      return (filtered)
+      
+  })
+  
+  compPairMet <- reactive({
+    req(input$metCompPair)
+    return(input$metCompPair)
+  })
+  
+  # Show filtered result table for selected comparison
+  observe({
+    output$metResTable <- DT::renderDataTable({
+      req(input$metCompPair)
+      output <- filteredResults()[[compPairMet()]]
+      # output <- arrange(output, pvalue)
+      # output <- output[,c(1,2,3,4,7,8)]
+      # colnames(output) <- c("Gene Name", "Avg Expr", "log2 FC", "FC", "p-value", "adj. p-value")
+      return(output)
+    }, server=TRUE,
+    options = list(pageLength = 5), rownames= FALSE)
     
   })
   
+  output$metVolcanoPlot <- renderPlot(NULL)
+  
+  #show volcano plot for selected comparison
+  output$metVolcanoPlot <- renderImage({
+    WORK_DIR <- getwd()
+    req(input$metCompPair)
+    if (compPairMet() == "CD vs non-IBD"){
+      path <- paste0(WORK_DIR,"/8-significantly_changed_metabolites_analysis/CD_relevant_labels_VolcanoPlot_absLogFC_0.58_pValue_0.05.png")
+      cat ("image path =",path,"\n")
+    }
+    if (compPairMet() == "UC vs non-IBD"){
+      path <- paste0(WORK_DIR,"/8-significantly_changed_metabolites_analysis/UC_relevant_labels_VolcanoPlot_absLogFC_0.58_pValue_0.05.png")
+      cat ("image path =",path,"\n")
+    }
+    
+    list(src = path, contentType = 'image/png',width = "500px", height = "auto",
+         alt = "This is alternate text")
+    
+  } ,deleteFile=FALSE)
+  
+  
+  # Go the next step
+  observeEvent(input$stat_NEXT, {
+    
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "Statistical analysis successfully completed! 
+      Now you can continue with pathway analysis!",
+      type = "success")
+    
+    updateTabsetPanel(session, "tabs_mets",
+                      selected = "pathway_mets")
+    
+    showTab("tabs_mets", target = "pathway_mets")
+    
+  })
   
  
 }#eof server

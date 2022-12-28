@@ -245,10 +245,6 @@ ui <- tagList(
                                                            width = "700px",
                                                            height = "auto")
                                                
-                                               
-                                                 
-                                               
-                                               
                                              )#End of mainPanel
                                             
                                     ),
@@ -501,11 +497,11 @@ ui <- tagList(
                                                            width = "700px",
                                                            height = "auto")
                                              )
-                                             )
+                                      )
                                     
-                        ) # End of tabset pabel
+                        ) # End of tabset panel
                         
-               ),
+               ),#tabPanel-trans
                
                ################################################################
                
@@ -553,13 +549,13 @@ ui <- tagList(
                                                             selected = ","),
                                                # Horizontal line
                                                tags$hr(),
-                                              
+                                               
                                                
                                                
                                                h3(strong("Metabolomics data")),
                                                hr(),
                                                h5("The peak intensity value data will be uploaded,"),
-                                              
+                                               
                                                # Upload file
                                                fileInput(inputId = "metsData", 
                                                          label = NULL,
@@ -595,7 +591,7 @@ ui <- tagList(
                                                           btn_type = "button", 
                                                           color = "danger",
                                                           icon = icon("arrow-right")
-                                                          )
+                                               )
                                                
                                              ),
                                              
@@ -610,12 +606,11 @@ ui <- tagList(
                                                uiOutput("mbxDataFileText"),
                                                DT::dataTableOutput("mbxDataFile")%>% 
                                                  withSpinner(color="#0dc5c1")
-                                            
+                                               
                                                
                                              )#mainPanel
                                              
                                     ),#tabPanel
-                                    
                                     
                                     #***************************************************#
                                     # Filtering
@@ -635,13 +630,13 @@ ui <- tagList(
                                                h5("2. Metabolites with all zero values across all samples will be filtered."),
                                                h5("3. Metabolites having >50% missing values will be filtered."),
                                                br(),
-
+                                               
                                                # Apply filtering
                                                actionBttn(inputId ="metsFiltering", label ="Apply", style = "jelly",
                                                           btn_type = "button", type = "primary", color = "primary"),
                                                tags$hr(),
                                                
-                                              
+                                               
                                                #Go forward
                                                actionBttn(inputId ="metPre_NEXT", 
                                                           label ="Next", 
@@ -650,7 +645,7 @@ ui <- tagList(
                                                           color = "danger",
                                                           icon = icon("arrow-right")
                                                )
-                                             
+                                               
                                              ),#sidebarPanel
                                              mainPanel(
                                                # Output: Data file-1 ----
@@ -661,7 +656,7 @@ ui <- tagList(
                                                # Output: Data file-2 ----
                                                uiOutput("UCpreprocessText"),
                                                DT::dataTableOutput("mbxUCPreprocessed")%>%
-                                                 withSpinner(color="#0dc5c1"),
+                                                 withSpinner(color="#0dc5c1")
                                                
                                              )#mainPanel
                                              
@@ -717,7 +712,7 @@ ui <- tagList(
                                                imageOutput("histPlotCD",
                                                            width = "800px",
                                                            height = "auto"),
-                                              
+                                               
                                                uiOutput("UChistogram"),
                                                verbatimTextOutput("UC_shapiro_result",placeholder = TRUE),
                                                selectInput(inputId = "whichHistUC",
@@ -734,21 +729,20 @@ ui <- tagList(
                                                
                                              )#End of mainPanel
                                              
-                                    ),#tabPanel
+                                    ),#tabPanel-norm
                                     
                                     
-                                    #***************************************************#
                                     #Statistical Analysis
                                     #***************************************************#
                                     tabPanel("Statistical Analysis", value= "stat_mets",
-                                    
+
                                       sidebarPanel(
 
                                         # Title + description
                                         h3(strong("Statistical Analysis")),
                                         h5("Statistical Analysis to identify statistically changed metabolites"),
-                                        hr(), 
-                                        
+                                        hr(),
+
                                         numericInput(
                                           inputId = "pthresholdMet",
                                           label = "P-value threshold",
@@ -758,7 +752,7 @@ ui <- tagList(
                                           step = 0.01
                                         ),
                                         br(),
-                                        
+
                                         numericInput(
                                           inputId = "FCthresholdMet",
                                           label = "FC threshold",
@@ -768,60 +762,78 @@ ui <- tagList(
                                           step = 0.1
                                         ),
                                         br(),
-                                        
+
                                         actionBttn(inputId ="statButton", label ="Apply", style = "jelly",
                                                    btn_type = "button", type = "primary", color = "primary"),
-                                        
+
                                         hr(),
                                         actionBttn(inputId ="stat_NEXT", label ="Next", style = "jelly",
                                                    btn_type = "button", type = "primary", color = "danger",
                                                    icon = icon("arrow-right"))
-                                        
 
-                                      )#sidebarPanel
+
+                                      ),#sidebarPanel
+                                      
+                                      mainPanel(
+
+                                        selectInput(inputId = "metCompPair",
+                                                    label = NULL,
+                                                    choices = c("CD vs non-IBD",
+                                                                "UC vs non-IBD"),
+                                                    selected = "CD vs non-IBD"
+                                                    ),
+
+                                        DT::dataTableOutput("metResTable")%>%
+                                          withSpinner(color="#0dc5c1"),
+
+                                        plotOutput("metVolcanoPlot", width = "800px", height = "700px")%>%
+                                          withSpinner(color="#0dc5c1")
+
+                                      )#mainPanel
+                                      
+
+                                    ),#tabPanel-stat
                                     
-                                    ),#tabPanel
-                                    
-                                    #***************************************************#
-                                    # Pathway Analysis
-                                    #***************************************************#
-                                    tabPanel("Pathway Analysis", value = "pathway_mets"),
-                                    
-                                    #***************************************************#
-                                    # Identifier mapping
-                                    #***************************************************#
+                                    # #***************************************************#
+                                    # # Pathway Analysis
+                                    # #***************************************************#
+                                      tabPanel("Pathway Analysis", value = "pathway_mets"),
+                                    # 
+                                    # #***************************************************#
+                                    # # Identifier mapping
+                                    # #***************************************************#
                                     tabPanel("Identifier Mapping", value = "mapping_mets")
                                     
-                        )
-                        
-               ),#tabPanel
-               ################################################################
+                                    
+                        )#tabSetPanel-mets
+               ),#tabPanel-mets
                
-               # Multi-omics
                
-               ################################################################
-               tabPanel("Multi-omics Visualization", 
+               # # Multi-omics
+               # 
+               # ################################################################
+               tabPanel("Multi-omics Visualization",
                         value = "multiomics",
                         tabsetPanel(id="tabs_multi",
-                                    
+
                                     #***************************************************#
                                     # Pathway Selection
                                     #***************************************************#
                                     tabPanel("Pathway Selection",value = "selection"),
-                                    
+
                                     #***************************************************#
                                     # Visualization
                                     #***************************************************#
                                     tabPanel("Visualization", value = "visualization")
-                                    
-                        )
-               )
+
+                        )#tabsetPanel
+               )#tabPanel
                
                
                
-    ) # End of navbar page
+    ) #navbar page
     
-  )
-)
+  )#fluidPage
+)#tagList
 
 

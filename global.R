@@ -1104,9 +1104,9 @@ normalizeMets <- function(selected = "log2 transformation"){
 
 ####################################################STATISTICAL ANALYSIS FUNCTIONS  #########################################
 
-statAnalysisMets <- function (mSet_transformed,disorder,transformation){
+statAnalysisMets <- function (mSet_transformed,disorder,transformation, FC, pvalue){
   
-  browser()
+ # browser()
   
   #take only first token of the transformation 
   transformation <- strsplit(transformation, " ")[[1]][1]
@@ -1180,9 +1180,11 @@ statAnalysisMets <- function (mSet_transformed,disorder,transformation){
   
   ##Define the thresholds for log2 (Fold Change) and p-values
   #For cut-off value uncertainties, see https://doi.org/10.1039/C6AN01342B .
-  log2FC_min <- -1
-  log2FC_max <- 1
-  p_value_threshold <- 0.05
+  #log2FC_min <- -log2(FC)
+  log2FC_min <- as.numeric(format(round(-log2(FC), 2), nsmall = 2))
+  #log2FC_max <- log2(FC)
+  log2FC_max <- as.numeric(format(round(log2(FC), 2), nsmall = 2))
+  p_value_threshold <- pvalue
   
   ##Create column with HMDB_IDs, only if the data is relevant
   mSet_AnalysisReady$relevant_labels <- mSet_AnalysisReady$HMDB_ID
@@ -1250,7 +1252,7 @@ statAnalysisMets <- function (mSet_transformed,disorder,transformation){
   ## Export the data and Volcano Plot:
   
   ##Save the data file
-  nameDataFile <- paste0("output/mbxData_", disorder ,".csv")
+  nameDataFile <- paste0("8-significantly_changed_metabolites_analysis/mbxData_", disorder ,".csv")
   write.table(mSet_AnalysisFinal, nameDataFile, sep =",", row.names = FALSE)
   
   if(!"svglite" %in% installed.packages()){install.packages("svglite")}
@@ -1258,7 +1260,7 @@ statAnalysisMets <- function (mSet_transformed,disorder,transformation){
   
   ##Save the Volcano plot:
   imageType <- "png" ##Options are: svg, png, eps, ps, tex, pdf, jpeg, tiff, png, bmp, svg or wmf
-  nameVolcano <- paste0("output/", disorder, "_", selectViz, "_VolcanoPlot_absLogFC_", log2FC_max, "_pValue_", p_value_threshold, ".", imageType)
+  nameVolcano <- paste0("8-significantly_changed_metabolites_analysis/", disorder, "_", selectViz, "_VolcanoPlot_absLogFC_", log2FC_max, "_pValue_", p_value_threshold, ".", imageType)
   
   ggsave(nameVolcano)
   
