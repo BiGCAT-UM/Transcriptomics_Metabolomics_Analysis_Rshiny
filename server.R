@@ -1079,12 +1079,10 @@ server = function(input, output,session) {
         WORK_DIR <- getwd()
         req(input$metCompPair)
         if (compPairMet() == "CD vs non-IBD"){
-         # path <- paste0(WORK_DIR,"/8-significantly_changed_metabolites_analysis/CD_relevant_labels_VolcanoPlot_absLogFC_0.58_pValue_0.05.png")
           path <- paste0(WORK_DIR,"/8-significantly_changed_metabolites_analysis/CD_relevant_labels_VolcanoPlot.png")
           cat ("image path =",path,"\n")
         }
         if (compPairMet() == "UC vs non-IBD"){
-         # path <- paste0(WORK_DIR,"/8-significantly_changed_metabolites_analysis/UC_relevant_labels_VolcanoPlot_absLogFC_0.58_pValue_0.05.png")
           path <- paste0(WORK_DIR,"/8-significantly_changed_metabolites_analysis/UC_relevant_labels_VolcanoPlot.png")
           cat ("image path =",path,"\n")
         }
@@ -1126,8 +1124,8 @@ server = function(input, output,session) {
     pathwayAnalysisMets(mSet_CD,"CD")
     pathwayAnalysisMets(mSet_UC, "UC")
     
-    results [[1]] <- read.csv("9-metabolite_pathway_analysis/mbxPWdata_CD.csv",na.strings=c("", "NA"))
-    results [[2]] <- read.csv("9-metabolite_pathway_analysis/mbxPWdata_UC.csv",na.strings=c("", "NA"))
+    results [[1]] <- read.csv("10-metabolite_pathway_analysis/mbxPWdata_CD.csv",na.strings=c("", "NA"))
+    results [[2]] <- read.csv("10-metabolite_pathway_analysis/mbxPWdata_UC.csv",na.strings=c("", "NA"))
     
     names(results) <- c("CD vs non-IBD",
                         "UC vs non-IBD")

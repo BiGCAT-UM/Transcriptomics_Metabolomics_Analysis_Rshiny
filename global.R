@@ -1381,7 +1381,7 @@ if(!dir.exists("9-metabolite_pathway_analysis"))
   dir.create("9-metabolite_pathway_analysis")
 
 ## Export the pathway data:
-nameDataFile <- paste0("9-metabolite_pathway_analysis/mbxPWdata_", disorder ,".csv")
+nameDataFile <- paste0("10-metabolite_pathway_analysis/mbxPWdata_", disorder ,".csv")
 write.table(pathwayAnalysis_results_sorted, nameDataFile, sep =",", row.names = FALSE)
 
 }
