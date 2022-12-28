@@ -671,7 +671,7 @@ createHeatmap <- function(p_threshold_pathway, q_threshold_pathway){
   my_heatmap <- pheatmap(as.matrix(log10(all.pathways)), scale = "none", color = colMain , 
                          legend = TRUE , legend_breaks = c(0, -5, -10, -15, min(log10(all.pathways))), 
                          main = "", 
-                         legend_labels = c("-log10(adj. p-values) \n", " -5", " -10", " -15", ""),
+                         legend_labels = c("-log10(adj. p-value) \n", " -5", " -10", " -15", ""),
                          cellwidth = 80, treeheight_row = 200, fontsize = fontsize_l, fontsize_row= fontsize_row_l, 
                          fontsize_col = fontsize_col_l, cluster_rows = TRUE, cluster_cols = FALSE)
   
