@@ -830,6 +830,9 @@ ui <- tagList(
                                                                   "UC vs non-IBD"),
                                                       selected = "CD vs non-IBD"
                                           ),
+                                          
+                                          DT::dataTableOutput("metPathwayRes")%>%
+                                            withSpinner(color="#0dc5c1"),
                                         )
                                       ),
                                     # 

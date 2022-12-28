@@ -1116,12 +1116,68 @@ server = function(input, output,session) {
   # Pathway Analysis
   #***************************************************#
   
-  observeEvent(input$pathwayButtonMet,{
+  pathwayResultsMet<- eventReactive(input$pathwayButtonMet,{
     
+    results <- list()
     
+    mSet_CD <- read.csv("8-significantly_changed_metabolites_analysis/mbxData_CD.csv", na.strings=c("", "NA"))
+    mSet_UC <- read.csv("8-significantly_changed_metabolites_analysis/mbxData_UC.csv", na.strings=c("", "NA"))
     
+    pathwayAnalysisMets(mSet_CD,"CD")
+    pathwayAnalysisMets(mSet_UC, "UC")
     
+    results [[1]] <- read.csv("9-metabolite_pathway_analysis/mbxPWdata_CD.csv",na.strings=c("", "NA"))
+    results [[2]] <- read.csv("9-metabolite_pathway_analysis/mbxPWdata_UC.csv",na.strings=c("", "NA"))
+    
+    names(results) <- c("CD vs non-IBD",
+                        "UC vs non-IBD")
+    
+    removeModal()
+    
+    # Success message
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "Pathway analysis finished!",
+      type = "success")
+    
+    return (results)
   })#observeEvent
+  
+  compPairMet <- reactive({
+    req(input$metCompPairPathway)
+    return(input$metCompPairPathway)
+  })
+  
+  # Show filtered result table for selected comparison
+  observe({
+    
+    output$metPathwayRes <- DT::renderDataTable({
+      req(input$metCompPair)
+      output <- pathwayResultsMet()[[compPairMet()]]
+    
+      return(output)
+    }, server=TRUE,
+    options = list(pageLength = 5), rownames= FALSE)
+    
+  })
+  
+  # Go the next step
+  observeEvent(input$pathwayMet_NEXT, {
+    
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "Pathway analysis successfully completed! 
+      Now you can continue with identifier mapping!",
+      type = "success")
+    
+    updateTabsetPanel(session, "tabs_mets",
+                      selected = "mapping_mets")
+    
+    showTab("tabs_mets", target = "mapping_mets")
+    
+  })
   
  
 }#eof server

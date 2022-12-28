@@ -1269,8 +1269,121 @@ statAnalysisMets <- function (mSet_transformed,disorder,transformation, FC, pval
 }
 
 #pathway analysis for metabolomics data 
-pathwayAnalysisMets <- function (){
+pathwayAnalysisMets <- function (mSet,disorder){
+ 
+  if (disorder == "CD") {
+    print("Selected disorder is Crohn's disease")}
+  else if(disorder == "UC"){ 
+      print("Selected disorder is Ulcerative Colitis")}
+  else{print("Disorder not Recognised")}
   
+  
+  if(!"SPARQL" %in% installed.packages()){
+    install.packages("SPARQL")
+  }
+  library(SPARQL)
+  ##Connect to Endpoint WikiPathways
+  endpointwp <- "https://sparql.wikipathways.org/sparql"
+  ## 1. Query metadata:
+  queryMetadata <-
+    "SELECT DISTINCT ?dataset (str(?titleLit) as ?title) ?date ?license 
+      WHERE {
+         ?dataset a void:Dataset ;
+         dcterms:title ?titleLit ;
+         dcterms:license ?license ;
+         pav:createdOn ?date .
+       }"
+  #below code should be performed first to handle the ssl certificate error
+  options(RCurlOptions = list(cainfo = paste0( tempdir() , "/cacert.pem" ), ssl.verifypeer = FALSE))
+  resultsMetadata <- SPARQL(endpointwp,queryMetadata,curl_args=list(useragent=R.version.string))
+  showresultsMetadata <- resultsMetadata$results
+  remove(queryMetadata, resultsMetadata)
+   
+  
+  ## Create a list of HMDB IDs according to filtering criteria from step 8.
+  list_Relevant_HMDB_IDs <- list(mSet$relevant_ids)
+  vector_HMDB <- unlist(list_Relevant_HMDB_IDs) #convert list to array, for traversing the data to a SPARQL query later on
+  vector_HMDB <- vector_HMDB[!is.na(vector_HMDB)]
+  ##Add the HMDb prefix IRI in front of all IDs.
+  query_HMDBs <- paste("ch:", vector_HMDB, sep="")
+  ##Merge the individual entries in the vector into one string, separated by a space
+  string_HMDB <- paste(c(query_HMDBs), collapse=' ' )
+  
+  ##TODO: add column with nr. of Metabolites in PW (to calculate PW impact)
+  
+  #For now, filter out Reactome PWs due to visualization issues in Cytoscape.
+  item1 = "PREFIX ch: <https://identifiers.org/hmdb/>
+PREFIX cur: <http://vocabularies.wikipathways.org/wp#Curation:>
+select distinct ?pathwayRes (str(?wpid) as ?pathway) (str(?title) as ?pathwayTitle) (count(distinct ?hmdbMetabolite) AS ?HMDBsInPWs) (count(distinct ?metaboliteDatanode) AS ?TotalMetabolitesinPW) (GROUP_CONCAT(DISTINCT fn:substring(?hgnc,37);separator=' ') AS ?Proteins) (count(distinct ?hgnc) AS ?ProteinsInPWs) (GROUP_CONCAT(DISTINCT fn:substring(?hmdbMetabolite,30);separator=' ') AS ?includedHMDBs)
+where {
+VALUES ?hmdbMetabolite {"
+  item2 = "}
+ 
+ ?metaboliteDatanode	a wp:Metabolite ;
+                        dcterms:isPartOf ?pathwayRes .
+ 
+ ?datanode	a wp:Metabolite ;          
+           	wp:bdbHmdb  ?hmdbMetabolite ;
+    		dcterms:isPartOf ?pathwayRes .
+ ?pathwayRes a wp:Pathway ;
+             wp:organismName 'Homo sapiens' ; 
+    		dcterms:identifier ?wpid ;
+    		dc:title ?title .
+    		
+ ?datanode2 wp:bdbHgncSymbol ?hgnc ;
+    		dcterms:isPartOf ?pathwayRes .
+    		
+  #?pathwayRes wp:ontologyTag cur:Reactome_Approved . 
+  ?pathwayRes wp:ontologyTag cur:AnalysisCollection .   		
+}
+ORDER BY DESC(?HMDBsInPWs)"
+query_CombinePWs <- paste(item1,string_HMDB,item2)
+remove(item1, item2)
+
+results_CombinePWs <- SPARQL(endpointwp,query_CombinePWs,curl_args=list(useragent=R.version.string))
+showresults_CombinePWs <- results_CombinePWs$results
+remove(query_CombinePWs,results_CombinePWs)
+#Print table with first 5 relevant pathways (if less than 5 are found, print only those)
+if(nrow(showresults_CombinePWs) < 5){
+  print(showresults_CombinePWs[1:nrow(showresults_CombinePWs),c(2:5)])
+}else{print(showresults_CombinePWs[1:5,c(2:5)])}
+
+remove(cleaned_string_HMDB, list_Relevant_HMDB_IDs, query_HMDBs)
+  
+## Calculate the ORA score for each pathway, using the Fishers exact test.
+#Create a dataframe to store the required numbers in.
+Contingency_table <- data.frame(matrix(ncol=5,nrow=0, dimnames=list(NULL, c("WP.ID", "x", "m", "n", "k"))))
+counter = 1
+for (i in 1:nrow(showresults_CombinePWs)) {
+  Contingency_table[counter,1] <- (showresults_CombinePWs[i,2]) #WP.ID
+  Contingency_table[counter,2] <- (showresults_CombinePWs[i,4]) ##x <- (number4) #Total differentially changed metabolites, also in a PW. (HMDBsInPWs)
+  Contingency_table[counter,3] <- (showresults_CombinePWs[i,5]) ##m <- (number) #Total Metabolites in PW (TotalMetabolitesinPW)
+  Contingency_table[counter,4] <- (length(unique(mSet[,1])) - showresults_CombinePWs[i,4]) ##n <- (number2) #Total Metabolites measured not in PW (DISTINCT all_HMDB - HMDBsInPWs)
+  Contingency_table[counter,5] <- length(unique(vector_HMDB)) ##k <- (number3) #Total differentially changed metabolites. (DISTINCT vector_HMDB)
+  
+  counter <- counter + 1
+}
+
+# Calculate hypergeometric density p-value for all pathways.
+i <- 1:nrow(Contingency_table)
+probabilities <- dhyper(Contingency_table[i,2], Contingency_table[i,3], Contingency_table[i,4], Contingency_table[i,5], log = FALSE)
+
+pathwayAnalysis_results <- cbind(showresults_CombinePWs[, c(2:4)], probabilities, showresults_CombinePWs[, c(6,7)])
+colnames(pathwayAnalysis_results)[5] <- "HGNCs"
+colnames(pathwayAnalysis_results)[6] <- "ProteinsInPWs"
+
+##Sort PW results based on 1. highest amount of #HMDBs in PW, 2. lowest p-values,  3. highest amouny of proteins in PW (which might be relevant for transcriptomics analysis later)
+pathwayAnalysis_results_sorted <- pathwayAnalysis_results[  with(pathwayAnalysis_results, order(-HMDBsInPWs, probabilities, -ProteinsInPWs)),]
+
+print(pathwayAnalysis_results_sorted[1:5,])
+
+if(!dir.exists("9-metabolite_pathway_analysis"))
+  dir.create("9-metabolite_pathway_analysis")
+
+## Export the pathway data:
+nameDataFile <- paste0("9-metabolite_pathway_analysis/mbxPWdata_", disorder ,".csv")
+write.table(pathwayAnalysis_results_sorted, nameDataFile, sep =",", row.names = FALSE)
+
 }
 
 
