@@ -1268,6 +1268,74 @@ statAnalysisMets <- function (mSet_transformed,disorder,transformation, FC, pval
   
 }
 
+#identifier mapping for metabolomics data
+mappingMets <- function (){
+ 
+  #to set timeout option for downloading data 
+  getOption('timeout')
+  
+  #Obtain data from step 8
+  mSet_CD <- read.csv("8-significantly_changed_metabolites_analysis/output/mbxData_CD.csv", na.strings=c("", "NA"))
+  mSet_UC <- read.csv("8-significantly_changed_metabolites_analysis/output/mbxData_UC.csv", na.strings=c("", "NA"))
+  #filter out unused columns
+  mSet_CD <- mSet_CD [,c(1:4)]
+  mSet_UC <- mSet_UC [,c(1:4)]
+  
+  ##Retain all metabolite IDs from CD and UC for identifier mapping:
+  mSet_total <- unique(rbind(mSet_CD[,c(1,2)], mSet_UC[,c(1,2)]))
+  
+  ##Set the working directory to download the Metabolite mapping file
+  location <- "data/metabolites.bridge"
+  checkfile <- paste0(getwd(), '/' ,location)
+  
+  ##Download the Metabolite mapping file (if it doesn't exist locally yet):
+  if (!file.exists(checkfile)) {
+    download.file(
+      "https://figshare.com/ndownloader/files/26001794",location)
+  }
+  
+  mapper <- BridgeDbR ::loadDatabase(checkfile)
+  
+  ## Obtain the System codes for the databases HMDB (source database of dataset) and ChEBI (intended output database)
+  code <- getOrganismCode("Homo sapiens")
+  code_mappingFrom <- getSystemCode("HMDB")
+  code_mappingTo   <- getSystemCode("ChEBI")
+  
+  ## Create a data frame with the mappings and the correct SystemCode
+  input = data.frame(
+    source = rep(code_mappingFrom, length(mSet_total$HMDB_ID)),
+    identifier = mSet_total$HMDB_ID)
+  #Obtain all mappings from HMDB to ChEBI
+  MultiMappings = BridgeDbR::maps(mapper, input, code_mappingTo)
+  #remove all rows in the mapped data which do not include the prefix "CHEBI"
+  MultiMappings <- MultiMappings %>% filter(grepl("CHEBI",mapping, fixed = TRUE))
+  #filter out double identifiers because there are one-to-many relationship between hmdb and chebi IDs
+  MultiMappings <- MultiMappings %>% distinct (MultiMappings$identifier, .keep_all = TRUE)
+  MultiMappings <- MultiMappings [,c(2,4)]
+  
+  merged.data_CD<- merge(MultiMappings, mSet_CD,by.x="identifier", by.y="HMDB_ID",sort = TRUE, all.x = TRUE, all.y = TRUE)
+  merged.data_UC<- merge(MultiMappings, mSet_UC,by.x="identifier", by.y="HMDB_ID",sort = TRUE, all.x = TRUE, all.y = TRUE)
+  #filter out metabolites that has NA value for CHEBI
+  merged.data_CD<- merged.data_CD %>% tidyr::drop_na(mapping)
+  merged.data_UC<- merged.data_UC %>% tidyr::drop_na(mapping)
+  #filter out metabolites that has NA value for foldchange_disorder
+  merged.data_CD<- merged.data_CD %>% tidyr::drop_na(foldchange_disorder)
+  merged.data_UC<- merged.data_UC %>% tidyr::drop_na(foldchange_disorder)
+  #change column names
+  colnames(merged.data_CD) <- c("HMDBID","CHEBI", "label", "log2FC_met", "pvalue_met")
+  colnames(merged.data_UC) <- c("HMDBID","CHEBI", "label", "log2FC_met", "pvalue_met")
+
+  
+  ## Export the mapped metabolomics data:
+  if(!dir.exist("9-identifier_mapping"))
+    create.dir("9-identifier_mapping")
+  ##Save the data file
+  write.table(merged.data_CD, '9-identifier_mapping/mbx_mapped_data_CD.tsv', sep ="\t", row.names = FALSE)
+  write.table(merged.data_UC, '9-identifier_mapping/mbx_mapped_data_UC.tsv', sep ="\t", row.names = FALSE)
+
+   
+}
+
 #pathway analysis for metabolomics data 
 pathwayAnalysisMets <- function (mSet,disorder){
  
@@ -1377,8 +1445,8 @@ pathwayAnalysis_results_sorted <- pathwayAnalysis_results[  with(pathwayAnalysis
 
 print(pathwayAnalysis_results_sorted[1:5,])
 
-if(!dir.exists("9-metabolite_pathway_analysis"))
-  dir.create("9-metabolite_pathway_analysis")
+if(!dir.exists("10-metabolite_pathway_analysis"))
+  dir.create("10-metabolite_pathway_analysis")
 
 ## Export the pathway data:
 nameDataFile <- paste0("10-metabolite_pathway_analysis/mbxPWdata_", disorder ,".csv")
