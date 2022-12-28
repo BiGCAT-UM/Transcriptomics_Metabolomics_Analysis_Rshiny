@@ -801,7 +801,37 @@ ui <- tagList(
                                     # #***************************************************#
                                     # # Pathway Analysis
                                     # #***************************************************#
-                                      tabPanel("Pathway Analysis", value = "pathway_mets"),
+                                      tabPanel("Pathway Analysis", value = "pathway_mets",
+                                        br(),       
+                                        sidebarPanel(
+                                          
+                                          #==========================================#
+                                          # side panel
+                                          #==========================================#
+                                          h3(strong("Pathway Analysis")),
+                                          h5("WikiPathways Overrepresentation Analysis will be performed. 
+                                                  The logFC and p-value thresholds from the statistical analysis will be used."),
+                                          br(),
+                                          
+                                          actionBttn(inputId ="pathwayButtonMet", label ="Apply", style = "jelly",
+                                                     btn_type = "button", type = "primary", color = "primary"),
+                                          
+                                          # Horizontal line ----
+                                          tags$hr(),
+                                          actionBttn(inputId ="pathwayMet_NEXT", label ="Next", style = "jelly",
+                                                     btn_type = "button", type = "primary", color = "danger",
+                                                     icon = icon("arrow-right"))
+                                        ),#sidePanel
+                                        
+                                        mainPanel(
+                                          selectInput(inputId = "metCompPairPathway",
+                                                      label = NULL,
+                                                      choices = c("CD vs non-IBD",
+                                                                  "UC vs non-IBD"),
+                                                      selected = "CD vs non-IBD"
+                                          ),
+                                        )
+                                      ),
                                     # 
                                     # #***************************************************#
                                     # # Identifier mapping

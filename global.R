@@ -1268,8 +1268,10 @@ statAnalysisMets <- function (mSet_transformed,disorder,transformation, FC, pval
   
 }
 
-
-
+#pathway analysis for metabolomics data 
+pathwayAnalysisMets <- function (){
+  
+}
 
 
 ##########################
