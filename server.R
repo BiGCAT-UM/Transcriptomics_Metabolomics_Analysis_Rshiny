@@ -127,8 +127,6 @@ server = function(input, output,session) {
     observeEvent(if (length(data())> 0){input$cpm_filtering},{
       output$histText_pre <- renderUI({
         tagList(
-          br(),
-          hr(),
           h3(strong("Histogram of Mean Expression Values (pre-filtering)"))
         )
       })
@@ -237,7 +235,7 @@ server = function(input, output,session) {
         data1 <-  removeOutliers(data_filtered()[[1]], data_filtered()[[2]], outliers)
         
         
-        showModal(modalDialog(title = h4(strong("Normalization and Quality Control"),
+        showModal(modalDialog(title = h4(strong("Normalization and Quality Control..."),
                                          align = "center"), 
                               footer = NULL,
                               h5("This might take a while. Please be patient.", 
@@ -622,9 +620,40 @@ server = function(input, output,session) {
       return(output)
     }, server=TRUE,
     options = list(pageLength = 5), rownames= FALSE)
+    
+    
+    output$pathwayPlot <- renderPlot({
+      req(input$pathwayComparison)
+      if (input$pathwayComparison == "Ileum: CD vs non-IBD"){
+        output <- read.delim(paste0(work_DIR,"/4-pathway_analysis/enrichResults_ORA_CD_ileum.tsv"))
+      }
+      if (input$pathwayComparison == "Rectum: CD vs non-IBD"){
+        output <- read.delim(paste0(work_DIR,"/4-pathway_analysis/enrichResults_ORA_CD_rectum.tsv"))
+      }
+      if (input$pathwayComparison == "Ileum: UC vs non-IBD"){
+        output <- read.delim(paste0(work_DIR,"/4-pathway_analysis/enrichResults_ORA_UC_ileum.tsv"))
+      }
+      if (input$pathwayComparison == "Rectum: UC vs non-IBD"){
+        output <- read.delim(paste0(work_DIR,"/4-pathway_analysis/enrichResults_ORA_UC_rectum.tsv"))
+      }
+      
+      output <- arrange(output, pvalue)
+      p <- ggplot(output[1:5,]) +
+        geom_segment(aes(y = 0, yend = -log10(pvalue), x = reorder(Description,-1*pvalue), xend = Description)) +
+        geom_point(aes(y = -log10(pvalue), x = reorder(Description, -1*pvalue), 
+                       size = Count, color = -log10(pvalue))) +
+        coord_flip() +
+        labs(size = "Set Size", color = "-log10 p-value", x = "", y = "-log10 p-value") +
+        scale_color_viridis_c() +
+        theme_minimal() +
+        theme(axis.text = element_text(size = 20))
+      
+      return(p)
+    })
+    
 
   })
-  
+
   # Go the next step
   observeEvent(input$pathway_NEXT, {
     
