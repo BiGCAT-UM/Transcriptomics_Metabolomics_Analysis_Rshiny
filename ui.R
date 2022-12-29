@@ -482,7 +482,7 @@ ui <- tagList(
                                                h3(strong("Network Analysis")),
                                                h5("Network analysis will be performed.  
                                                   Please make sure to have Cytoscape opened before running 
-                                                  the analysis"),
+                                                  the analysis."),
                                                br(),
                                                actionBttn(inputId ="networkButton", label ="Apply", style = "jelly",
                                                           btn_type = "button", type = "primary", color = "primary")
@@ -495,7 +495,8 @@ ui <- tagList(
                                              mainPanel(
                                                selectInput(inputId = "location_network",
                                                            label = NULL,
-                                                           choices = c("ileum", "rectum"),
+                                                           choices = c(Ileum = "ileum", 
+                                                                       Rectum = "rectum"),
                                                            selected = "ileum"),
                                                imageOutput("NetworkPlot",
                                                            width = "700px",
