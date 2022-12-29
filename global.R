@@ -17,6 +17,7 @@ if(!"readxl" %in% installed.packages()) BiocManager::install("readxl")
 if(!"downloader" %in% installed.packages()) BiocManager::install("downloader")
 if(!"R.utils" %in% installed.packages()){install.packages("R.utils")}
 if(!"pheatmap" %in% installed.packages()) BiocManager::install("pheatmap")
+if(!"BridgeDbR" %in% installed.packages()) BiocManager::install("BridgeDbR")
 
 library(rstudioapi)
 library(readxl)
@@ -43,6 +44,8 @@ library(org.Hs.eg.db)
 library(pheatmap)
 library(RColorBrewer)
 library(RCy3)
+library(BridgeDbR)
+library(rJava)
 
 source("functions_ArrayAnalysis_v2.R")
 
@@ -469,7 +472,6 @@ pathwayAnalysisTranscriptomics <- function(logFCtheshold, Pthreshold, Pthreshold
       dataset <- na.omit(subset( dataset_UC, select = c(3,2,4:7)))
       print("Selected disorder is Ulcerative Colitis")}else{print("Disorder not Recognised")
       }
-    
     
     if(!dir.exists("4-pathway_analysis")) dir.create("4-pathway_analysis")
     #we will use selection criteria as Fold change=1.5,log2FC=0.58 and p.value < 0.05
@@ -1272,11 +1274,11 @@ statAnalysisMets <- function (mSet_transformed,disorder,transformation, FC, pval
 mappingMets <- function (){
  
   #to set timeout option for downloading data 
-  getOption('timeout')
-  
+  options(timeout=300)
+browser()  
   #Obtain data from step 8
-  mSet_CD <- read.csv("8-significantly_changed_metabolites_analysis/output/mbxData_CD.csv", na.strings=c("", "NA"))
-  mSet_UC <- read.csv("8-significantly_changed_metabolites_analysis/output/mbxData_UC.csv", na.strings=c("", "NA"))
+  mSet_CD <- read.csv("8-significantly_changed_metabolites_analysis/mbxData_CD.csv", na.strings=c("", "NA"))
+  mSet_UC <- read.csv("8-significantly_changed_metabolites_analysis/mbxData_UC.csv", na.strings=c("", "NA"))
   #filter out unused columns
   mSet_CD <- mSet_CD [,c(1:4)]
   mSet_UC <- mSet_UC [,c(1:4)]
@@ -1290,8 +1292,7 @@ mappingMets <- function (){
   
   ##Download the Metabolite mapping file (if it doesn't exist locally yet):
   if (!file.exists(checkfile)) {
-    download.file(
-      "https://figshare.com/ndownloader/files/26001794",location)
+    download.file("https://figshare.com/ndownloader/files/26001794",location)
   }
   
   mapper <- BridgeDbR ::loadDatabase(checkfile)
@@ -1330,8 +1331,8 @@ mappingMets <- function (){
   if(!dir.exist("9-identifier_mapping"))
     create.dir("9-identifier_mapping")
   ##Save the data file
-  write.table(merged.data_CD, '9-identifier_mapping/mbx_mapped_data_CD.tsv', sep ="\t", row.names = FALSE)
-  write.table(merged.data_UC, '9-identifier_mapping/mbx_mapped_data_UC.tsv', sep ="\t", row.names = FALSE)
+  write.csv(merged.data_CD, '9-identifier_mapping/mbx_mapped_data_CD.csv', row.names = FALSE)
+  write.csv(merged.data_UC, '9-identifier_mapping/mbx_mapped_data_UC.csv', row.names = FALSE)
 
    
 }

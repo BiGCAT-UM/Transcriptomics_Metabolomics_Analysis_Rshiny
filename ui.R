@@ -842,7 +842,7 @@ ui <- tagList(
                                                ),
                                                
                                                #output from identifier mapping
-                                               DT::dataTableOutput("mappingTable")
+                                               DT::dataTableOutput("metMappingTable")
                                              )         
                                              
                                     ),

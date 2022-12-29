@@ -26,8 +26,9 @@ server = function(input, output,session) {
   hideTab("tabs_mets", target = "filtering_mets")
   #hideTab("tabs_mets", target = "norm_mets")
   #hideTab("tabs_mets", target = "stat_mets")
+  #hideTab("tabs_mets", target = "mapping_mets")
   #hideTab("tabs_mets", target = "pathway_mets")
-  hideTab("tabs_mets", target = "mapping_mets")
+
 
   #**************************************************************************************************************#
   #                      Transcriptomics Data Operations
@@ -1109,19 +1110,19 @@ server = function(input, output,session) {
     showTab("tabs_mets", target = "pathway_mets")
     
   })
+  
   #***************************************************#
   # Identifier Mapping
   #***************************************************#
-  pathwayResultsMet<- eventReactive(input$pathwayButtonMet,{
+  
+  mappingResultsMet<- eventReactive(input$mappingButtonMets,{
     
     results <- list()
+    #perform identifier mapping
     mappingMets()
     
-    pathwayAnalysisMets(mSet_CD,"CD")
-    pathwayAnalysisMets(mSet_UC, "UC")
-    
-    results [[1]] <- read.csv("10-metabolite_pathway_analysis/mbxPWdata_CD.csv",na.strings=c("", "NA"))
-    results [[2]] <- read.csv("10-metabolite_pathway_analysis/mbxPWdata_UC.csv",na.strings=c("", "NA"))
+    results [[1]] <- read.csv("9-identifier_mapping/mbx_mapped_data_CD.csv",na.strings=c("", "NA"))
+    results [[2]] <- read.csv("9-identifier_mapping/mbx_mapped_data_UC.csv",na.strings=c("", "NA"))
     
     names(results) <- c("CD vs non-IBD",
                         "UC vs non-IBD")
@@ -1132,23 +1133,23 @@ server = function(input, output,session) {
     sendSweetAlert(
       session = session,
       title = "Success!",
-      text = "Pathway analysis finished!",
+      text = "Identifier mapping finished!",
       type = "success")
     
     return (results)
   })#observeEvent
   
   compPairMet <- reactive({
-    req(input$metCompPairPathway)
-    return(input$metCompPairPathway)
+    req(input$metCompPairMapping)
+    return(input$metCompPairMapping)
   })
   
   # Show filtered result table for selected comparison
   observe({
     
-    output$metPathwayRes <- DT::renderDataTable({
-      req(input$metCompPair)
-      output <- pathwayResultsMet()[[compPairMet()]]
+    output$metMappingTable <- DT::renderDataTable({
+      req(input$metCompPairMapping)
+      output <- mappingResultsMet()[[compPairMet()]]
       
       return(output)
     }, server=TRUE,
@@ -1157,19 +1158,19 @@ server = function(input, output,session) {
   })
   
   # Go the next step
-  observeEvent(input$pathwayMet_NEXT, {
+  observeEvent(input$mappingMets_NEXT, {
     
     sendSweetAlert(
       session = session,
       title = "Success!",
-      text = "Pathway analysis successfully completed! 
+      text = "Identifier mapping successfully completed! 
       Now you can continue with identifier mapping!",
       type = "success")
     
     updateTabsetPanel(session, "tabs_mets",
-                      selected = "mapping_mets")
+                      selected = "pathway_mets")
     
-    showTab("tabs_mets", target = "mapping_mets")
+    showTab("tabs_mets", target = "pathway_mets")
     
   })
   
