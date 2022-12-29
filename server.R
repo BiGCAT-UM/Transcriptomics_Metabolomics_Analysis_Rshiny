@@ -9,13 +9,13 @@ server = function(input, output,session) {
   
   # ################################################################
   # 
-  # hideTab("tabs_trans", target = "filtering_trans")
-  # hideTab("tabs_trans", target = "norm_trans")
-  # hideTab("tabs_trans", target = "deg_trans")
-  # hideTab("tabs_trans", target = "mapping_trans")
-  # hideTab("tabs_trans", target = "pathway_trans")
-  # hideTab("tabs_trans", target = "heatmap_trans")
-  # hideTab("tabs_trans", target = "network_trans")
+  hideTab("tabs_trans", target = "filtering_trans")
+  hideTab("tabs_trans", target = "norm_trans")
+  hideTab("tabs_trans", target = "deg_trans")
+  hideTab("tabs_trans", target = "mapping_trans")
+  hideTab("tabs_trans", target = "pathway_trans")
+  hideTab("tabs_trans", target = "heatmap_trans")
+  hideTab("tabs_trans", target = "network_trans")
   # 
   # ################################################################
   # 
@@ -645,9 +645,20 @@ server = function(input, output,session) {
                        size = Count, color = -log10(pvalue))) +
         coord_flip() +
         labs(size = "Set Size", color = "-log10 p-value", x = "", y = "-log10 p-value") +
+        ggtitle("Top 5 Enriched Pathways",
+                subtitle = input$pathwayComparison) +
         scale_color_viridis_c() +
         theme_minimal() +
-        theme(axis.text = element_text(size = 20))
+        theme(axis.text = element_text(size = 12),
+              axis.title = element_text(size = 12),
+              legend.title = element_text(size = 12),
+              legend.text = element_text(size = 12),
+              plot.title = element_text(hjust = 0.5,
+                                        face = "bold",
+                                        size = 16),
+              plot.subtitle = element_text(hjust = 0.5,
+                                           size = 10,
+                                           face = "italic"))
       
       return(p)
     })
@@ -714,22 +725,40 @@ server = function(input, output,session) {
   
   observeEvent(input$networkButton, {
     
-    showModal(modalDialog(title = h4(strong("Network Analysis"),
-                                     align = "center"), 
-                          footer = NULL,
-                          h5("This might take a while. Please be patient.", 
-                             align = "center")))
-    networkAnalysis()
+    testCy <- try(cytoscapePing())
     
-    removeModal()
-    
-    output$NetworkPlot<- renderImage({
-      wp.hs.gmt <- "wikipathways-20220510-gmt-Homo_sapiens.gmt"
-      path <- paste0("6-network_analysis/PPI_Pathway_Network_", wp.hs.gmt, input$location_network,".png")
-      list(src = path, contentType = 'image/png',width = "800px", height = "auto",
-           alt = "This is alternate text")
+    if (class(testCy) == "try-error"){
+      sendSweetAlert(
+        session = session,
+        title = "Error!",
+        text = "Cytoscape is cannot be found! Make sure Cytoscape is running!",
+        type = "error")
+    }
+    if (!(class(testCy) == "try-error")){
+      showModal(modalDialog(title = h4(strong("Network Analysis..."),
+                                       align = "center"), 
+                            footer = NULL,
+                            h5("This might take a while. Please be patient.", 
+                               align = "center")))
+      networkAnalysis()
       
-    }, deleteFile=FALSE)
+      removeModal()
+      
+      sendSweetAlert(
+        session = session,
+        title = "Success!",
+        text = "Network analysis has been performed successfully!",
+        type = "success")
+      
+      output$NetworkPlot<- renderImage({
+        wp.hs.gmt <- "wikipathways-20220510-gmt-Homo_sapiens.gmt"
+        path <- paste0 ("6-network_analysis/PPI_Pathway_Network_",input$location_network, wp.hs.gmt,"_clustered",".png")
+        list(src = path, contentType = 'image/png',width = "800px", height = "auto",
+             alt = "This is alternate text")
+        
+      }, deleteFile=FALSE)
+      
+    }
     
   })
   
