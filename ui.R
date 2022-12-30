@@ -894,7 +894,8 @@ ui <- tagList(
                         )#tabSetPanel-mets
                ),#tabPanel-mets
                
-               
+               ################################################################
+               #
                # # Multi-omics
                # 
                # ################################################################
@@ -905,7 +906,94 @@ ui <- tagList(
                                     #***************************************************#
                                     # Pathway Selection
                                     #***************************************************#
-                                    tabPanel("Pathway Selection",value = "selection"),
+                                    tabPanel("Pathway Selection",value = "selection",
+                                             br(),
+                                             #==========================================#
+                                             # Side bar panel
+                                             #==========================================#
+                                             sidebarPanel(
+                                               h3(strong("Pathway Selection")),
+                                               h5("Select pathways for multi-omics visualization."),
+                                               br(),
+                                               h4(strong("Transcriptomics Thresholds")),
+                                               numericInput(
+                                                 inputId = "p_threshold_multi_trans",
+                                                 label = "Adj. p-value threshold",
+                                                 value = 0.05,
+                                                 min = 0,
+                                                 max = 1,
+                                                 step = 0.01
+                                               ),
+                                               br(),
+                                               numericInput(
+                                                 inputId = "q_threshold_multi_trans",
+                                                 label = "q-value threshold",
+                                                 value = 0.02,
+                                                 min = 0,
+                                                 max = 1,
+                                                 step = 0.01
+                                               ),
+                                               hr(),
+                                               h4(strong("Metabolomics Thresholds")),
+                                               numericInput(
+                                                 inputId = "p_threshold_multi_mets",
+                                                 label = "p-value threshold",
+                                                 value = 0.05,
+                                                 min = 0,
+                                                 max = 1,
+                                                 step = 0.01
+                                               ),
+                                               hr(),
+                                               h4(strong("Pathway Thresholds")),
+                                               numericInput(
+                                                 inputId = "nProteinsPathway",
+                                                 label = "# Proteins",
+                                                 value = 5,
+                                                 min = 0,
+                                                 max = 20,
+                                                 step = 1
+                                               ),
+                                               numericInput(
+                                                 inputId = "nMetsPathway",
+                                                 label = "# Metabolites",
+                                                 value = 3,
+                                                 min = 0,
+                                                 max = 20,
+                                                 step = 1
+                                               ),
+                                               br(),
+                                               actionBttn(inputId ="selectionButtonMulti", label ="Apply", style = "jelly",
+                                                          btn_type = "button", type = "primary", color = "primary"),
+                                               
+                                             ),
+                                             
+                                             #==========================================#
+                                             # Main panel
+                                             #==========================================#
+                                             mainPanel(
+                                               fluidRow(
+                                                 column(width = 3,
+                                                        selectInput(inputId = "whichDisease_multi",
+                                                                    label = "Disease",
+                                                                    choices = c("CD",
+                                                                                "UC"),
+                                                                    selected = "CD")
+                                                 ),
+                                                 column(width = 3,
+                                                        selectInput(inputId = "whichLocation_multi", 
+                                                                     label = "Location",
+                                                                     choices = c("Ileum",
+                                                                                 "Rectum",
+                                                                                 "Both"),
+                                                                     selected = "Ileum")
+                                                 ),
+                                               ),
+                                               hr(),
+                                               uiOutput("selectedPathways_header"),
+                                               DT::dataTableOutput("selectedPathways_multi")%>%
+                                                 withSpinner(color="#0dc5c1")
+                                             )
+                                             ),
 
                                     #***************************************************#
                                     # Visualization
