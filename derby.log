@@ -1,4 +1,4 @@
-2022-12-29 00:21:50.198 GMT Thread[main,5,main] Cleanup action starting
+2022-12-30 10:49:28.498 GMT Thread[main,5,main] Cleanup action starting
 java.sql.SQLException: Failed to start database 'jar:(C:/Users/duygu/OneDrive/Desktop/myProject/Transcriptomics_Metabolomics_Analysis_Rshiny/data/metabolites.bridge)database', see the next exception for details.
 	at org.apache.derby.impl.jdbc.SQLExceptionFactory40.getSQLException(Unknown Source)
 	at org.apache.derby.impl.jdbc.Util.newEmbedSQLException(Unknown Source)
@@ -158,7 +158,7 @@ java.util.zip.ZipException: invalid CEN header (bad signature)
 	at RJavaTools.invokeMethod(RJavaTools.java:399)
 ============= end nested exception, level (3) ===========
 Cleanup action completed
-2022-12-29 00:45:49.476 GMT Thread[main,5,main] Cleanup action starting
+2022-12-30 10:49:45.393 GMT Thread[main,5,main] Cleanup action starting
 java.sql.SQLException: Failed to start database 'jar:(C:/Users/duygu/OneDrive/Desktop/myProject/Transcriptomics_Metabolomics_Analysis_Rshiny/data/metabolites.bridge)database', see the next exception for details.
 	at org.apache.derby.impl.jdbc.SQLExceptionFactory40.getSQLException(Unknown Source)
 	at org.apache.derby.impl.jdbc.Util.newEmbedSQLException(Unknown Source)
@@ -318,7 +318,7 @@ java.util.zip.ZipException: invalid CEN header (bad signature)
 	at RJavaTools.invokeMethod(RJavaTools.java:399)
 ============= end nested exception, level (3) ===========
 Cleanup action completed
-2022-12-29 00:46:56.516 GMT Thread[main,5,main] Cleanup action starting
+2022-12-30 10:50:24.129 GMT Thread[main,5,main] Cleanup action starting
 java.sql.SQLException: Failed to start database 'jar:(C:/Users/duygu/OneDrive/Desktop/myProject/Transcriptomics_Metabolomics_Analysis_Rshiny/data/metabolites.bridge)database', see the next exception for details.
 	at org.apache.derby.impl.jdbc.SQLExceptionFactory40.getSQLException(Unknown Source)
 	at org.apache.derby.impl.jdbc.Util.newEmbedSQLException(Unknown Source)
@@ -478,7 +478,13 @@ java.util.zip.ZipException: invalid CEN header (bad signature)
 	at RJavaTools.invokeMethod(RJavaTools.java:399)
 ============= end nested exception, level (3) ===========
 Cleanup action completed
-2022-12-29 00:49:09.682 GMT Thread[main,5,main] Cleanup action starting
+----------------------------------------------------------------
+2022-12-30 10:51:43.550 GMT:
+ Booting Derby version The Apache Software Foundation - Apache Derby - 10.5.3.0 - (802917): instance a816c00e-0185-62a6-ac41-00000da6fa50
+on database directory jar:(C:\Users\duygu\AppData\Local\Temp\RtmpGIeOLo\Bs_Derby_Ensembl_91.bridge)database in READ ONLY mode 
+
+Database Class Loader started - derby.database.classpath=''
+2022-12-30 10:56:52.034 GMT Thread[main,5,main] Cleanup action starting
 java.sql.SQLException: Failed to start database 'jar:(C:/Users/duygu/OneDrive/Desktop/myProject/Transcriptomics_Metabolomics_Analysis_Rshiny/data/metabolites.bridge)database', see the next exception for details.
 	at org.apache.derby.impl.jdbc.SQLExceptionFactory40.getSQLException(Unknown Source)
 	at org.apache.derby.impl.jdbc.Util.newEmbedSQLException(Unknown Source)

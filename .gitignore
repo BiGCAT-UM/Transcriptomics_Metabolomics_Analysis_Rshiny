@@ -9,3 +9,6 @@
 
 #Ignore .bridge file
 *.bridge
+
+#Ignore .log files
+*.log
