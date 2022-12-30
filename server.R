@@ -1060,18 +1060,14 @@ server = function(input, output,session) {
   filteredResults <- eventReactive(input$statButton, {
     
     filtered <- list()
-    #WORK_DIR <- getwd()
     
-    #if (input$AdjOrRaw == "Raw") {
       temp <- resTable()[[1]]
       filtered[[1]] <- temp[(abs(temp$foldchange_disorder) > FC_met()) &
                               (temp$p_values_disorder < pvalue_met()),]
-#browser()
       temp <- resTable()[[2]]
       filtered[[2]] <- temp[(abs(temp$foldchange_disorder) > FC_met()) &
                               (temp$p_values_disorder < pvalue_met()),]
       
-    #}
       names(filtered) <- c("CD vs non-IBD",
                           "UC vs non-IBD")
       return (filtered)
@@ -1089,9 +1085,6 @@ server = function(input, output,session) {
     output$metResTable <- DT::renderDataTable({
       req(input$metCompPair)
       output <- filteredResults()[[compPairMet()]]
-      # output <- arrange(output, pvalue)
-      # output <- output[,c(1,2,3,4,7,8)]
-      # colnames(output) <- c("Gene Name", "Avg Expr", "log2 FC", "FC", "p-value", "adj. p-value")
       return(output)
     }, server=TRUE,
     options = list(pageLength = 5), rownames= FALSE)
