@@ -1150,8 +1150,8 @@ server = function(input, output,session) {
     #perform identifier mapping
     mappingMets()
     
-    results [[1]] <- read.csv("9-identifier_mapping/mbx_mapped_data_CD.csv",na.strings=c("", "NA"))
-    results [[2]] <- read.csv("9-identifier_mapping/mbx_mapped_data_UC.csv",na.strings=c("", "NA"))
+    results [[1]] <- read.csv("9-metabolite_identifier_mapping/mbx_mapped_data_CD.csv",na.strings=c("", "NA"))
+    results [[2]] <- read.csv("9-metabolite_identifier_mapping/mbx_mapped_data_UC.csv",na.strings=c("", "NA"))
     
     names(results) <- c("CD vs non-IBD",
                         "UC vs non-IBD")
@@ -1193,7 +1193,7 @@ server = function(input, output,session) {
       session = session,
       title = "Success!",
       text = "Identifier mapping successfully completed! 
-      Now you can continue with identifier mapping!",
+      Now you can continue with pathway analysis!",
       type = "success")
     
     updateTabsetPanel(session, "tabs_mets",

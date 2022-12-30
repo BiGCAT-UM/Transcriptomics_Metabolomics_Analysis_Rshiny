@@ -1274,8 +1274,8 @@ statAnalysisMets <- function (mSet_transformed,disorder,transformation, FC, pval
 mappingMets <- function (){
  
   #to set timeout option for downloading data 
-  options(timeout=300)
-browser()  
+  options(timeout=10000)
+
   #Obtain data from step 8
   mSet_CD <- read.csv("8-significantly_changed_metabolites_analysis/mbxData_CD.csv", na.strings=c("", "NA"))
   mSet_UC <- read.csv("8-significantly_changed_metabolites_analysis/mbxData_UC.csv", na.strings=c("", "NA"))
@@ -1292,7 +1292,8 @@ browser()
   
   ##Download the Metabolite mapping file (if it doesn't exist locally yet):
   if (!file.exists(checkfile)) {
-    download.file("https://figshare.com/ndownloader/files/26001794",location)
+    download.file("https://figshare.com/ndownloader/files/26001794",location) #this code should be changed since the full size of the file can not 
+    #be downloaded
   }
   
   mapper <- BridgeDbR ::loadDatabase(checkfile)
@@ -1328,13 +1329,12 @@ browser()
 
   
   ## Export the mapped metabolomics data:
-  if(!dir.exist("9-identifier_mapping"))
-    create.dir("9-identifier_mapping")
+  if(!dir.exists("9-metabolite_identifier_mapping"))
+    dir.create("9-metabolite_identifier_mapping")
   ##Save the data file
-  write.csv(merged.data_CD, '9-identifier_mapping/mbx_mapped_data_CD.csv', row.names = FALSE)
-  write.csv(merged.data_UC, '9-identifier_mapping/mbx_mapped_data_UC.csv', row.names = FALSE)
+  write.csv(merged.data_CD, '9-metabolite_identifier_mapping/mbx_mapped_data_CD.csv', row.names = FALSE)
+  write.csv(merged.data_UC, '9-metabolite_identifier_mapping/mbx_mapped_data_UC.csv', row.names = FALSE)
 
-   
 }
 
 #pathway analysis for metabolomics data 
