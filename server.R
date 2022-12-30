@@ -1272,5 +1272,42 @@ server = function(input, output,session) {
     
   })
   
- 
+  #**************************************************************************************************************#
+  #                      Multi-omics Data Operations
+  #**************************************************************************************************************#
+  
+  MultiTable <- eventReactive(input$selectionButtonMulti, {
+    MultiTable <- pathwaySelection(input$p_threshold_multi_trans,
+                     input$q_threshold_multi_trans,
+                     input$p_threshold_multi_mets,
+                     input$nProteinsPathway,
+                     input$nMetsPathway)
+    
+    return(MultiTable)
+    
+  })
+  
+  output$selectedPathways_multi <- DT::renderDataTable(NULL)
+  observeEvent(input$selectionButtonMulti,{
+    output$selectedPathways_header <- renderUI({
+      tagList(
+        h3(strong("Selected Pathways"))
+      )
+    })
+    
+    output$selectedPathways_multi <- DT::renderDataTable({
+      req(MultiTable())
+      req(input$whichDisease_multi)
+      req(input$whichLocation_multi)
+      
+      index <- paste(input$whichDisease_multi,
+                     input$whichLocation_multi,
+                     sep = "_")
+      output <- MultiTable()[[index]]
+      colnames(output) <- c("ID", "Description")
+      return(output)
+    }, server=TRUE,
+    options = list(pageLength = 10), rownames= FALSE)
+  })
+
 }#eof server
