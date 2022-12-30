@@ -1606,3 +1606,73 @@ createPvalTab <- function(files,postfix="",pvaluelist=c(0.001,0.01,0.05,0.1),
   }
   
 }
+
+#############################################Multi-omics analysis functions ###################################################
+
+pathwaySelection <- function(p_threshold_multi_trans,
+                             q_threshold_multi_trans,
+                             p_threshold_multi_mets,
+                             nProteinsPathway,
+                             nMetsPathway){
+  filelocation_t <- paste0(work_DIR, "/4-pathway_analysis/")
+  #Obtain data from step 4 (transcript PWs)
+  tPWs_CD_ileum <- read.delim(paste0(filelocation_t, 'enrichResults_ORA_CD_ileum.tsv'), sep = "\t", header = TRUE)
+  tPWs_CD_rectum <- read.delim(paste0(filelocation_t, 'enrichResults_ORA_CD_rectum.tsv'), sep = "\t",header = TRUE)
+  tPWs_UC_ileum <- read.delim(paste0(filelocation_t, 'enrichResults_ORA_UC_ileum.tsv'), sep = "\t", header = TRUE)
+  tPWs_UC_rectum <- read.delim(paste0(filelocation_t, 'enrichResults_ORA_UC_rectum.tsv'), sep = "\t",header = TRUE)
+  #Set location to download data for metabolomics pathway analysis:
+  filelocation_m <- paste0(work_DIR, "/10-metabolite_pathway_analysis/")
+  #Obtain data from step 9 (metabolite PWs)
+  mPWs_CD <- read.delim(paste0(filelocation_m, 'mbxPWdata_CD.csv'), sep = ",", na.strings=c("", "NA"))
+  mPWs_UC <- read.delim(paste0(filelocation_m, 'mbxPWdata_UC.csv'), sep = ",", na.strings=c("", "NA"))
+  
+  # Select pathways
+  tPWs_CD_ileum_sign <- tPWs_CD_ileum[(tPWs_CD_ileum$p.adjust<p_threshold_multi_trans)&(tPWs_CD_ileum$qvalue<q_threshold_multi_trans),]
+  tPWs_CD_rectum_sign <- tPWs_CD_rectum[(tPWs_CD_rectum$p.adjust<p_threshold_multi_trans)&(tPWs_CD_rectum$qvalue<q_threshold_multi_trans),]
+  tPWs_UC_ileum_sign <- tPWs_UC_ileum[(tPWs_UC_ileum$p.adjust<p_threshold_multi_trans)&(tPWs_UC_ileum$qvalue<q_threshold_multi_trans),]
+  tPWs_UC_rectum_sign <- tPWs_UC_rectum[(tPWs_UC_rectum$p.adjust<p_threshold_multi_trans)&(tPWs_UC_rectum$qvalue<q_threshold_multi_trans),]
+  
+  mPWs_CD_sign <- mPWs_CD[(mPWs_CD$probabilities< p_threshold_multi_mets)&(mPWs_CD$HMDBsInPWs>nMetsPathway)&(mPWs_CD$ProteinsInPWs>nProteinsPathway),]
+  mPWs_UC_sign <- mPWs_UC[(mPWs_UC$probabilities< p_threshold_multi_mets)&(mPWs_UC$HMDBsInPWs>nMetsPathway)&(mPWs_UC$ProteinsInPWs>nProteinsPathway),]
+  
+  # Determine overlap
+  overlapCD_all <- intersect(intersect(tPWs_CD_ileum_sign[,1], tPWs_CD_rectum_sign[,1]), mPWs_CD_sign[,1])
+  overlapCD_ileum <- intersect(tPWs_CD_ileum_sign[,1], mPWs_CD_sign[,1])
+  overlapCD_rectum <- intersect(tPWs_CD_rectum_sign[,1], mPWs_CD_sign[,1])
+  
+  overlapUC_all <- intersect(intersect(tPWs_UC_ileum_sign[,1], tPWs_UC_rectum_sign[,1]), mPWs_UC_sign[,1])
+  overlapUC_ileum <- intersect(tPWs_UC_ileum_sign[,1], mPWs_UC_sign[,1])
+  overlapUC_rectum <- intersect(tPWs_UC_rectum_sign[,1], mPWs_UC_sign[,1])
+  
+  overlapBoth_all <- intersect(overlapCD_all,overlapUC_all)
+  overlapBoth_ileum <- intersect(overlapCD_ileum, overlapUC_ileum)
+  overlapBoth_rectum <- intersect(overlapCD_rectum, overlapUC_rectum)
+  
+  # Make final table
+  finalTable <- unique(rbind.data.frame(mPWs_CD, mPWs_UC)[,c(1,2)])
+  finalTable_CD_all <- finalTable[finalTable[,1] %in% overlapCD_all,]
+  finalTable_CD_ileum <- finalTable[finalTable[,1] %in% overlapCD_ileum,]
+  finalTable_CD_rectum <- finalTable[finalTable[,1] %in% overlapCD_rectum,]
+  
+  finalTable_UC_all <- finalTable[finalTable[,1] %in% overlapUC_all,]
+  finalTable_UC_ileum <- finalTable[finalTable[,1] %in% overlapUC_ileum,]
+  finalTable_UC_rectum <- finalTable[finalTable[,1] %in% overlapUC_rectum,]
+  
+  output <- list(
+    finalTable_CD_all,
+    finalTable_CD_ileum,
+    finalTable_CD_rectum,
+    finalTable_UC_all,
+    finalTable_UC_ileum,
+    finalTable_UC_rectum
+  )
+  names(output) <- c("CD_Both",
+                     "CD_Ileum",
+                     "CD_Rectum",
+                     "UC_Both",
+                     "UC_Ileum",
+                     "UC_Rectum")
+  
+  return(output)
+}
+
