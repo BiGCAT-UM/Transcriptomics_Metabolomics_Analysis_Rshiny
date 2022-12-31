@@ -1614,6 +1614,7 @@ pathwaySelection <- function(p_threshold_multi_trans,
                              p_threshold_multi_mets,
                              nProteinsPathway,
                              nMetsPathway){
+  setwd(work_DIR)
   filelocation_t <- paste0(work_DIR, "/4-pathway_analysis/")
   #Obtain data from step 4 (transcript PWs)
   tPWs_CD_ileum <- read.delim(paste0(filelocation_t, 'enrichResults_ORA_CD_ileum.tsv'), sep = "\t", header = TRUE)
@@ -1674,5 +1675,106 @@ pathwaySelection <- function(p_threshold_multi_trans,
                      "UC_Rectum")
   
   return(output)
+}
+
+visualizeMultiOmics <- function(pathwayID, location_transcriptomics, disorder){
+  setwd(work_DIR)
+  
+  #Set location to download data for transcriptomics:
+  filelocation_t <- paste0(work_DIR, "/3-identifier_mapping/")
+  #Obtain data from step 3
+  tSet_CD <- read.delim(paste0(filelocation_t, 'IDMapping_CD.tsv'), sep = "\t", na.strings=c("", "NA"))
+  tSet_UC <- read.delim(paste0(filelocation_t, 'IDMapping_UC.tsv'), sep = "\t", na.strings=c("", "NA"))
+  ##Select the corresponding location to be visualized:
+  #filter out unused columns
+  if(location_transcriptomics == "ileum"){
+    tSet_CD <- na.omit(tSet_CD [,c(1,4:5)])
+    tSet_UC <- na.omit(tSet_UC [,c(1,4:5)])
+    } else if(location_transcriptomics == "rectum"){
+      tSet_CD <- na.omit(tSet_CD [,c(1,6:7)])
+      tSet_UC <- na.omit(tSet_UC [,c(1,6:7)])
+  } else {print("Location for transcriptomics data not recognised.")}
+  #Rename columns for merger later
+  colnames(tSet_CD) <- c('ID','log2FC','pvalues')
+  colnames(tSet_UC) <- c('ID','log2FC','pvalues')
+  #Set location to download data for metabolomics:
+  filelocation_m <- paste0(work_DIR, "/9-metabolite_identifier_mapping/")
+  #Obtain data from step 10
+  mSet_CD <- read.csv(paste0(filelocation_m, 'mbx_mapped_data_CD.csv'), sep = ",", na.strings=c("", "NA"))
+  mSet_UC <- read.csv(paste0(filelocation_m, 'mbx_mapped_data_UC.csv'), sep = ",", na.strings=c("", "NA"))
+  #filter out unused columns
+  mSet_CD <- na.omit(mSet_CD [,c(2,4:5)])
+  mSet_UC <- na.omit(mSet_UC [,c(2,4:5)])
+  #Rename columns for merger later
+  colnames(mSet_CD) <- c('ID','log2FC','pvalues')
+  colnames(mSet_UC) <- c('ID','log2FC','pvalues')
+  
+  combined.data_CD <- rbind(tSet_CD, mSet_CD)
+  combined.data_UC <- rbind(tSet_UC, mSet_UC)
+  
+  ##Select disorder to visualize later on:
+  if(disorder == "CD"){combined.data <- combined.data_CD}else if(disorder == "UC"){combined.data <- combined.data_UC}else{print("Disorder not recognized.")}
+  
+  cytoscapePing()
+  #close all opened session before starting
+  closeSession(FALSE)
+  #Set up WikiPathways app in Cytoscape, v.3.3.10
+  if("WikiPathways" %in% commandsHelp("")) print("Success: the WikiPathways app is installed") else print("Warning: WikiPathways app is not installed. Please install the WikiPathways app before proceeding.")
+  if(!"WikiPathways" %in% commandsHelp("")) installApp("WikiPathways")
+  
+  RCy3::commandsRun(paste0('wikipathways import-as-pathway id=',pathwayID )) 
+  
+  #get node table from imported pathway in cytoscape
+  ID.cols <- getTableColumns(table ="node", columns = c("XrefId","Ensembl", "ChEBI"))
+  #filter out rows which contain NA value for columns Ensembl and ChEBI
+  ID.cols <- ID.cols[!with(ID.cols, is.na(Ensembl) & is.na(ChEBI)),]
+  #if a row value in the Ensembl column is NA then replace it with ChEBI  
+  ID.cols$Ensembl <- ifelse(is.na(ID.cols$Ensembl), ID.cols$ChEBI, ID.cols$Ensembl)
+  #use the only one column contains both Ensembl and ChEBI identifiers
+  ID.cols <- data.frame(ID.cols[,c(1,2)])
+  #change column name
+  colnames(ID.cols)[2] <- "omics.ID"
+  #merge two data frames for adding xrefid to the combined data frame
+  data <- merge(combined.data, ID.cols, by.x = "ID", by.y = "omics.ID" )
+  #remove duplicate rows
+  data <- data %>% distinct(ID, .keep_all = TRUE)
+  colnames(data)[1] <- "omics.ID"
+  #load data to the imported pathway in cytoscape by key column as XrefId
+  loadTableData(table = "node", data = data, data.key.column = "XrefId", table.key.column = "XrefId")
+  
+  #new visual style is created
+  RCy3::copyVisualStyle("default","pathwayStyle")
+  #set new style as the current style
+  RCy3::setVisualStyle("pathwayStyle")
+  #set node dimensions as fixed sizes
+  RCy3::lockNodeDimensions(TRUE, style.name="pathwayStyle")
+  #node shape mapping
+  RCy3::setNodeShapeMapping('Type',c('GeneProduct','Protein', 'Metabolite'),c('ELLIPSE','ELLIPSE','RECTANGLE'), style.name="pathwayStyle")
+  #change node height
+  RCy3::setNodeHeightMapping('Type',c('GeneProduct','Protein', 'Metabolite'), c(23,23,25), mapping.type = "d", style.name = "pathwayStyle")
+  #change node width
+  RCy3::setNodeWidthMapping('Type',c('GeneProduct','Protein', 'Metabolite'), c(60,60,100), mapping.type = "d", style.name = "pathwayStyle")
+  #set node color based on log2FC for both genes and metabolites
+  node.colors <- c(rev(brewer.pal(3, "RdBu")))
+  setNodeColorMapping("log2FC", c(-1,0,1), node.colors, default.color = "#D3D3D3", style.name = "pathwayStyle")
+  #Set node border width and color based on p-value
+  #First we need to get all p-values from node table
+  pvalues <- getTableColumns(table = 'node', columns = 'pvalues')
+  pvalues <- na.omit(pvalues)
+  #Create a range for all sign. p-values, and one for all not significant.
+  significant_pvalues <- pvalues[(pvalues < 0.05)]
+  not.significant_pvalues <- pvalues[(pvalues >= 0.05)]
+  significant_pvalues.colors <- rep("#2e9d1d", length(significant_pvalues))
+  not.significant_pvalues.colors <- rep("#FFFFFF", length(not.significant_pvalues))
+  RCy3::setNodeBorderWidthMapping('pvalues', table.column.values = NULL , c(6,6) , mapping.type = "c", style.name = "pathwayStyle")
+  RCy3::setNodeBorderColorMapping('pvalues', c(significant_pvalues,not.significant_pvalues), c(significant_pvalues.colors, not.significant_pvalues.colors), default.color = "#AAAAAA", mapping.type = "d", style.name = "pathwayStyle")
+  ##Update relevant interactions to directional ones:
+  RCy3::setEdgeTargetArrowShapeMapping(table.column = 'EndArrow', c('mim-conversion', 'Arrow', 'mim-catalysis'), c('DELTA', 'DELTA', 'OPEN_CIRCLE'), style.name = "pathwayStyle")
+  
+  #Save output 
+  if(!dir.exists("11-multiomics_visualization")) dir.create("11-multiomics_visualization")
+  filename_multiomics <- paste0("11-multiomics_visualization/", pathwayID, "_", disorder, "_location_", location_transcriptomics,"_visualization.png")
+  png.file <- file.path(getwd(), filename_multiomics)
+  exportImage(png.file, 'PNG', zoom = 500)
 }
 
