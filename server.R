@@ -1346,7 +1346,7 @@ server = function(input, output,session) {
       
       output$multiPlot <- renderImage({
         
-        figure <- paste0("11-multiomics_visualization/", 
+        figure <- paste0("12-multiomics_visualization/", 
                          input$vis_pathway, "_", 
                          input$vis_disease, "_location_", 
                          input$vis_location,"_visualization.png")
