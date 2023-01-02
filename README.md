@@ -10,13 +10,13 @@ Transcriptomics analysis:
 [5-Heatmap creation](/5-create_heatmap/)<br />
 [6-Network analysis](/6-network_analysis)<br />
 Metabolomics analysis:  
-[7-Data preprocessing](/7-metabolite_data_preprocessing/)<br />
-[8-Significantly changed metabolites analysis](/8-significantly_changed_metabolites_analysis/)<br />
-[9-Identifier mapping](9-metabolite_identifier_mapping/)<br />
-[10-Metabolite Pathway Analysis (ORA)](/10-metabolite_pathway_analysis/)<br />
+[7-Data preprocessing](/7-metabolite_data_preprocessing)<br />
+[8-Significantly changed metabolites analysis](/8-significantly_changed_metabolites_analysis)<br />
+[9-Identifier mapping](9-metabolite_identifier_mapping)<br />
+[10-Metabolite Pathway Analysis (ORA)](/10-metabolite_pathway_analysis)<br />
 Multi-omics visualization<br />
-[11-Pathway selection](visualization_multiomics/11-pathway_selection/)<br />
-[12-Visualizaiton of multi-omics](visualization_multiomics/12-visualization/)<br />
+[11-Pathway selection](visualization_multiomics/11-pathway_selection)<br />
+[12-Visualizaiton of multi-omics](visualization_multiomics/12-visualization)<br />
 
 The setup of this project has been tested with:
 - OS Windows 10, R-studio 2021.09.02, R 4.1.3.
