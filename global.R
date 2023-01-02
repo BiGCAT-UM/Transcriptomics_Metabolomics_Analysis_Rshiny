@@ -535,7 +535,7 @@ pathwayAnalysisTranscriptomics <- function(logFCtheshold, Pthreshold, Pthreshold
     
     pathway_data <- "local" #Options: local, new
     if (pathway_data == "local") {
-      wp.hs.gmt <-list.files(work_DIR, pattern="wikipathways", full.names=FALSE)
+      wp.hs.gmt <-list.files(paste0(work_DIR,"/4-pathway_analysis"), pattern="wikipathways", full.names=FALSE)
       paste0("Using local file, from: ", wp.hs.gmt )
     }else if(pathway_data == "new"){ 
       #below code should be performed first to handle the ssl certificate error while downloading pathways 
@@ -545,7 +545,7 @@ pathwayAnalysisTranscriptomics <- function(logFCtheshold, Pthreshold, Pthreshold
       paste0("Using new data, from: ", wp.hs.gmt)}else{print("Pathway data type not recognized")
       }
     
-    wp2gene   <- rWikiPathways::readPathwayGMT(wp.hs.gmt)
+    wp2gene   <- rWikiPathways::readPathwayGMT(paste0(work_DIR,"/4-pathway_analysis/",wp.hs.gmt))
     wpid2gene <- wp2gene %>% dplyr::select(wpid,gene) #TERM2GENE
     wpid2name <- wp2gene %>% dplyr::select(wpid,name) #TERM2NAME
     ewp.ileum <- clusterProfiler::enricher(
