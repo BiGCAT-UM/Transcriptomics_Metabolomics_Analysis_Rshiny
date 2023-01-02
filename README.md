@@ -5,7 +5,7 @@ This workflow, developed in R Shiny application, includes differential gene expr
 Transcriptomics analysis:  
 [1-Data preprocessing](https://github.com/BiGCAT-UM/Transcriptomics_Metabolomics_Analysis_Rshiny/tree/master/1-data_preprocessing)<br /> 
 [2-Differential gene expression analysis](https://github.com/BiGCAT-UM/Transcriptomics_Metabolomics_Analysis_Rshiny/tree/master/2-differential_gene_expression_analysis)<br />
-[3-Identifier mapping](/transcriptomics_analysis/3-identifier_mapping/)<br />
+[3-Identifier mapping](/3-identifier_mapping)<br />
 [4-Gene Pathway analysis (ORA)](/transcriptomics_analysis/4-pathway_analysis/)<br />
 [5-Heatmap creation](/transcriptomics_analysis/5-create_heatmap/)<br />
 [6-Network analysis](/transcriptomics_analysis/6-network_analysis)<br />
