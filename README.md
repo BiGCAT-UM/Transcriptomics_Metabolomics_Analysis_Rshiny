@@ -23,3 +23,4 @@ The setup of this project has been tested with:
 - OS Linux (Debian), R-studio 2022.02.2, R 4.2.
 
 The workflow is an example of how to bring together different software tools and methods to analyze transcriptomics and metabolomics data to reveal the underlying mechanism behind IBD disease as a use case study.
+![workflow pptx](https://user-images.githubusercontent.com/65600609/210248763-ae312fec-4df9-43f0-9cc6-c995629dd2c2.jpg)
