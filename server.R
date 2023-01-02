@@ -17,6 +17,7 @@ server = function(input, output,session) {
   hideTab("tabs_trans", target = "heatmap_trans")
   hideTab("tabs_trans", target = "network_trans")
   hideTab("tabs_multi", target = "visualization")
+
   # 
   # ################################################################
   # 
@@ -24,7 +25,7 @@ server = function(input, output,session) {
   # 
   # ################################################################
   # 
-  hideTab("tabs_mets", target = "filtering_mets")
+  #hideTab("tabs_mets", target = "filtering_mets")
   #hideTab("tabs_mets", target = "norm_mets")
   #hideTab("tabs_mets", target = "stat_mets")
   #hideTab("tabs_mets", target = "mapping_mets")

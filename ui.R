@@ -134,7 +134,7 @@ ui <- tagList(
                                                br(),
                                                
                                                # Title + description
-                                               h4(strong("Average log CPM filtering")),
+                                               h4(strong("Average log CPM (Count per million) filtering")),
                                                h5("This filtering step will be performed to remove lowly expressed genes."),
                                                
                                                # log CPM threshold
@@ -532,6 +532,8 @@ ui <- tagList(
                                                # Header
                                                h3(strong("Meta data")),
                                                
+                                               h5("Upload the ",em("hmp2_metadata.csv"), " file"),
+                                               
                                                # Upload meta data
                                                fileInput(inputId = "metaFile", 
                                                          label = NULL,
@@ -559,7 +561,7 @@ ui <- tagList(
                                                
                                                h3(strong("Metabolomics data")),
                                                hr(),
-                                               h5("The peak intensity value data will be uploaded,"),
+                                               h5("Upload the ",em("metabolomics.csv"), " file"),
                                                
                                                # Upload file
                                                fileInput(inputId = "metsData", 
@@ -581,7 +583,7 @@ ui <- tagList(
                                                             choices = c(Comma = ",",
                                                                         Semicolon = ";",
                                                                         Tab = "\t"),
-                                                            selected = "\t"),
+                                                            selected = ","),
                                                
                                                # Horizontal line
                                                tags$hr(),
