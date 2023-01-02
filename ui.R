@@ -945,8 +945,7 @@ ui <- tagList(
                                                  max = 1,
                                                  step = 0.01
                                                ),
-                                               hr(),
-                                               h4(strong("Pathway Thresholds")),
+                                               br(),
                                                numericInput(
                                                  inputId = "nProteinsPathway",
                                                  label = "# Proteins",
@@ -966,6 +965,11 @@ ui <- tagList(
                                                br(),
                                                actionBttn(inputId ="selectionButtonMulti", label ="Apply", style = "jelly",
                                                           btn_type = "button", type = "primary", color = "primary"),
+                                               
+                                               tags$hr(),
+                                               actionBttn(inputId ="selectionMulti_NEXT", label ="Next", style = "jelly",
+                                                          btn_type = "button", type = "primary", color = "danger",
+                                                          icon = icon("arrow-right"))
                                                
                                              ),
                                              
@@ -1000,7 +1004,41 @@ ui <- tagList(
                                     #***************************************************#
                                     # Visualization
                                     #***************************************************#
-                                    tabPanel("Visualization", value = "visualization")
+                                    tabPanel("Visualization", value = "visualization",
+                                             br(),
+                                             #==========================================#
+                                             # Side bar panel
+                                             #==========================================#
+                                             sidebarPanel(
+                                               h3(strong("Multi-omics Visualization")),
+                                               br(),
+                                               textInput(inputId = "vis_pathway",
+                                                         label = "Pathway ID",
+                                                         value = "WP4726"),
+                                               radioButtons(inputId = "vis_location", 
+                                                            label = "Location",
+                                                            choices = c(Ileum = "ileum", 
+                                                                        Rectum = "rectum"),
+                                                            selected = "ileum"),
+                                               radioButtons(inputId = "vis_disease", 
+                                                            label = "Disease",
+                                                            choices = c(CD = "CD", 
+                                                                        UC = "UC"),
+                                                            selected = "CD"),
+                                               br(),
+                                               actionBttn(inputId ="visButtonMulti", label ="Apply", style = "jelly",
+                                                          btn_type = "button", type = "primary", color = "primary")
+                                             ),
+                                             #==========================================#
+                                             # Main panel
+                                             #==========================================#
+                                             mainPanel(
+                                               imageOutput("multiPlot",
+                                                           width = "1200px",
+                                                           height = "auto")
+                                             )
+   
+                                             )
 
                         )#tabsetPanel
                )#tabPanel

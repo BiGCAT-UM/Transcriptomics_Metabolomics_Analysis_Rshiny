@@ -9,6 +9,7 @@ server = function(input, output,session) {
   
   # ################################################################
   # 
+<<<<<<< HEAD
   # hideTab("tabs_trans", target = "filtering_trans")
   # hideTab("tabs_trans", target = "norm_trans")
   # hideTab("tabs_trans", target = "deg_trans")
@@ -16,6 +17,16 @@ server = function(input, output,session) {
   # hideTab("tabs_trans", target = "pathway_trans")
   # hideTab("tabs_trans", target = "heatmap_trans")
   # hideTab("tabs_trans", target = "network_trans")
+=======
+  hideTab("tabs_trans", target = "filtering_trans")
+  hideTab("tabs_trans", target = "norm_trans")
+  hideTab("tabs_trans", target = "deg_trans")
+  hideTab("tabs_trans", target = "mapping_trans")
+  hideTab("tabs_trans", target = "pathway_trans")
+  hideTab("tabs_trans", target = "heatmap_trans")
+  hideTab("tabs_trans", target = "network_trans")
+  hideTab("tabs_multi", target = "visualization")
+>>>>>>> ba06804fd302d356f99531691089aba3add55244
   # 
   # ################################################################
   # 
@@ -1269,6 +1280,9 @@ server = function(input, output,session) {
   #                      Multi-omics Data Operations
   #**************************************************************************************************************#
   
+  #***************************************************#
+  # Pathway Selection
+  #***************************************************#
   MultiTable <- eventReactive(input$selectionButtonMulti, {
     MultiTable <- pathwaySelection(input$p_threshold_multi_trans,
                      input$q_threshold_multi_trans,
@@ -1302,5 +1316,65 @@ server = function(input, output,session) {
     }, server=TRUE,
     options = list(pageLength = 10), rownames= FALSE)
   })
-
+  
+  # Go the next step
+  observeEvent(input$selectionMulti_NEXT, {
+    updateTabsetPanel(session, "tabs_multi",
+                      selected = "visualization")
+    
+    showTab("tabs_multi", target = "visualization")
+    
+  })
+  
+  #***************************************************#
+  # Pathway Visualization
+  #***************************************************#
+  
+  
+  observeEvent(input$visButtonMulti,{
+    
+    testCy <- try(cytoscapePing())
+    
+    if (class(testCy) == "try-error"){
+      sendSweetAlert(
+        session = session,
+        title = "Error!",
+        text = "Cytoscape is cannot be found! Make sure Cytoscape is running!",
+        type = "error")
+    }
+    if (!(class(testCy) == "try-error")){
+      showModal(modalDialog(title = h4(strong("Multi-omics Pathway Visualization..."),
+                                       align = "center"), 
+                            footer = NULL,
+                            h5("This might take a while. Please be patient.", 
+                               align = "center")))
+      
+      visualizeMultiOmics(pathwayID = input$vis_pathway, 
+                          location_transcriptomics = input$vis_location, 
+                          disorder = input$vis_disease)
+      
+      output$multiPlot <- renderImage({
+        
+        figure <- paste0("11-multiomics_visualization/", 
+                         input$vis_pathway, "_", 
+                         input$vis_disease, "_location_", 
+                         input$vis_location,"_visualization.png")
+        
+        path <- paste0(work_DIR,"/",figure)
+        list(src = path, contentType = 'image/png',width = "1200px", height = "auto",
+             alt = "This is alternate text")
+        
+      } ,deleteFile=FALSE)
+      
+      removeModal()
+      
+      sendSweetAlert(
+        session = session,
+        title = "Success!",
+        text = "Pathway visualization completed!",
+        type = "success")
+    }
+  })
+  
+  
 }#eof server
