@@ -825,10 +825,11 @@ ui <- tagList(
                                                #******************************************************#
                                                
                                                h3(strong("Identifier Mapping")),
-                                               h5("To visualize the multi-omics data in CytoScape, data need to be prepared 
+                                               h5("To visualize the multi-omics data in CytoScape, metabolomic data need to be prepared 
                                                for importing according to the unified database identifiers available.
-                                               Therefor, metabolite data is mapped to ChEBI IDS."),
+                                               Therefore, metabolite data is mapped to ChEBI IDs"),
                                                br(),
+                                               
                                                
                                                actionBttn(inputId ="mappingButtonMets", label ="Apply", style = "jelly",
                                                           btn_type = "button", type = "primary", color = "primary"),
