@@ -1,4 +1,12 @@
 ui <- tagList(
+  tags$head(tags$style(HTML("
+                           .navbar-nav {
+                           float: none !important;
+                           }
+                           .navbar-nav > li:nth-child(4) {
+                           float: right;
+                           }
+                           "))),
   fluidPage(
     
     # Allow warning/information messages
@@ -116,7 +124,7 @@ ui <- tagList(
                                     ),
                                     
                                     #***************************************************#
-                                    # Preprocessing
+                                    # Filtering
                                     #***************************************************#
                                     
                                     tabPanel("Filtering", value = "filtering_trans",
@@ -1041,7 +1049,134 @@ ui <- tagList(
                                              )
 
                         )#tabsetPanel
-               )#tabPanel
+               ),#tabPanel
+               
+               ################################################################
+               #
+               # # Multi-omics
+               # 
+               # ################################################################
+               tabPanel("Documentation",
+                        value = "Documentation",
+                        icon = icon("far fa-question-circle"),
+                        tabsetPanel(id="tabs_documentation",
+                                    
+                                    #***************************************************#
+                                    # Documentation of transcriptomics analysis
+                                    #***************************************************#
+                                    tabPanel("Transcriptomics Analysis",value = "doc_trans",
+                                             h2(strong("Documentation of Transcriptomics Analysis")),
+                                             hr(),
+                                             
+                                             
+                                             h3(strong("1. Data pre-processing")),
+                                             br(),
+                                             h4(strong("1.1.Data upload")),
+                                             h5("Before you can start with the transcriptomics analysis,
+                                                the data needs to be uploaded first. Particularly, the 
+                                                transcriptomics analysis requires two files:"),
+                                             h5(strong("1. Meta data file: "), em("hmp2_metadata.csv")),
+                                             h5(strong("2. Transcriptomics count data file: "), 
+                                                em("host_tx_counts.tsv")),
+                                             h5("Both files can be found in the ", em("data"), " folder in
+                                                the working directory. The default settings for the data upload are
+                                                correct and, thus, only the file location needs to be selected manually."),
+                                             br(),
+                                             
+                                             
+                                             h4(strong("1.2. Filtering")),
+                                             h5("In this part, three filtering steps will be applied. The first
+                                                two filtering steps consist of removing genes and samples with
+                                                only zero values. Furthermore, in the third filtering step, genes 
+                                                will be filtered based on its mean logCPM value. The default 
+                                                threshold is 1 logCPM, but can be changed by the user."),
+                                             br(),
+                                             
+                                             
+                                             h4(strong("1.3. Normalization & QC")),
+                                             h5("Here, normalization using the ", 
+                                                tags$a(href = "https://bioconductor.org/packages/release/bioc/html/DESeq2.html", 
+                                                        "DESeq2")  
+                                                ," package will be performed. Additional quality control 
+                                                will be performed through ",
+                                                tags$a(href = "https://doi.org/10.1093/nar/gkt293", 
+                                                       "ArrayAnalysis"), "
+                                                functions (v.2)."),
+                                             br(),
+                                             hr(),
+                                             
+                                             
+                                             h3(strong("2. Differential gene expression analysis")),
+                                             h5("Also the differential gene expression (DEG) analysis will be performed using the ", 
+                                                tags$a(href = "https://bioconductor.org/packages/release/bioc/html/DESeq2.html", 
+                                                       "DESeq2")  
+                                                ," package."),
+                                             br(),
+                                             hr(),
+                                             
+                                             
+                                             h3(strong("3. Identifier mapping")),
+                                             h5("In the identifier mapping procedure, gene symbols will 
+                                             be converted to Entrez Gene and ENSEMBL IDs. For this, the ",
+                                             tags$a(href = "https://bioconductor.org/packages/release/bioc/html/AnnotationDbi.html", 
+                                                       "AnnotationDbi"),
+                                             "package (v1.58.0) will be used. Furthermore, 
+                                             one-to-many mappings will be omitted by selecting the first hit only."),
+                                             br(),
+                                             hr(),
+                                             
+                                             
+                                             h3(strong("4. Pathway analysis")),
+                                             h5("In this step, Over-representation analysis (ORA) will be performed 
+                                             using the selected logFC and p-value thresholds (selected in the DEG step).
+                                             The ORA implementation in ",
+                                             tags$a(href = "https://bioconductor.org/packages/release/bioc/html/clusterProfiler.html", 
+                                                      "clusterProfiler"),
+                                             " (v4.2.2) package will be applied to perform ORA 
+                                             on WikiPathways, version 20220510 (747 pathways). 
+                                             The false discovery rate (FDR) approach will be used to acquire adjusted p-values. 
+                                             Accordingly, the q-values were calculated to prevent a high FDR in multiple testing."),
+                                             br(),
+                                             hr(),
+                                             
+                                             
+                                             h3(strong("5. Heatmap")),
+                                             h5("A heatmap of pathway significance for the different 
+                                                biopsy locations and diseases will be shown."),
+                                             br(),
+                                             hr(),
+                                             
+                                             
+                                             h3(strong("6. Network analysis")),
+                                             h5("This part requires Cytoscape to be installed and opened. 
+                                             The first step of the network analysis includes the construction 
+                                             of Protein-Protein-Interaction (PPI) networks from the STRING database 
+                                             using the stringApp (v1.7.0) in Cytoscape through the R package RCy3 (v2.14.1). 
+                                             The STRING database will be queried for the overlapping DEGs per biopsy location 
+                                             with a confidence score of > 0.7 to construct a PPI network, 
+                                             extended with the curated human pathway collection from WikiPathways, version 20220210, 2018) 
+                                             to create Protein-Protein-Pathway interaction (PPP-I) networks. 
+                                             The DEG data, including log2FC for CD and UC, 
+                                             will be added to the networks for each biopsy location individually, 
+                                             by linking Entrez gene IDs. The gene expression changes of CD and UC will be visualized 
+                                             to allow for the investigation of up-regulated and down-regulated genes in both diseases. 
+                                             The Markov Clustering Algorithm (MCL) was applied to the PPP-I networks through the 
+                                             Cytoscape plugin named clusterMaker2 (v2.0) to investigate similarities 
+                                             between genes and pathways."),
+                                             br()
+                                             ),
+                                    
+                                    #***************************************************#
+                                    # Documentation of Metabolomics analysis
+                                    #***************************************************#
+                                    tabPanel("Metabolomics Analysis",value = "doc_trans"),
+                                    
+                                    #***************************************************#
+                                    # Documentation of multi-omics visualization
+                                    #***************************************************#
+                                    tabPanel("Multi-omics Visualization",value = "doc_trans"),
+                        )# tabsetpanel
+               ) #tabPanel
                
                
                

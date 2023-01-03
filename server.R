@@ -31,6 +31,18 @@ server = function(input, output,session) {
   #hideTab("tabs_mets", target = "mapping_mets")
   #hideTab("tabs_mets", target = "pathway_mets")
 
+  # Welcome message
+  sendSweetAlert(
+    session = session,
+    title = paste0("Hi There!"),
+    text = tags$span("Welcome to the ", tags$b("IBD Analysis App"), "! ", tags$br(),
+                     "If you need information about how to use the app or the applied 
+                     methodologies, please click
+                     on the ", tags$em("Documentation"), " tab in the top right corner."),
+    type = "info",
+    html = TRUE,
+    btn_labels = "Start the analysis!",
+    showCloseButton = TRUE)
 
   #**************************************************************************************************************#
   #                      Transcriptomics Data Operations
