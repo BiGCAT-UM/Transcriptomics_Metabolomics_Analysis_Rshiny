@@ -1358,11 +1358,17 @@ mappingMets <- function (){
   location <- "data/metabolites.bridge"
   checkfile <- paste0(getwd(), '/' ,location)
   
-  ##Download the Metabolite mapping file (if it doesn't exist locally yet):
+  # ##Download the Metabolite mapping file (if it doesn't exist locally yet):
+  # if (!file.exists(checkfile)) {
+  #   download.file("https://figshare.com/ndownloader/files/26001794",location) #this code should be changed since the full size of the file can not 
+  #   #be downloaded
+  # }
+  
+  #if file does not exist
   if (!file.exists(checkfile)) {
-    download.file("https://figshare.com/ndownloader/files/26001794",location) #this code should be changed since the full size of the file can not 
-    #be downloaded
-  }
+    print("metabolites.bridge file does not exist! Please dowload the file from the link in the application")
+    return (FALSE)
+  }else{
   
   mapper <- BridgeDbR ::loadDatabase(checkfile)
   
@@ -1402,8 +1408,9 @@ mappingMets <- function (){
   ##Save the data file
   write.csv(merged.data_CD, '9-metabolite_identifier_mapping/mbx_mapped_data_CD.csv', row.names = FALSE)
   write.csv(merged.data_UC, '9-metabolite_identifier_mapping/mbx_mapped_data_UC.csv', row.names = FALSE)
-
-}
+  return (TRUE)
+  }#else
+}#function
 
 #==============================================================================#
 #pathway analysis for metabolomics data

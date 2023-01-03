@@ -830,6 +830,13 @@ ui <- tagList(
                                                Therefore, metabolite data is mapped to ChEBI IDs"),
                                                br(),
                                                
+                                               h4(strong("Data download")),
+                                               h5("To start with mapping you should fisrt download metabolites.bridge file  ", 
+                                                  tags$a(href = "https://figshare.com/ndownloader/files/26001794", "here")  
+                                                  ," and locate it to /data folder" ),
+                                               h5("If you already downloaded it you can continue with clicking Apply button! "),
+                                               br(),
+                                               hr(),
                                                
                                                actionBttn(inputId ="mappingButtonMets", label ="Apply", style = "jelly",
                                                           btn_type = "button", type = "primary", color = "primary"),

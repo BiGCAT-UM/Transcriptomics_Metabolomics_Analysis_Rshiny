@@ -1155,8 +1155,9 @@ server = function(input, output,session) {
     
     results <- list()
     #perform identifier mapping
-    mappingMets()
+    success <- mappingMets()
     
+    if(success){
     results [[1]] <- read.csv("9-metabolite_identifier_mapping/mbx_mapped_data_CD.csv",na.strings=c("", "NA"))
     results [[2]] <- read.csv("9-metabolite_identifier_mapping/mbx_mapped_data_UC.csv",na.strings=c("", "NA"))
     
@@ -1173,6 +1174,15 @@ server = function(input, output,session) {
       type = "success")
     
     return (results)
+    
+    }else{
+      sendSweetAlert(
+        session = session,
+        title = "Error!",
+        text = "metabolites.bridge file does not exist! 
+        Please dowload the file from the link in the application",
+        type = "error")
+    }
   })#observeEvent
   
   compPairMet <- reactive({
