@@ -145,12 +145,6 @@ removeOutliers <- function (sampleLabels, htxCount,outliers){
 
 sample_gene_filtering<-function(htxMeta,htxOrj){
   
-  # #to get current working directory
-  # WORK.DIR <- getwd()  
-  # 
-  # # set working environment to the location where current source file is saved into.
-  # setwd(paste0(WORK.DIR,"/1-data_preprocessing")) 
-  
   #filter out samples by data type as host_transcriptomics
   htxMeta <- htxMeta  %>% filter(htxMeta$data_type == "host_transcriptomics")
   
@@ -198,14 +192,13 @@ sample_gene_filtering<-function(htxMeta,htxOrj){
   nonzero <- rowSums(htxCount) > 0
   htxCount %<>% .[nonzero,]
   
-# setwd('..')
 
 return(list((htxMeta),(htxCount)))
        
 }
 
 #==============================================================================#
-# Filtering applying CPM method: Create heatmap
+# Filtering applying CPM method: Create histogram
 #==============================================================================#
 
 cpm_filter<-function(htxMeta, htxCount, filter_threshold){
