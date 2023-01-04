@@ -210,73 +210,43 @@ server = function(input, output,session) {
   #====================================================#
   # Normalize data
   #====================================================#
-  observeEvent(input$outlierButton, {
-    
-    ### if remove outlier not selected
+  #remove outliers
+  data1 <- eventReactive(input$outlierButton,{
     if (input$outlierCheckBox == TRUE){
-      
       outliers <- NULL
-      
-      showModal(modalDialog(title = h4(strong("Normalization and Quality Control..."),
-                                       align = "center"), 
-                            footer = NULL,
-                            h5("This might take a while. Please be patient.", 
-                               align = "center")))
-      
-      #the preprocessed data will be normalized
-      normalize_QCplots(data_filtered()[[1]], data_filtered()[[2]])
-      
-      removeModal()
-      
-      sendSweetAlert(
-        session = session,
-        title = "Success!",
-        text = "Normalization and QC successfully performed! 
-        You can now view the generated QC plots.",
-        type = "success")
-      
     }
-    
-    ### if outlier removal selected
     if (input$outlierCheckBox == FALSE){
-      
       if (length(input$outliersPicker) < 1){
         outliers <- NULL
       }
       if (length(input$outliersPicker) > 0){
         outliers <- input$outliersPicker
-        
-        #remove outliers
-        data1 <- reactive({
-          req(data_filtered())
-          data1 <-  removeOutliers(data_filtered()[[1]], data_filtered()[[2]], outliers)
-          return (data1)
-        })
-        
-        
-        
-        showModal(modalDialog(title = h4(strong("Normalization and Quality Control..."),
-                                         align = "center"), 
-                              footer = NULL,
-                              h5("This might take a while. Please be patient.", 
-                                 align = "center")))
-        
-        #normalize QC plots   
-        normalize_QCplots(data1[[1]], data1[[2]])
-        
-        removeModal()
-        
-        
-        sendSweetAlert(
-          session = session,
-          title = "Success!",
-          text = "Normalization and QC successfully performed! 
-        You can now view the generated QC plots.",
-          type = "success")
-        
-        
       }
     }
+    data1 <-  removeOutliers(data_filtered()[[1]], data_filtered()[[2]], outliers)
+    return (data1)
+  })
+  
+  
+  observeEvent(input$outlierButton, {
+
+    showModal(modalDialog(title = h4(strong("Normalization and Quality Control..."),
+                                     align = "center"), 
+                          footer = NULL,
+                          h5("This might take a while. Please be patient.", 
+                             align = "center")))
+    
+    #the preprocessed data will be normalized
+    normalize_QCplots(data1()[[1]], data1()[[2]])
+    
+    removeModal()
+    
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "Normalization and QC successfully performed! 
+        You can now view the generated QC plots.",
+      type = "success")
     
     #====================================================#
     # Make PCA plots
