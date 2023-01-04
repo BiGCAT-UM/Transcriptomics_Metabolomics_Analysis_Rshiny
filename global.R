@@ -327,7 +327,7 @@ cont.matrix <- makeContrasts(
 # #create summary table of the contrast results
 #
 # cat ("FC degeri", FC_threshold,"\n")
-createPvalTab(files,postfix="",namePVal="pvalue",nameAdjPVal="padj",nameFC="FoldChange",nameLogFC="log2FoldChange",html=FALSE, FC_threshold)
+createPvalTab(files,postfix="",namePVal="pvalue",nameAdjPVal="padj",nameFC="FoldChange",nameLogFC="log2FoldChange",html=FALSE, FC_threshold = FC_threshold)
 
 # 
 #   WORK.DIR <- getwd()
