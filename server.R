@@ -247,7 +247,12 @@ server = function(input, output,session) {
         outliers <- input$outliersPicker
         
         #remove outliers
-        data1 <-  removeOutliers(data_filtered()[[1]], data_filtered()[[2]], outliers)
+        data1 <- reactive({
+          req(data_filtered())
+          data1 <-  removeOutliers(data_filtered()[[1]], data_filtered()[[2]], outliers)
+          return (data1)
+        })
+        
         
         
         showModal(modalDialog(title = h4(strong("Normalization and Quality Control..."),
@@ -408,7 +413,7 @@ server = function(input, output,session) {
                              align = "center")))
     
     # perform DE analysis
-    DE_analysis(data_filtered()[[1]], data_filtered()[[2]], 1)
+    DE_analysis(data1()[[1]], data1()[[2]], 1)
       
     # Read tables
     topTable[[1]] <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Ileum_vs_nonIBD_Ileum.tab"))
