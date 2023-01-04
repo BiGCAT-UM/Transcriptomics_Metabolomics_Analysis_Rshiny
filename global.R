@@ -233,14 +233,11 @@ histogram_tmp <- ggplot() + aes(x=mean_log_cpm) +
 #Having chosen our threshold, lets pick the subset of genes whose average expression passes that threshold.
 keep_genes <- mean_log_cpm >= filter_threshold 
 htxCount <- htxCount[keep_genes,]
-cat("\nortada\n")
+
 #sample distribution based on biopsy locations
 ileum = nrow(htxMeta[htxMeta$biopsy_location=="Ileum",])
 rectum = nrow(htxMeta[htxMeta$biopsy_location=="Rectum",])
 cat ("Number of samples in ileum:", ileum ,"\nNumber of samples in rectum:",rectum)
-
-#create output folder if it doesn't exist
-#if(!dir.exists("output")) dir.create("output")
 
 #Write all the generated data into the related output files 
 write.table(htxCount, "1-data_preprocessing/htxCount.csv", sep=",",quote=FALSE, row.names = TRUE )
