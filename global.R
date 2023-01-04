@@ -279,10 +279,6 @@ cpm_filter_output <- function(htxMeta, htxCount, filter_threshold){
 DE_analysis <- function (sampleLabels, htxCount, FC_threshold){
 
 WORK.DIR <- getwd()
-#browser()
-#this line of code can be removed
-#htxCount <- read.csv(paste0(WORK.DIR,"/1-data_preprocessing/htxCount.csv"))
-#sampleLabels <- read.csv(paste0(WORK.DIR,"/1-data_preprocessing/sampleLabels.csv"),row.names = 1 )
 
 setwd(paste0(WORK.DIR,"/2-differential_gene_expression_analysis"))
 sampleLabels$disease <- relevel(factor(sampleLabels$disease),ref="nonIBD")
@@ -322,17 +318,6 @@ cont.matrix <- makeContrasts(
 # cat ("FC degeri", FC_threshold,"\n")
 createPvalTab(files,postfix="",namePVal="pvalue",nameAdjPVal="padj",nameFC="FoldChange",nameLogFC="log2FoldChange",html=FALSE, FC_threshold = FC_threshold)
 
-# 
-#   WORK.DIR <- getwd()
-#  # setwd(paste0(WORK.DIR,"/2-differential_gene_expression_analysis"))
-#   readPath <- paste0(WORK.DIR,"/2-differential_gene_expression_analysis/statsmodel/Summary_tables.tab")
-#   summaryTab <- readLines(readPath)
-#   
-#   for (i in 2:length(summaryTab)){
-#     strsplit(summaryTab[i], split = "\t")
-#     
-#   }
-  
 }
 
 #==============================================================================#
