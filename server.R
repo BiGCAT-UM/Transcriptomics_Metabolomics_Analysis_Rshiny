@@ -754,7 +754,7 @@ server = function(input, output,session) {
                             footer = NULL,
                             h5("This might take a while. Please be patient.", 
                                align = "center")))
-      networkAnalysis()
+      networkAnalysis(PPI_cutoff = input$PPI_cutoff)
       
       removeModal()
       

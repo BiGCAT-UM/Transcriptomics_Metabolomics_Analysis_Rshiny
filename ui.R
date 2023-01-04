@@ -492,6 +492,15 @@ ui <- tagList(
                                                   Please make sure to have Cytoscape opened before running 
                                                   the analysis."),
                                                br(),
+                                               numericInput(
+                                                 inputId = "PPI_cutoff",
+                                                 label = "STRING protein query cutoff",
+                                                 value = 0.7,
+                                                 min = 0,
+                                                 max = 1,
+                                                 step = 0.1
+                                               ),
+                                               br(),
                                                actionBttn(inputId ="networkButton", label ="Apply", style = "jelly",
                                                           btn_type = "button", type = "primary", color = "primary")
                                                
@@ -1080,36 +1089,40 @@ ui <- tagList(
                                              h3(strong("1. Data pre-processing")),
                                              br(),
                                              h4(strong("1.1.Data upload")),
-                                             h5("Before you can start with the transcriptomics analysis,
+                                             h5("Before starting with the transcriptomics analysis,
                                                 the data needs to be uploaded first. Particularly, the 
                                                 transcriptomics analysis requires two files:"),
                                              h5(strong("1. Meta data file: "), em("hmp2_metadata.csv")),
-                                             h5(strong("2. Transcriptomics count data file: "), 
+                                             h5(strong("2. RNA-seq count data file: "), 
                                                 em("host_tx_counts.tsv")),
-                                             h5("Both files can be found in the ", em("data"), " folder in
+                                             h5("Both files can be found in the ", em("'data'"), " folder in
                                                 the working directory. The default settings for the data upload are
                                                 correct and, thus, only the file location needs to be selected manually."),
                                              br(),
                                              
                                              
                                              h4(strong("1.2. Filtering")),
-                                             h5("In this part, three filtering steps will be applied. The first
-                                                two filtering steps consist of removing genes and samples with
-                                                only zero values. Furthermore, in the third filtering step, genes 
-                                                will be filtered based on its mean logCPM value. The default 
-                                                threshold is 1 logCPM, but can be changed by the user."),
+                                             h5("In this part, three filtering steps will be applied:"), 
+                                             h5("1. Removal of samples with zero values only."),
+                                             h5("2. Removal of genes with zero values only."),
+                                             h5("3. Removal of genes with a mean logCPM below the selected threshold. 
+                                                For this, the default threshold is 1 logCPM, but can be changed by the user."),
+                                             h5("NOTE: The filtered meta data and RNA-seq count data can be found in the ",
+                                                em("'1-data_preprocessing'"), " folder."),
                                              br(),
                                              
                                              
                                              h4(strong("1.3. Normalization & QC")),
-                                             h5("Here, normalization using the ", 
+                                             h5("Using the filtered data, normalization with the ", 
                                                 tags$a(href = "https://bioconductor.org/packages/release/bioc/html/DESeq2.html", 
                                                         "DESeq2")  
                                                 ," package will be performed. Additional quality control 
                                                 will be performed through ",
                                                 tags$a(href = "https://doi.org/10.1093/nar/gkt293", 
                                                        "ArrayAnalysis"), "
-                                                functions (v.2)."),
+                                                functions (v.2). The QC plots of the raw and normalized data are saved in the ",
+                                                em("'2-differential_gene_expression_analysis/QCraw'"), " and ",
+                                                em("'2-differential_gene_expression_analysis/QCnorm'"), " folders, respectively."),
                                              br(),
                                              hr(),
                                              
@@ -1118,7 +1131,8 @@ ui <- tagList(
                                              h5("Also the differential gene expression (DEG) analysis will be performed using the ", 
                                                 tags$a(href = "https://bioconductor.org/packages/release/bioc/html/DESeq2.html", 
                                                        "DESeq2")  
-                                                ," package."),
+                                                ," package. All output plots and tables can be found in the ",
+                                                em("'2-differential_gene_expression_analysis/statsmodel'"), " folder."),
                                              br(),
                                              hr(),
                                              
@@ -1128,29 +1142,34 @@ ui <- tagList(
                                              be converted to Entrez Gene and ENSEMBL IDs. For this, the ",
                                              tags$a(href = "https://bioconductor.org/packages/release/bioc/html/AnnotationDbi.html", 
                                                        "AnnotationDbi"),
-                                             "package (v1.58.0) will be used. Furthermore, 
-                                             one-to-many mappings will be omitted by selecting the first hit only."),
+                                             "package (v1.58.0) will be used. In the applied methodology, 
+                                             one-to-many mappings will be omitted by selecting the first hit only. 
+                                             The identifier mapping output is located in the ",
+                                             em("'3-identifier_mapping'"), " folder."),
                                              br(),
                                              hr(),
                                              
                                              
                                              h3(strong("4. Pathway analysis")),
-                                             h5("In this step, Over-representation analysis (ORA) will be performed 
-                                             using the selected logFC and p-value thresholds (selected in the DEG step).
-                                             The ORA implementation in ",
+                                             h5("In this step, pathway overrepresentation analysis (ORA) will be performed 
+                                             using the mapped identifiers (Identifier Mapping step) and the selected logFC and 
+                                             p-value thresholds (DEG Analysis step). The ORA implementation in ",
                                              tags$a(href = "https://bioconductor.org/packages/release/bioc/html/clusterProfiler.html", 
                                                       "clusterProfiler"),
                                              " (v4.2.2) package will be applied to perform ORA 
                                              on WikiPathways, version 20220510 (747 pathways). 
                                              The false discovery rate (FDR) approach will be used to acquire adjusted p-values. 
-                                             Accordingly, the q-values were calculated to prevent a high FDR in multiple testing."),
+                                             Accordingly, the q-values were calculated to prevent a high FDR in multiple testing. 
+                                             The output files can be found in the ", em("'4-pathway_analysis'"), " folder."),
                                              br(),
                                              hr(),
                                              
                                              
                                              h3(strong("5. Heatmap")),
                                              h5("A heatmap of pathway significance for the different 
-                                                biopsy locations and diseases will be shown."),
+                                                biopsy locations and diseases will be created using the ",
+                                                tags$a(href = "https://github.com/raivokolde/pheatmap", 
+                                                       "pheatmap"), " package."),
                                              br(),
                                              hr(),
                                              
@@ -1159,9 +1178,11 @@ ui <- tagList(
                                              h5("This part requires Cytoscape to be installed and opened. 
                                              The first step of the network analysis includes the construction 
                                              of Protein-Protein-Interaction (PPI) networks from the STRING database 
-                                             using the stringApp (v1.7.0) in Cytoscape through the R package RCy3 (v2.14.1). 
+                                             using the stringApp (v2.0.0) in Cytoscape through the R package ",
+                                             tags$a(href = "https://bioconductor.org/packages/release/bioc/html/RCy3.html", 
+                                                       "RCy3"), " (v2.14.1). 
                                              The STRING database will be queried for the overlapping DEGs per biopsy location 
-                                             with a confidence score of > 0.7 to construct a PPI network, 
+                                             with a confidence score selected by the user (default = 0.7) to construct a PPI network, 
                                              extended with the curated human pathway collection from WikiPathways, version 20220210, 2018) 
                                              to create Protein-Protein-Pathway interaction (PPP-I) networks. 
                                              The DEG data, including log2FC for CD and UC, 
@@ -1177,12 +1198,32 @@ ui <- tagList(
                                     #***************************************************#
                                     # Documentation of Metabolomics analysis
                                     #***************************************************#
-                                    tabPanel("Metabolomics Analysis",value = "doc_trans"),
+                                    tabPanel("Metabolomics Analysis",value = "doc_mets",
+                                             h2(strong("Documentation of Metabolomics Analysis")),
+                                             hr(),
+                                             h3(strong("7. Data pre-processing")),
+                                             br(),
+                                             hr(),
+                                             h3(strong("8. Significantly changed metabolites analysis")),
+                                             br(),
+                                             hr(),
+                                             h3(strong("9. Identifier mapping")),
+                                             br(),
+                                             hr(),
+                                             h3(strong("10. Pathway analysis"))
+                                             ),
                                     
                                     #***************************************************#
                                     # Documentation of multi-omics visualization
                                     #***************************************************#
-                                    tabPanel("Multi-omics Visualization",value = "doc_trans"),
+                                    tabPanel("Multi-omics Visualization",value = "doc_multi",
+                                             h2(strong("Documentation of Multi-omics Visualization")),
+                                             hr(),
+                                             h3(strong("11. Pathway selection")),
+                                             br(),
+                                             hr(),
+                                             h3(strong("12. Multi-omics visualization"))
+                                             ),
                         )# tabsetpanel
                ) #tabPanel
                

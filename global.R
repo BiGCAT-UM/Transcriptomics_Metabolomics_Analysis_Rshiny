@@ -9,54 +9,62 @@
 # Save working directory
 work_DIR <- getwd()
 
-# check if BioCmanager libraries are already installed > otherwise install it
-if(!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager",repos = "http://cran.us.r-project.org")
-if(!"rstudioapi" %in% installed.packages()) BiocManager::install("rstudioapi")
-if(!"baySeq" %in% installed.packages()) BiocManager::install("baySeq")
-if(!"DESeq2" %in% installed.packages()) BiocManager::install("DESeq2")
-if(!"edgeR" %in% installed.packages()) BiocManager::install("edgeR")
-if(!"bioDist" %in% installed.packages()) BiocManager::install("bioDist")
-if(!"biomaRt" %in% installed.packages()) BiocManager::install("biomaRt")
-if(!"dplyr" %in% installed.packages()) BiocManager::install("dplyr")
-if(!"magrittr" %in% installed.packages()) BiocManager::install("magrittr")
-if(!"EnhancedVolcano" %in% installed.packages()) BiocManager::install("EnhancedVolcano")
-if(!"ggplot2" %in% installed.packages()){install.packages("ggplot2")}
-if(!"limma" %in% installed.packages()){install.packages("limma")}
-if(!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager",repos = "http://cran.us.r-project.org")
-if(!"readxl" %in% installed.packages()) BiocManager::install("readxl")
-if(!"downloader" %in% installed.packages()) BiocManager::install("downloader")
-if(!"R.utils" %in% installed.packages()){install.packages("R.utils")}
-if(!"pheatmap" %in% installed.packages()) BiocManager::install("pheatmap")
-if(!"BridgeDbR" %in% installed.packages()) BiocManager::install("BridgeDbR")
+#******************************************************************************#
+#CRAN packages
+#******************************************************************************#
 
-# Load packages
-library(rstudioapi)
-library(readxl)
-library(dplyr)
-library(magrittr)
-library(edgeR)
-library(ggplot2)
-library(baySeq)
-library(DESeq2)
-library(bioDist)
-library(biomaRt)
-library(EnhancedVolcano)
-library(limma)
-library(shiny)
-library(shinyWidgets)
-library(shinydashboard)
-library(shinydashboardPlus)
-library(DT)
-library(shinyBS)
-library(shinycssloaders)
-library(downloader)
-library(R.utils)
-library(org.Hs.eg.db)
-library(pheatmap)
-library(RColorBrewer)
-library(RCy3)
-library(BridgeDbR)
-library(rJava)
+#Required CRAN packages:
+CRANpackages <- c("shiny",
+                  "shinyWidgets",
+                  "DT",
+                  "shinycssloaders",
+                  "rstudioapi",
+                  "dplyr",
+                  "magrittr",
+                  "ggplot2",
+                  "readxl",
+                  "downloader",
+                  "R.utils",
+                  "pheatmap",
+                  "RColorBrewer",
+                  "rJava")
+
+#Install (if not yet installed) and load the required packages: 
+for (pkg in CRANpackages) {
+  if (!requireNamespace(pkg, quietly = TRUE))
+    install.packages(pkg, ask = FALSE)
+  require(as.character(pkg), character.only = TRUE)
+}
+
+#library(shinydashboard)
+#library(shinydashboardPlus)
+#library(shinyBS)
+
+#******************************************************************************#
+#Bioconductor packages
+#******************************************************************************#
+
+#Required Bioconductor packages:
+BiocPackages <- c("baySeq",
+                  "DESeq2",
+                  "edgeR",
+                  "bioDist",
+                  "biomaRt",
+                  "EnhancedVolcano",
+                  "limma",
+                  "BridgeDbR",
+                  "org.Hs.eg.db",
+                  "RCy3")
+
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager", ask = F)
+
+for (pkg in BiocPackages) {
+  if (!requireNamespace(pkg, quietly = TRUE))
+    BiocManager::install(pkg, ask = FALSE)
+  require(as.character(pkg), character.only = TRUE)
+}
 
 #source("functions_ArrayAnalysis_v2.R")
 
@@ -742,7 +750,7 @@ createHeatmap <- function(p_threshold_pathway, q_threshold_pathway){
 #==============================================================================#
 # Perform network analysis
 #==============================================================================#
-networkAnalysis <- function(){
+networkAnalysis <- function(PPI_cutoff = 0.7){
   setwd(work_DIR)
   #read all DEG data
   CD.ileum <- read.delim("4-pathway_analysis/DEGs_CD_ileum.tsv",sep = "\t", header = TRUE)
@@ -810,13 +818,19 @@ networkAnalysis <- function(){
     x <- readr::format_csv(as.data.frame(deg$ENTREZ), col_names=F, escape = "double", eol =",")
     #then use the below function to convert a command string into a CyREST query URL, executes a GET request, 
     #and parses the result content into an R list object. Same as commandsGET
-    commandsRun(paste0('string protein query cutoff=0.7', ' newNetName=',networkName, ' query=',x,' limit=0'))
+    commandsRun(paste0('string protein query cutoff=', PPI_cutoff, ' newNetName=',networkName, ' query=',x,' limit=0'))
     #get proteins (nodes) from the constructed network: #Query term: entrez IDs, display name: HGNC symbols.
     proteins <- RCy3::getTableColumns(columns=c("query term", "display name"))
+    # Map ENSP ID to gene symbol
+    IDmapping_table <- RCy3::getTableColumns(columns=c("display name", "name"))
+    IDmapping <- IDmapping_table$`display name`
+    names(IDmapping) <- IDmapping_table$name
     #get edges from the network
     ppis     <- RCy3::getTableColumns(table="edge", columns=c("name"))
     #split extracted edge information into source-target format
     ppis     <- data.frame(do.call('rbind', strsplit(as.character(ppis$name),' (pp) ',fixed=TRUE)))
+    ppis$X1 <- IDmapping[ppis$X1]
+    ppis$X2 <- IDmapping[ppis$X2]
     #merge obtained nodes and edges to get entrez IDs for each source genes 
     ppis.2   <- merge(ppis, proteins, by.x="X1", by.y="display name", all.x=T)
     #change column names
@@ -833,7 +847,7 @@ networkAnalysis <- function(){
     ##Work with local file (for publication), or new download:
     pathway_data <- "local" #Options: local, new
     if (pathway_data == "local") {
-      wp.hs.gmt <-list.files(work_DIR, pattern="wikipathways", full.names=FALSE)
+      wp.hs.gmt <-list.files(paste0(work_DIR,"/4-pathway_analysis"), pattern="wikipathways", full.names=FALSE)
       paste0("Using local file, from: ", wp.hs.gmt )
     }else if(pathway_data == "new"){ 
       #below code should be performed first to handle the ssl certificate error while downloading pathways 
@@ -843,7 +857,7 @@ networkAnalysis <- function(){
       paste0("Using new data, from: ", wp.hs.gmt)}else{print("Pathway data type not recognized")
       }
     #all wp and gene information stored in wp2gene object
-    wp2gene   <- rWikiPathways::readPathwayGMT(wp.hs.gmt)
+    wp2gene   <- rWikiPathways::readPathwayGMT(paste0(work_DIR,"/4-pathway_analysis/",wp.hs.gmt))
     #filter out  pathways that does not consist of any differentially expressed genes 
     wp2gene.filtered <- wp2gene [wp2gene$gene %in% deg$ENTREZ,]
     #change column names 
@@ -876,10 +890,6 @@ networkAnalysis <- function(){
     RCy3::copyVisualStyle("default","ppi")#Create a new visual style (ppi) by copying a specified style (default)
     RCy3::setNodeLabelMapping("label", style.name="ppi")
     RCy3::lockNodeDimensions(TRUE, style.name="ppi")#Set a boolean value to have node width and height fixed to a single size value.
-    #threshold is set based of differential expressed gene criteria
-    data.values<-c(-0.58,0,0.58) 
-    #red-blue color schema chosen
-    node.colors <- c(brewer.pal(length(data.values), "RdBu"))
     #nodes are split to show both log2fc values for both diseases 
     RCy3::setNodeCustomHeatMapChart(c("log2FC_CD","log2FC_UC"), slot = 2, style.name = "ppi", colors = c("#CC3300","#FFFFFF","#6699FF","#CCCCCC"))
     RCy3::setVisualStyle("ppi")
