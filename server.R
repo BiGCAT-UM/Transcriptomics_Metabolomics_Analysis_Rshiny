@@ -83,6 +83,7 @@ server = function(input, output,session) {
   
   # Return table with transcriptomics data
   output$fileContent2 <- DT::renderDataTable({
+    req(countData1())
     countData1()
   }, server = TRUE, options = list(pageLength = 5), rownames= TRUE)
   
@@ -790,6 +791,7 @@ server = function(input, output,session) {
   })
   
   output$mbxDataFile <- DT::renderDataTable({
+    req(mbxData())
     mbxData()
   }, server=TRUE, options = list(pageLength = 5), rownames= FALSE)
   
@@ -1116,9 +1118,9 @@ server = function(input, output,session) {
       type = "success")
     
     updateTabsetPanel(session, "tabs_mets",
-                      selected = "pathway_mets")
+                      selected = "mapping_mets")
     
-    showTab("tabs_mets", target = "pathway_mets")
+    showTab("tabs_mets", target = "mapping_mets")
     
   })
   
@@ -1247,22 +1249,6 @@ server = function(input, output,session) {
     
   })
   
-  # Go the next step
-  observeEvent(input$pathwayMet_NEXT, {
-    
-    sendSweetAlert(
-      session = session,
-      title = "Success!",
-      text = "Pathway analysis successfully completed! 
-      Now you can continue with identifier mapping!",
-      type = "success")
-    
-    updateTabsetPanel(session, "tabs_mets",
-                      selected = "mapping_mets")
-    
-    showTab("tabs_mets", target = "mapping_mets")
-    
-  })
   
   #**************************************************************************************************************#
   #                      Multi-omics Data Operations
