@@ -577,7 +577,7 @@ ui <- tagList(
                                                
                                                
                                                h3(strong("Metabolomics data")),
-                                               hr(),
+                                               
                                                h5("Upload the ",em("metabolomics.csv"), " file"),
                                                
                                                # Upload file
@@ -759,6 +759,7 @@ ui <- tagList(
                                     #Statistical Analysis
                                     #***************************************************#
                                     tabPanel("Statistical Analysis", value= "stat_mets",
+                                             br(),
 
                                       sidebarPanel(
 
@@ -895,11 +896,6 @@ ui <- tagList(
                                           actionBttn(inputId ="pathwayButtonMet", label ="Apply", style = "jelly",
                                                      btn_type = "button", type = "primary", color = "primary"),
                                           
-                                          # Horizontal line ----
-                                          tags$hr(),
-                                          actionBttn(inputId ="pathwayMet_NEXT", label ="Next", style = "jelly",
-                                                     btn_type = "button", type = "primary", color = "danger",
-                                                     icon = icon("arrow-right"))
                                         ),#sidePanel
                                         
                                         mainPanel(
@@ -960,6 +956,14 @@ ui <- tagList(
                                                  max = 1,
                                                  step = 0.01
                                                ),
+                                               numericInput(
+                                                 inputId = "nProteinsPathway",
+                                                 label = "# Proteins",
+                                                 value = 5,
+                                                 min = 0,
+                                                 max = 20,
+                                                 step = 1
+                                               ),
                                                hr(),
                                                h4(strong("Metabolomics Thresholds")),
                                                numericInput(
@@ -969,15 +973,6 @@ ui <- tagList(
                                                  min = 0,
                                                  max = 1,
                                                  step = 0.01
-                                               ),
-                                               br(),
-                                               numericInput(
-                                                 inputId = "nProteinsPathway",
-                                                 label = "# Proteins",
-                                                 value = 5,
-                                                 min = 0,
-                                                 max = 20,
-                                                 step = 1
                                                ),
                                                numericInput(
                                                  inputId = "nMetsPathway",

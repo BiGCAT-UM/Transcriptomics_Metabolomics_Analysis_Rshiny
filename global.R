@@ -66,8 +66,11 @@ for (pkg in BiocPackages) {
   require(as.character(pkg), character.only = TRUE)
 }
 
-#source("functions_ArrayAnalysis_v2.R")
-
+# SPARQL package
+if (!requireNamespace("SPARQL", quietly = TRUE)){
+  install.packages("https://cran.r-project.org/src/contrib/Archive/SPARQL/SPARQL_1.16.tar.gz", repos = NULL)
+}
+library(SPARQL)
 
 ################################################################################
 
@@ -1266,7 +1269,8 @@ mappingMets <- function (){
   mSet_total <- unique(rbind(mSet_CD[,c(1,2)], mSet_UC[,c(1,2)]))
   
   ##Set the working directory to download the Metabolite mapping file
-  location <- "data/metabolites.bridge"
+  #location <- "data/metabolites.bridge"
+  location <- paste0("data/", list.files(paste0(work_DIR,"/data"), pattern=".bridge", full.names=FALSE))
   checkfile <- paste0(getwd(), '/' ,location)
   
   # ##Download the Metabolite mapping file (if it doesn't exist locally yet):
