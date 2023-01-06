@@ -1452,6 +1452,46 @@ if(!dir.exists("10-metabolite_pathway_analysis"))
 nameDataFile <- paste0("10-metabolite_pathway_analysis/mbxPWdata_", disorder ,".csv")
 write.table(pathwayAnalysis_results_sorted, nameDataFile, sep =",", row.names = FALSE)
 
+##Find Missing Biomarkers (not part of any Human pathway model)
+item1 = "PREFIX ch: <https://identifiers.org/hmdb/>
+SELECT DISTINCT ?HMDBMetabolite WHERE {
+  VALUES ?HMDBMetabolite {"
+item2 = "}
+  ?pathwayRes  a wp:Pathway ;
+             	wp:organismName 'Homo sapiens' .
+  
+  ?metabolite 	a wp:Metabolite ;
+                dcterms:identifier ?id ;
+                dcterms:isPartOf ?pathwayRes .
+  ?metabolite wp:bdbHmdb ?HMDBMetabolite.
+}"
+queryMissingBiomarkers <- paste(item1,string_HMDB,item2)
+remove(item1,item2)
+resultsMissingBiomarkers <- SPARQL(endpointwp,queryMissingBiomarkers,curl_args=list(useragent=R.version.string))
+listMissingBiomarkers <- c(resultsMissingBiomarkers$results) #safe results as list for comparison.
+remove(queryMissingBiomarkers,resultsMissingBiomarkers)
+HMDBs_inPWs <- gsub("[<https://identifiers.org/hmdb/>]", "", listMissingBiomarkers) #HMDB IDs IRI cleanup
+intersectingHMDB <- setdiff(vector_HMDB, HMDBs_inPWs)
+
+string_intersectingHMDB <- paste(c(intersectingHMDB), collapse=', ' )
+
+#Find names for missing Biomarkers based on HMDB ID (to help with data understanding and curation)
+missingNames <- list()
+for (j in 1:length(intersectingHMDB)){
+  for (i in 1:nrow(mSet)){
+    if(!is.na(mSet[i,5]) & mSet[i,5] == intersectingHMDB[j]){
+      missingNames[j] <- mSet[i,6]
+    }
+    else{next}
+  }
+}
+remove(i,j)
+#Save list on one string for reporting purposes
+string_missingNames <- do.call(paste, c(as.list(missingNames), sep = ", "))
+#Print relevant information:
+if(length(intersectingHMDB) == 0 ){print("All relevant biomarkers are in a pathway!")} else{
+  print(paste0("For the disorder ", disorder, ", ", length(intersectingHMDB), " biomarkers are not in a pathway; with the following HMDB IDs: " , string_intersectingHMDB, "; with the following Database names: ", string_missingNames))}
+
 }
 
 
