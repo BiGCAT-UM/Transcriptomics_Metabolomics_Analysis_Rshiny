@@ -605,9 +605,6 @@ ui <- tagList(
                                                # Horizontal line
                                                tags$hr(),
                                                
-                                               # Horizontal line ----
-                                               tags$hr(),
-                                               
                                                #Go forward
                                                actionBttn(inputId ="metUpload_NEXT", 
                                                           label ="Next", 
@@ -701,7 +698,7 @@ ui <- tagList(
                                                h3(strong("Normalization & QC")),
                                                hr(),
                                                h3(strong("Normalization" )),
-                                               h4("Please select a normalization method to be applied:"),
+                                               h5("Please select a normalization method."),
                                                selectInput(inputId = "whichNormMethod",
                                                            label = NULL,
                                                            choices = c("log2 transformation",
@@ -755,8 +752,8 @@ ui <- tagList(
                                              
                                     ),#tabPanel-norm
                                     
-                                    
-                                    #Statistical Analysis
+                                    #***************************************************#
+                                    # Statistical Analysis
                                     #***************************************************#
                                     tabPanel("Statistical Analysis", value= "stat_mets",
                                              br(),
@@ -841,12 +838,11 @@ ui <- tagList(
                                                br(),
                                                
                                                h4(strong("Data download")),
-                                               h5("To start with mapping you should fisrt download metabolites.bridge file  ", 
+                                               h5("To start with mapping you should first download metabolites.bridge file  ", 
                                                   tags$a(href = "https://figshare.com/ndownloader/files/26001794", "here")  
-                                                  ," and locate it to /data folder" ),
-                                               h5("If you already downloaded it you can continue with clicking Apply button! "),
+                                                  ," and locate it to /data folder. NOTE: If you already downloaded the .bridge file, 
+                                                  you can continue by clicking the Apply button! "),
                                                br(),
-                                               hr(),
                                                
                                                actionBttn(inputId ="mappingButtonMets", label ="Apply", style = "jelly",
                                                           btn_type = "button", type = "primary", color = "primary"),
@@ -947,7 +943,6 @@ ui <- tagList(
                                                  max = 1,
                                                  step = 0.01
                                                ),
-                                               br(),
                                                numericInput(
                                                  inputId = "q_threshold_multi_trans",
                                                  label = "q-value threshold",
@@ -976,7 +971,7 @@ ui <- tagList(
                                                ),
                                                numericInput(
                                                  inputId = "nMetsPathway",
-                                                 label = "# Metabolites",
+                                                 label = "# Significant Metabolites",
                                                  value = 3,
                                                  min = 0,
                                                  max = 20,
@@ -1009,8 +1004,7 @@ ui <- tagList(
                                                         selectInput(inputId = "whichLocation_multi", 
                                                                      label = "Location",
                                                                      choices = c("Ileum",
-                                                                                 "Rectum",
-                                                                                 "Both"),
+                                                                                 "Rectum"),
                                                                      selected = "Ileum")
                                                  ),
                                                ),
@@ -1065,7 +1059,7 @@ ui <- tagList(
                
                ################################################################
                #
-               # # Multi-omics
+               # # Documentation
                # 
                # ################################################################
                tabPanel("Documentation",

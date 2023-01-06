@@ -1123,10 +1123,13 @@ statAnalysisMets <- function (mSet_transformed,disorder,transformation, FC, pval
   control_IBD = apply(mSet_FINAL[,(end_Disorders+1):ncol(mSet_FINAL)], 1, mean, na.rm=TRUE)
   
   #because the metabolomics data is already log2 transformed, we need to take the difference between the means (iso dividing the means over one another), since log2 Fold Change or log2 Ratio == log2(condition / control). Note: if the transformation step applied is cube_root or square_root, one needs to divide control over disease for this step!
-  if(transformation == "log2" | transformation == "log10"){
+  if(transformation == "log2"){
     foldchange_disorder <-  disease - control_IBD
-  }else{
-    foldchange_disorder <- (disease /control_IBD )}
+  } else if(transformation == "log10"){
+    foldchange_disorder <-  log2((10^disease)/(10^control_IBD))
+  } else {
+    foldchange_disorder <- log2(disease /control_IBD )
+  }
   
   ##ADD HMDB column at start, add fold change columns.
   mSet_AnalysisReady <- cbind(mSet_FINAL$HMDB.ID, mSet_FINAL$Compound.Name, foldchange_disorder)
@@ -1661,13 +1664,9 @@ pathwaySelection <- function(p_threshold_multi_trans,
   finalTable_UC_rectum <- finalTable[finalTable[,1] %in% overlapUC_rectum,]
   
   if(!dir.exists("11-pathway_selection")) dir.create("11-pathway_selection")
-  write.table(finalTable_CD_all, file=paste0("11-pathway_selection/SelectedPathways_CD_Both.tsv"),
-              sep = "\t" ,quote = FALSE, row.names = FALSE)
   write.table(finalTable_CD_ileum, file=paste0("11-pathway_selection/SelectedPathways_CD_Ileum.tsv"),
               sep = "\t" ,quote = FALSE, row.names = FALSE)
   write.table(finalTable_CD_rectum, file=paste0("11-pathway_selection/SelectedPathways_CD_Rectum.tsv"),
-              sep = "\t" ,quote = FALSE, row.names = FALSE)
-  write.table(finalTable_UC_all, file=paste0("11-pathway_selection/SelectedPathways_UC_Both.tsv"),
               sep = "\t" ,quote = FALSE, row.names = FALSE)
   write.table(finalTable_UC_ileum, file=paste0("11-pathway_selection/SelectedPathways_UC_Ileum.tsv"),
               sep = "\t" ,quote = FALSE, row.names = FALSE)
