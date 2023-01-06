@@ -778,7 +778,7 @@ ui <- tagList(
                                         numericInput(
                                           inputId = "FCthresholdMet",
                                           label = "FC threshold",
-                                          value = 1.5,
+                                          value = 2,
                                           min = 1,
                                           max = 10,
                                           step = 0.1
