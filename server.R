@@ -827,12 +827,11 @@ server = function(input, output,session) {
   
   # Metabolomics Sample/Gene filtering
   data2 <- eventReactive(input$metsFiltering, {
-    sendSweetAlert(
-      session = session,
-      title = "Message",
-      text = "Filtering process started! It might take time please be patient.",
-      type = "info"
-      )
+    showModal(modalDialog(title = h4(strong("Data Filtering..."),
+                                     align = "center"), 
+                          footer = NULL,
+                          h5("This might take a while. Please be patient.", 
+                             align = "center")))
     data2 <- filteringMets(mbxMeta(),mbxData())
   return (data2)
   })#eventReactive
@@ -840,6 +839,13 @@ server = function(input, output,session) {
 
   # Header for filtered meta data
   observeEvent((length(data2())> 0),{
+    removeModal()
+    sendSweetAlert(
+      session = session,
+      title = "Success!",
+      text = "Data successfully filtered! Please wait for the figures to be rendered.",
+      type = "success")
+    
     output$CDpreprocessText <- renderUI({
       tagList(
         h3(strong("CD preprocessed metabolomics data"))
@@ -880,7 +886,7 @@ server = function(input, output,session) {
     sendSweetAlert(
       session = session,
       title = "Success!",
-      text = "Data successfully filtered! You can now start with normalization process!",
+      text = "Data filtering completed! You can now start with normalization process!",
       type = "success")
 
     updateTabsetPanel(session, "tabs_mets",
@@ -902,15 +908,24 @@ server = function(input, output,session) {
   
   shapiroResults <- eventReactive (input$normButton,{ 
     
+    showModal(modalDialog(title = h4(strong("Normalization..."),
+                                     align = "center"), 
+                          footer = NULL,
+                          h5("This might take a while. Please be patient.", 
+                             align = "center")))
+    
     #call function     
     shapiroResults <- normalizeMets(selectedMethod())
+    
+    removeModal()
   
     sendSweetAlert(
       session = session,
       title = "Success!",
-      text = "Normalization and QC plots done. 
-        You can find all QC plots in 7-metabolite_data_preprocessing",
+      text = "Normalization and QC done. 
+        You can find all QC plots in the 7-metabolite_data_preprocessing folder.",
       type = "success")
+    
   return (shapiroResults)  
     
   })#eventReactive
@@ -948,9 +963,9 @@ server = function(input, output,session) {
         
       } ,deleteFile=FALSE)
     
-      output$CDhistogram <- renderUI({
+      output$UChistogram <- renderUI({
         tagList(
-          h3(strong("CD histogram"))
+          h3(strong("UC histogram"))
         )
       })
       
@@ -1017,7 +1032,7 @@ server = function(input, output,session) {
     allResults <- list()
    
     # Loading message
-    showModal(modalDialog(title = h4(strong("Metabolomics statistical analysis started"),
+    showModal(modalDialog(title = h4(strong("Metabolomics statistical analysis..."),
                                      align = "center"), 
                           footer = NULL,
                           h5("This might take a while. Please be patient.", 
@@ -1053,10 +1068,10 @@ server = function(input, output,session) {
     filtered <- list()
     
       temp <- resTable()[[1]]
-      filtered[[1]] <- temp[(abs(temp$foldchange_disorder) > FC_met()) &
+      filtered[[1]] <- temp[(abs(temp$foldchange_disorder) > log2(FC_met())) &
                               (temp$p_values_disorder < pvalue_met()),]
       temp <- resTable()[[2]]
-      filtered[[2]] <- temp[(abs(temp$foldchange_disorder) > FC_met()) &
+      filtered[[2]] <- temp[(abs(temp$foldchange_disorder) > log2(FC_met())) &
                               (temp$p_values_disorder < pvalue_met()),]
       
       names(filtered) <- c("CD vs non-IBD",
@@ -1076,6 +1091,8 @@ server = function(input, output,session) {
     output$metResTable <- DT::renderDataTable({
       req(input$metCompPair)
       output <- filteredResults()[[compPairMet()]]
+      output <- output[,1:4]
+      colnames(output) <- c("HMDB ID", "Compound Name", "log2FC", "p-value")
       return(output)
     }, server=TRUE,
     options = list(pageLength = 5), rownames= FALSE)
@@ -1101,7 +1118,7 @@ server = function(input, output,session) {
           cat ("image path =",path,"\n")
         }
         
-        list(src = path, contentType = 'image/png',width = "500px", height = "auto",
+        list(src = path, contentType = 'image/png',width = "600px", height = "auto",
              alt = "This is alternate text")
         
       } ,deleteFile=FALSE)
@@ -1130,18 +1147,23 @@ server = function(input, output,session) {
   
   mappingResultsMet<- eventReactive(input$mappingButtonMets,{
     
+    showModal(modalDialog(title = h4(strong("Identifier Mapping..."),
+                                     align = "center"), 
+                          footer = NULL,
+                          h5("This might take a while. Please be patient.", 
+                             align = "center")))
     results <- list()
     #perform identifier mapping
     success <- mappingMets()
+    removeModal()
     
     if(success){
+
     results [[1]] <- read.csv("9-metabolite_identifier_mapping/mbx_mapped_data_CD.csv",na.strings=c("", "NA"))
     results [[2]] <- read.csv("9-metabolite_identifier_mapping/mbx_mapped_data_UC.csv",na.strings=c("", "NA"))
     
     names(results) <- c("CD vs non-IBD",
                         "UC vs non-IBD")
-    
-    removeModal()
     
     # Success message
     sendSweetAlert(
@@ -1162,7 +1184,7 @@ server = function(input, output,session) {
     }
   })#observeEvent
   
-  compPairMet <- reactive({
+  compPairMet_mapping <- reactive({
     req(input$metCompPairMapping)
     return(input$metCompPairMapping)
   })
@@ -1172,11 +1194,12 @@ server = function(input, output,session) {
     
     output$metMappingTable <- DT::renderDataTable({
       req(input$metCompPairMapping)
-      output <- mappingResultsMet()[[compPairMet()]]
+      output <- mappingResultsMet()[[compPairMet_mapping()]]
+      colnames(output) <- c("HMDB ID", "CHEBI ID", "Label", "log2FC", "p-value")
       
       return(output)
     }, server=TRUE,
-    options = list(pageLength = 5), rownames= FALSE)
+    options = list(pageLength = 10), rownames= FALSE)
     
   })
   
@@ -1205,6 +1228,11 @@ server = function(input, output,session) {
   
   pathwayResultsMet<- eventReactive(input$pathwayButtonMet,{
     
+    showModal(modalDialog(title = h4(strong("Pathway Analysis..."),
+                                     align = "center"), 
+                          footer = NULL,
+                          h5("This might take a while. Please be patient.", 
+                             align = "center")))
     results <- list()
     
     mSet_CD <- read.csv("8-significantly_changed_metabolites_analysis/mbxData_CD.csv", na.strings=c("", "NA"))
@@ -1231,7 +1259,7 @@ server = function(input, output,session) {
     return (results)
   })#observeEvent
   
-  compPairMet <- reactive({
+  compPairMet_pathway <- reactive({
     req(input$metCompPairPathway)
     return(input$metCompPairPathway)
   })
@@ -1241,11 +1269,13 @@ server = function(input, output,session) {
     
     output$metPathwayRes <- DT::renderDataTable({
       req(input$metCompPair)
-      output <- pathwayResultsMet()[[compPairMet()]]
+      output <- pathwayResultsMet()[[compPairMet_pathway()]]
+      output <- output[,-5]
+      colnames(output) <- c("Pathway ID", "Pathway Title", "# Sig. Metabolites", "p-value", "# Proteins")
     
       return(output)
     }, server=TRUE,
-    options = list(pageLength = 5), rownames= FALSE)
+    options = list(pageLength = 10), rownames= FALSE)
     
   })
   
