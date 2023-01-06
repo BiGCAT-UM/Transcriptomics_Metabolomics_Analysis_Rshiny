@@ -143,8 +143,11 @@ normalize_QCplots <- function (sampleLabels, htxCount){
 removeOutliers <- function (sampleLabels, htxCount,outliers){
 
   #remove selected outliers from both orj data and sample Labels
-  htxCount <- htxCount[,-match(outliers,colnames(htxCount))]
-  sampleLabels <- sampleLabels[-match(outliers,rownames(sampleLabels)),]
+  if (!is.null(outliers)){
+    htxCount <- htxCount[,-match(outliers,colnames(htxCount))]
+    sampleLabels <- sampleLabels[-match(outliers,rownames(sampleLabels)),]
+  }
+
   
   
   return(list((sampleLabels),(htxCount)))
