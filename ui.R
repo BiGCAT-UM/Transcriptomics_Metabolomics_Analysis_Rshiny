@@ -647,7 +647,7 @@ ui <- tagList(
                                                h3(strong("Filtering")),
                                                hr(),
                                                h4(strong("Sample and gene filtering")),
-                                               h5("1. Samples based on visit number and data type will be filtered."),
+                                               h5("1. Samples will be filtered based on visit number and data type."),
                                                h5("2. Metabolites with all zero values across all samples will be filtered."),
                                                h5("3. Metabolites having >50% missing values will be filtered."),
                                                br(),
@@ -1077,7 +1077,7 @@ ui <- tagList(
                                              
                                              h3(strong("1. Data pre-processing")),
                                              br(),
-                                             h4(strong("1.1.Data upload")),
+                                             h4(strong("1.1. Data upload")),
                                              h5("Before starting with the transcriptomics analysis,
                                                 the data needs to be uploaded first. Particularly, the 
                                                 transcriptomics analysis requires two files:"),
@@ -1146,8 +1146,9 @@ ui <- tagList(
                                              tags$a(href = "https://bioconductor.org/packages/release/bioc/html/clusterProfiler.html", 
                                                       "clusterProfiler"),
                                              " (v4.2.2) package will be applied to perform ORA 
-                                             on WikiPathways, version 20220510 (747 pathways). 
-                                             The false discovery rate (FDR) approach will be used to acquire adjusted p-values. 
+                                             on WikiPathways, version 20220510 (747 pathways). For this analysis, 
+                                             the WikiPathways .gmt file needs to be located in the ", em("'4-pathway_analysis'"), 
+                                             " folder. The false discovery rate (FDR) approach will be used to acquire adjusted p-values. 
                                              Accordingly, the q-values were calculated to prevent a high FDR in multiple testing. 
                                              The output files can be found in the ", em("'4-pathway_analysis'"), " folder."),
                                              br(),
@@ -1190,17 +1191,77 @@ ui <- tagList(
                                     tabPanel("Metabolomics Analysis",value = "doc_mets",
                                              h2(strong("Documentation of Metabolomics Analysis")),
                                              hr(),
+                                             
                                              h3(strong("7. Data pre-processing")),
                                              br(),
+                                             h4(strong("7.1. Data upload")),
+                                             h5("Before starting with the metabolomics analysis,
+                                                the data needs to be uploaded first. Particularly, the 
+                                                metabolomics analysis requires two files:"),
+                                             h5(strong("1. Meta data file: "), em("hmp2_metadata.csv")),
+                                             h5(strong("2. Metabolomics data file: "), 
+                                                em("metabolomics.csv")),
+                                             h5("Both files can be found in the ", em("'data'"), " folder in
+                                                the working directory. The default settings for the data upload are
+                                                correct and, thus, only the file location needs to be selected manually."),
+                                             br(),
+                                             
+                                             
+                                             h4(strong("7.2. Filtering")),
+                                             h5("In this part, three filtering steps will be applied:"), 
+                                             h5("1. Samples will be filtered based on visit number and data type."),
+                                             h5("2. Metabolites with all zero values across all samples will be filtered."),
+                                             h5("3. Metabolites having >50% missing values will be filtered."),
+                                             h5("NOTE: The filtered metabolomics data can be found in the ",
+                                                em("'7-metabolite_data_preprocessing/filtered'"), " folder."),
+                                             br(),
+                                             
+                                             
+                                             h4(strong("7.3. Normalization & QC")),
+                                             h5("In this step, different normalization methods including cube-root, square-root, 
+                                                log2, and log10 transformation can be applied. Shapiro-Wilk normality test will be 
+                                                applied to observe whether the normalization method generates data with normal distribution. 
+                                                The QC plots of the raw and normalized data are saved in the ",
+                                                em("'7-metabolite_data_preprocessing/normalized'"), " folder."),
+                                             br(),
                                              hr(),
+                                             
+                                             
                                              h3(strong("8. Significantly changed metabolites analysis")),
+                                             h5("In the statstical analysis procedure, 
+                                             the p-value for each metabolite will be calculated using 
+                                                a t-test. The user can specificy log2FC and p-value thresholds 
+                                                to establish significantly changed metabolites which will be used as 
+                                                input for the pathway analysis (step 10)."),
                                              br(),
                                              hr(),
+                                             
+                                             
                                              h3(strong("9. Identifier mapping")),
+                                             h5("The metabolomics data is annotated with HMDB identifiers 
+                                             , which can be transformed into ChEBI IDs using the ",
+                                                tags$a(href = "https://bioconductor.org/packages/release/bioc/html/BridgeDbR.html", 
+                                                       "BridgeDbR"), 
+                                                       " (v2.6.0) package. This requires the .bridge file
+                                                       which can be downloaded ",
+                                                tags$a(href = "https://figshare.com/ndownloader/files/26001794", "here"),
+                                                       " and then be placed in the ", em("data"), " folder.
+                                                       Furthermore, in the applied procedure, one-to-many mappings 
+                                                       are omitted by selecting the first hit only containing the prefix ‘CHEBI:’"),
                                              br(),
                                              hr(),
-                                             h3(strong("10. Pathway analysis"))
-                                             ),
+                                             
+                                             
+                                             h3(strong("10. Pathway analysis")),
+                                             h5("The significantly changed metabolites from the 
+                                             statistical analysis are retrieved as HMDB IDs and compared 
+                                             against the content of each pathway in the WikiPathways SPARQL 
+                                             endpoint using a semantic web query, filtering out pathways 
+                                             from the Reactome database. Enrichment analysis of the 
+                                             metabolomics data was conducted by over-representation 
+                                             analysis (ORA) using a Fisher's 
+                                             exact test by means of a hypergeometric density calculation.")
+                                    ),
                                     
                                     #***************************************************#
                                     # Documentation of multi-omics visualization
@@ -1209,9 +1270,30 @@ ui <- tagList(
                                              h2(strong("Documentation of Multi-omics Visualization")),
                                              hr(),
                                              h3(strong("11. Pathway selection")),
+                                             h5("In this step, the user can find interesting pathways by
+                                                looking at the overlap of the significant pathways from 
+                                                the transcriptomics and metabolomics analysis. The user 
+                                                can select different significance thresholds for the metabolomics 
+                                                and transcriptomics results, giving more weight to the 
+                                                user-desired data type."),
                                              br(),
                                              hr(),
-                                             h3(strong("12. Multi-omics visualization"))
+                                             h3(strong("12. Multi-omics visualization")),
+                                             h5("This part requires Cytoscape to be installed and opened.
+                                                The user-selected pathway will be loaded into Cytoscape 
+                                                using the ",
+                                                tags$a(href = "https://bioconductor.org/packages/release/bioc/html/RCy3.html", 
+                                                       "RCy3"), 
+                                                " and ",
+                                                tags$a(href = "https://www.bioconductor.org/packages/release/bioc/html/rWikiPathways.html", 
+                                                       "rWikiPathways"), 
+                                                " (v1.16.0) packages and ",
+                                                tags$a(href = "https://apps.cytoscape.org/apps/wikipathways", 
+                                                       "WikiPathways app for Cytoscape"),
+                                                " (v3.3.10). The gene expression 
+                                                and metabolite data were visualized on the nodes of the 
+                                                Cytoscape network as log2FC and p-values, based on their 
+                                                Ensembl and ChEBI identifiers, respectively.")
                                              ),
                         )# tabsetpanel
                ) #tabPanel
