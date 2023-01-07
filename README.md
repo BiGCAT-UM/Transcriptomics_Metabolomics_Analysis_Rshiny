@@ -37,7 +37,7 @@ The setup of this project has been tested with:
 #### 2. Install required apps in Cytoscape
 1. Open Cytoscape.
 2. Go to the app manager: Apps -> App Manager
-3. Install the follwing apps:
+3. Install the following apps:
     * WikiPathways
     * stringApp
     * clusterMaker2
