@@ -28,9 +28,37 @@ The workflow is an example of how to bring together different software tools and
 ![workflow pptx](https://user-images.githubusercontent.com/65600609/210248763-ae312fec-4df9-43f0-9cc6-c995629dd2c2.jpg)
 
 ### Setup and Preparation
-Please follow the instructions in the link below to prepare your working environment<br />
-https://bigcat-um.github.io/Transcriptomics_Metabolomics_tutorials/pages/prep
+
+#### Download required software tools
+* [R](https://cran.r-project.org/bin/windows/base/)
+* [RStudio](https://www.rstudio.com/products/rstudio/download/#download)
+* [Rtools](https://cran.r-project.org/bin/windows/Rtools/)
+* [Cytoscape](https://cytoscape.org/)
+
+#### Install required apps in Cytoscape
+1. Open Cytoscape.
+2. Go to the app manager: Apps -> App Manager
+3. Install the follwing apps:
+    * WikiPathways
+    * stringApp
+    * clusterMaker2
+
+Detailed instructions can be found [here](https://bigcat-um.github.io/Transcriptomics_Metabolomics_tutorials/pages/prep).
+
+#### Run the app
+To run the app in RStudio, click on "Run App" in the top right corner when having either the `App/ui.R`, `App/server.R`, or `App/global.R` file open in the RStudio window.
+
+If this is not possible, run the following commands:
+```r
+# Install the shiny package
+install.packages("shiny")
+
+# Load the shiny package
+library(shiny)
+
+# Run the shiny app
+runApp("..PATH../ScientificProgramming/App")
+```
 
 ### Acknowledgment
-
 This research was undertaken by Maastricht University (UM, Netherlands), a beneficiary in FNS-Cloud, which has received funding from the European Union’s Horizon 2020 Research and Innovation programme (H2020-EU.3.2.2.3. – A sustainable and competitive agri-food industry) under Grant Agreement No. 863059.
