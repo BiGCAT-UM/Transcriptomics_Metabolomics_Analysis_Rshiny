@@ -45,9 +45,9 @@ The setup of this project has been tested with:
 Detailed instructions can be found [here](https://bigcat-um.github.io/Transcriptomics_Metabolomics_tutorials/pages/prep).
 
 #### 3. Run the app
-To run the app in RStudio, click on **"Run App"** in the top right corner when having either the `App/ui.R`, `App/server.R`, or `App/global.R` file open in the RStudio window.
+To run the app in RStudio, click on **"Run App"** in the top right corner when having either the `ui.R`, `server.R`, or `global.R` file open in the RStudio window.
 
-If this is not possible, run the following commands:
+If this is not possible, please try running the following commands to start the app:
 ```r
 # Install the shiny package
 install.packages("shiny")
@@ -56,7 +56,7 @@ install.packages("shiny")
 library(shiny)
 
 # Run the shiny app
-runApp("..PATH../ScientificProgramming/App")
+runApp(..PATH..)
 ```
 
 ### Acknowledgment
