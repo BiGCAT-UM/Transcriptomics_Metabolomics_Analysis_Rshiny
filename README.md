@@ -20,22 +20,21 @@ This workflow, developed in R Shiny, includes differential gene expression analy
 [11-Pathway selection](11-pathway_selection)<br />
 [12-Visualizaiton of multi-omics](12-multiomics_visualization)<br />
 
-The setup of this project has been tested with:
-- OS Windows 10, R-studio 2021.09.02, R 4.1.3.
-- OS Linux (Debian), R-studio 2022.02.2, R 4.2.
-
 The workflow is an example of how to bring together different software tools and methods to analyze transcriptomics and metabolomics data to reveal the underlying mechanism behind IBD disease as a use case study.
 ![workflow pptx](https://user-images.githubusercontent.com/65600609/210248763-ae312fec-4df9-43f0-9cc6-c995629dd2c2.jpg)
 
 ### Setup and Preparation
+The setup of this project has been tested with:
+- OS Windows 10, R-studio 2021.09.02, R 4.1.3.
+- OS Linux (Debian), R-studio 2022.02.2, R 4.2.
 
-#### Download required software tools
+#### 1. Download required software tools
 * [R](https://cran.r-project.org/bin/windows/base/)
 * [RStudio](https://www.rstudio.com/products/rstudio/download/#download)
 * [Rtools](https://cran.r-project.org/bin/windows/Rtools/)
 * [Cytoscape](https://cytoscape.org/)
 
-#### Install required apps in Cytoscape
+#### 2. Install required apps in Cytoscape
 1. Open Cytoscape.
 2. Go to the app manager: Apps -> App Manager
 3. Install the follwing apps:
@@ -45,8 +44,8 @@ The workflow is an example of how to bring together different software tools and
 
 Detailed instructions can be found [here](https://bigcat-um.github.io/Transcriptomics_Metabolomics_tutorials/pages/prep).
 
-#### Run the app
-To run the app in RStudio, click on "Run App" in the top right corner when having either the `App/ui.R`, `App/server.R`, or `App/global.R` file open in the RStudio window.
+#### 3. Run the app
+To run the app in RStudio, click on *"Run App"* in the top right corner when having either the `App/ui.R`, `App/server.R`, or `App/global.R` file open in the RStudio window.
 
 If this is not possible, run the following commands:
 ```r
