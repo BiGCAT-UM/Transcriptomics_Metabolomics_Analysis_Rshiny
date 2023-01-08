@@ -315,11 +315,10 @@ cont.matrix <- makeContrasts(
 )
 #extract resulting contrasts based on the model, and save those in a table; also save some graphical representations
 #the function results() is called from within the saveStatOutputDESeq2 function to compute the contrasts
- files <- saveStatOutputDESeq2(cont.matrix,dds,postfix="",annotation=NULL)
-# #create summary table of the contrast results
-#
-# cat ("FC degeri", FC_threshold,"\n")
-createPvalTab(files,postfix="",namePVal="pvalue",nameAdjPVal="padj",nameFC="FoldChange",nameLogFC="log2FoldChange",html=FALSE, FC_threshold = FC_threshold)
+files <- saveStatOutputDESeq2(cont.matrix,dds,postfix="",annotation=NULL)
+
+createPvalTab(files,postfix="",namePVal="pvalue",nameAdjPVal="padj",nameFC="FoldChange",
+                nameLogFC="log2FoldChange",html=FALSE, FC_threshold = FC_threshold)
 
 }
 
