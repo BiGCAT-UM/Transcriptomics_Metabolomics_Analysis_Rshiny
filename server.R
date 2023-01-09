@@ -384,7 +384,7 @@ server = function(input, output,session) {
                              align = "center")))
     
     # perform DE analysis
-    DE_analysis(data1()[[1]], data1()[[2]], 1)
+    DE_analysis(data1()[[1]], data1()[[2]], FC_threshold())
       
     # Read tables
     topTable[[1]] <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Ileum_vs_nonIBD_Ileum.tab"))
