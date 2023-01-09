@@ -1,6 +1,6 @@
 ## A workflow for functional analysis of transcriptomic and metabolomic data in R shiny 
 
-This workflow, developed in R Shiny, includes differential gene expression analysis, statistical analysis of metabolomics data, as well as identifier mapping and pathway enrichment analysis for both transcriptomics and metabolomics data followed by integration of this data through network analysis to identify disease-related processes and visualization of multi-omics data. A publicly available (https://ibdmdb.org/) gut-transcriptomic and stool-metabolome dataset of the gut microbial ecosystem in inflammatory bowel diseases was used to test the proposed workflow.
+This workflow, developed in R Shiny, includes differential gene expression analysis, statistical analysis of metabolomics data, as well as identifier mapping and pathway enrichment analysis for both transcriptomics and metabolomics data followed by integration of this data through network analysis to identify disease-related processes and visualization of multi-omics data. A publicly available (https://ibdmdb.org/) gut-transcriptomic and stool-metabolome\ic dataset of the gut microbial ecosystem in inflammatory bowel diseases was used to test the proposed workflow.
 
 #### Transcriptomics analysis  
 [1-Data preprocessing](/1-data_preprocessing)<br /> 
