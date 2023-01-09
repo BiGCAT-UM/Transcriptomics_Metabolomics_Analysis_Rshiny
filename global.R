@@ -418,8 +418,12 @@ mappingTranscriptomics <- function (RawOrAdj){
 # Pathway analysis
 #==============================================================================#
 
-pathwayAnalysisTranscriptomics <- function(logFCtheshold, Pthreshold, Pthreshold_pathway, Qthreshold_pathway){
+pathwayAnalysisTranscriptomics <- function(FCthreshold, Pthreshold, Pthreshold_pathway, Qthreshold_pathway){
   setwd(work_DIR)
+  
+  #calculate log2FC for entered FC value
+  logFCthreshold <- as.numeric(format(round(log2(FCthreshold), 2), nsmall = 2))
+  
   for (disorder in c("CD", "UC")){
     # Load data
     if (disorder == "CD") {
@@ -437,14 +441,16 @@ pathwayAnalysisTranscriptomics <- function(logFCtheshold, Pthreshold, Pthreshold
     if(!dir.exists("4-pathway_analysis")) dir.create("4-pathway_analysis")
     #we will use selection criteria as Fold change=1.5,log2FC=0.58 and p.value < 0.05
     #for ileum location
-    up.genes.ileum   <- dataset[dataset$log2FC_ileum >= logFCtheshold & dataset$pvalue_ileum < Pthreshold, 2] 
-    down.genes.ileum <- dataset[dataset$log2FC_ileum <= -1*logFCtheshold & dataset$pvalue_ileum < Pthreshold, 2] 
-    deg.ileum <- unique(dataset[(!is.na(dataset$ENTREZ.ID)) & (!is.na(dataset$pvalue_ileum)) & (dataset$pvalue_ileum < Pthreshold) & (abs(dataset$log2FC_ileum) > logFCtheshold),c(1:4)])
+    up.genes.ileum   <- dataset[(dataset$log2FC_ileum >= logFCthreshold) & dataset$pvalue_ileum < Pthreshold, 2] 
+    down.genes.ileum <- dataset[(dataset$log2FC_ileum <= (-1*logFCthreshold)) & dataset$pvalue_ileum < Pthreshold, 2] 
+    deg.ileum <- unique(dataset[(!is.na(dataset$ENTREZ.ID)) & (!is.na(dataset$pvalue_ileum)) & (dataset$pvalue_ileum < Pthreshold) & 
+                                  (abs(dataset$log2FC_ileum) > logFCthreshold),c(1:4)])
     write.table(deg.ileum,file = paste0("4-pathway_analysis/DEGs_",disorder,"_ileum.tsv"),sep="\t", quote=FALSE, row.names = FALSE)
     #for rectum location
-    up.genes.rectum   <- dataset[dataset$log2FC_rectum >= logFCtheshold & dataset$pvalue_rectum < Pthreshold, 2] 
-    down.genes.rectum <- dataset[dataset$log2FC_rectum <= -1*logFCtheshold & dataset$pvalue_rectum < Pthreshold, 2] 
-    deg.rectum <- unique(dataset[!is.na(dataset$ENTREZ.ID) & !is.na(dataset$pvalue_rectum) & dataset$pvalue_rectum < Pthreshold & abs(dataset$log2FC_rectum) > logFCtheshold,c(1,2,5,6)])
+    up.genes.rectum   <- dataset[(dataset$log2FC_rectum >= logFCthreshold) & dataset$pvalue_rectum < Pthreshold, 2] 
+    down.genes.rectum <- dataset[(dataset$log2FC_rectum <= (-1*logFCthreshold)) & dataset$pvalue_rectum < Pthreshold, 2] 
+    deg.rectum <- unique(dataset[!is.na(dataset$ENTREZ.ID) & !is.na(dataset$pvalue_rectum) & dataset$pvalue_rectum < Pthreshold & 
+                                   abs(dataset$log2FC_rectum) > logFCthreshold,c(1,2,5,6)])
     write.table(deg.rectum, file=paste0("4-pathway_analysis/DEGs_",disorder,"_rectum.tsv"),sep="\t", quote=FALSE, row.names = FALSE)
     
     pathway_data <- "local" #Options: local, new

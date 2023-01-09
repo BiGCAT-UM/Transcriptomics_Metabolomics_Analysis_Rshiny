@@ -580,7 +580,7 @@ server = function(input, output,session) {
                              align = "center")))
     
     # Perform pathway analysis
-    pathwayAnalysisTranscriptomics(log2(FC_threshold()), P_threshold(), 0.05,0.02)
+    pathwayAnalysisTranscriptomics(FC_threshold(), P_threshold(), 0.05,0.02)
     
     removeModal()
     
