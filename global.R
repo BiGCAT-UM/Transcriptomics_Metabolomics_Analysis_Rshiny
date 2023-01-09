@@ -1575,8 +1575,8 @@ createPvalTab <- function(files,postfix="",pvaluelist=c(0.001,0.01,0.05,0.1),
     #remove extension from file name for display in table
     nameNoExt <- paste(strsplit(files[i],".",fixed=TRUE)[[1]][-length(strsplit(files[1],".",fixed=TRUE)[[1]])],collapse=".")
     
-    #log2 of selected FC value   
-    log2FC <- log2(FC_threshold)
+    #log2 of selected FC value use only 2 digits after decimal point   
+    log2FC <- round(log2(FC_threshold),2)
     
     ### P-values
     rowsP <- NULL
