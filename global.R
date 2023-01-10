@@ -1664,8 +1664,10 @@ createPvalTab <- function(files,postfix="",pvaluelist=c(0.001,0.01,0.05,0.1),
 pathwaySelection <- function(p_threshold_multi_trans,
                              q_threshold_multi_trans,
                              p_threshold_multi_mets,
-                             nProteinsPathway,
+                             nProteinsPathwayMets,
+                             nProteinsPathwayTrans,
                              nMetsPathway){
+  
   setwd(work_DIR)
   filelocation_t <- paste0(work_DIR, "/4-pathway_analysis/")
   #Obtain data from step 4 (transcript PWs)
@@ -1678,15 +1680,32 @@ pathwaySelection <- function(p_threshold_multi_trans,
   #Obtain data from step 9 (metabolite PWs)
   mPWs_CD <- read.delim(paste0(filelocation_m, 'mbxPWdata_CD.csv'), sep = ",", na.strings=c("", "NA"))
   mPWs_UC <- read.delim(paste0(filelocation_m, 'mbxPWdata_UC.csv'), sep = ",", na.strings=c("", "NA"))
+
+  #filter out enrichedPathway based on criterias
+  tPWs_CD_ileum_sign <- tPWs_CD_ileum[(tPWs_CD_ileum$p.adjust<p_threshold_multi_trans)
+                                      &(tPWs_CD_ileum$qvalue<q_threshold_multi_trans)
+                                      &(tPWs_CD_ileum$Count>nProteinsPathwayTrans),]
   
-  # Select pathways
-  tPWs_CD_ileum_sign <- tPWs_CD_ileum[(tPWs_CD_ileum$p.adjust<p_threshold_multi_trans)&(tPWs_CD_ileum$qvalue<q_threshold_multi_trans),]
-  tPWs_CD_rectum_sign <- tPWs_CD_rectum[(tPWs_CD_rectum$p.adjust<p_threshold_multi_trans)&(tPWs_CD_rectum$qvalue<q_threshold_multi_trans),]
-  tPWs_UC_ileum_sign <- tPWs_UC_ileum[(tPWs_UC_ileum$p.adjust<p_threshold_multi_trans)&(tPWs_UC_ileum$qvalue<q_threshold_multi_trans),]
-  tPWs_UC_rectum_sign <- tPWs_UC_rectum[(tPWs_UC_rectum$p.adjust<p_threshold_multi_trans)&(tPWs_UC_rectum$qvalue<q_threshold_multi_trans),]
+  tPWs_CD_rectum_sign <- tPWs_CD_rectum[(tPWs_CD_rectum$p.adjust<p_threshold_multi_trans)
+                                        &(tPWs_CD_rectum$qvalue<q_threshold_multi_trans)
+                                        &(tPWs_CD_rectum$Count>nProteinsPathwayTrans) ,]
   
-  mPWs_CD_sign <- mPWs_CD[(mPWs_CD$probabilities< p_threshold_multi_mets)&(mPWs_CD$HMDBsInPWs>nMetsPathway)&(mPWs_CD$ProteinsInPWs>nProteinsPathway),]
-  mPWs_UC_sign <- mPWs_UC[(mPWs_UC$probabilities< p_threshold_multi_mets)&(mPWs_UC$HMDBsInPWs>nMetsPathway)&(mPWs_UC$ProteinsInPWs>nProteinsPathway),]
+  tPWs_UC_ileum_sign <- tPWs_UC_ileum[(tPWs_UC_ileum$p.adjust<p_threshold_multi_trans)
+                                       &(tPWs_UC_ileum$qvalue<q_threshold_multi_trans)
+                                       &(tPWs_UC_ileum$Count>nProteinsPathwayTrans) ,]
+  
+  tPWs_UC_rectum_sign <- tPWs_UC_rectum[(tPWs_UC_rectum$p.adjust<p_threshold_multi_trans)
+                                        &(tPWs_UC_rectum$qvalue<q_threshold_multi_trans)
+                                        &(tPWs_UC_rectum$Count>nProteinsPathwayTrans) ,]
+  
+  
+  mPWs_CD_sign <- mPWs_CD[(mPWs_CD$probabilities< p_threshold_multi_mets)
+                          &(mPWs_CD$HMDBsInPWs>nMetsPathway)
+                          &(mPWs_CD$ProteinsInPWs>nProteinsPathwayMets),]
+  
+  mPWs_UC_sign <- mPWs_UC[(mPWs_UC$probabilities< p_threshold_multi_mets)
+                          &(mPWs_UC$HMDBsInPWs>nMetsPathway)
+                          &(mPWs_UC$ProteinsInPWs>nProteinsPathwayMets),]
   
   # Determine overlap
   overlapCD_all <- intersect(intersect(tPWs_CD_ileum_sign[,1], tPWs_CD_rectum_sign[,1]), mPWs_CD_sign[,1])

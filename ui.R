@@ -952,7 +952,7 @@ ui <- tagList(
                                                  step = 0.01
                                                ),
                                                numericInput(
-                                                 inputId = "nProteinsPathway",
+                                                 inputId = "nProteinsPathwayTrans",
                                                  label = "# Proteins",
                                                  value = 5,
                                                  min = 0,
@@ -973,6 +973,14 @@ ui <- tagList(
                                                  inputId = "nMetsPathway",
                                                  label = "# Significant Metabolites",
                                                  value = 3,
+                                                 min = 0,
+                                                 max = 20,
+                                                 step = 1
+                                               ),
+                                               numericInput(
+                                                 inputId = "nProteinsPathwayMets",
+                                                 label = "# Proteins",
+                                                 value = 5,
                                                  min = 0,
                                                  max = 20,
                                                  step = 1

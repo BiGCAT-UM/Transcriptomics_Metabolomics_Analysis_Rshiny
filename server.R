@@ -1288,11 +1288,12 @@ server = function(input, output,session) {
   # Pathway Selection
   #***************************************************#
   MultiTable <- eventReactive(input$selectionButtonMulti, {
-    MultiTable <- pathwaySelection(input$p_threshold_multi_trans,
-                     input$q_threshold_multi_trans,
-                     input$p_threshold_multi_mets,
-                     input$nProteinsPathway,
-                     input$nMetsPathway)
+    MultiTable <-   pathwaySelection(input$p_threshold_multi_trans,
+                                     input$q_threshold_multi_trans,
+                                     input$p_threshold_multi_mets,
+                                     input$nProteinsPathwayMets,
+                                     input$nProteinsPathwayTrans,
+                                     input$nMetsPathway)
     
     return(MultiTable)
     
