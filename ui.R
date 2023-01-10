@@ -979,7 +979,7 @@ ui <- tagList(
                                                ),
                                                numericInput(
                                                  inputId = "nProteinsPathwayMets",
-                                                 label = "# Proteins",
+                                                 label = "# Significant genes",
                                                  value = 5,
                                                  min = 0,
                                                  max = 20,
