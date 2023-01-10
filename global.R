@@ -27,7 +27,8 @@ CRANpackages <- c("shiny",
                   "R.utils",
                   "pheatmap",
                   "RColorBrewer",
-                  "rJava")
+                  "rJava",
+                  "plotly")
 
 #Install (if not yet installed) and load the required packages: 
 for (pkg in CRANpackages) {
@@ -801,6 +802,7 @@ networkAnalysis <- function(PPI_cutoff = 0.7){
     #nodes are split to show both log2fc values for both diseases 
     RCy3::setNodeCustomHeatMapChart(c("log2FC_CD","log2FC_UC"), slot = 2, style.name = "ppi", colors = c("#CC3300","#FFFFFF","#6699FF","#CCCCCC"))
     RCy3::setVisualStyle("ppi")
+    RCy3::clearSelection()
     # Saving output
     outputName = paste0("6-network_analysis/PPI_Pathway_Network_", wp.hs.gmt, location,".png")
     png.file <- file.path(getwd(), outputName)
@@ -809,9 +811,9 @@ networkAnalysis <- function(PPI_cutoff = 0.7){
     # CLUSTERING
     cytoscapePing()
     #Install the Clustermaker2 app (if not available already)
-    if("Clustermaker2" %in% commandsHelp("")) print("Success: the Clustermaker2 app is installed") else print("Warning: Clustermaker2 app is not installed. Please install the Clustermaker2 app before proceeding.")
-    if(!"Clustermaker2" %in% commandsHelp("")){
-      installApp("Clustermaker2")
+    if("cluster" %in% commandsHelp("")) print("Success: the clusterMaker2 app is installed") else print("Warning: Clustermaker2 app is not installed. Please install the Clustermaker2 app before proceeding.")
+    if(!"cluster" %in% commandsHelp("")){
+      installApp("clusterMaker2")
     }
     networkName = paste0 ("PPI_Pathway_Network_",location)
     #to get network name of the location 
@@ -827,6 +829,7 @@ networkAnalysis <- function(PPI_cutoff = 0.7){
     pathways <- RCy3::selectNodes(nodes="pathway", by.col = "type")
     RCy3::setNodeColorBypass(node.names = pathways$nodes, "#D3D3D3")
     RCy3::setNodeBorderWidthBypass(node.names = pathways$nodes, 10)
+    RCy3::clearSelection()
     #export image
     outputName = paste0 ("6-network_analysis/PPI_Pathway_Network_",location, wp.hs.gmt,"_clustered",".png")
     png.file <- file.path(getwd(), outputName)
@@ -1800,11 +1803,11 @@ visualizeMultiOmics <- function(pathwayID, location_transcriptomics, disorder){
   #close all opened session before starting
   closeSession(FALSE)
   #Set up WikiPathways app in Cytoscape, v.3.3.10
-  if("WikiPathways" %in% commandsHelp("")) print("Success: the WikiPathways app is installed") else print("Warning: WikiPathways app is not installed. Please install the WikiPathways app before proceeding.")
-  if(!"WikiPathways" %in% commandsHelp("")) installApp("WikiPathways")
-  
-  RCy3::commandsRun(paste0('wikipathways import-as-pathway id=',pathwayID )) 
-  
+  if("wikipathways" %in% commandsHelp("")) print("Success: the WikiPathways app is installed") else print("Warning: WikiPathways app is not installed. Please install the WikiPathways app before proceeding.")
+  if(!"wikipathways" %in% commandsHelp("")) {
+    installApp("wikipathways")
+  }
+  RCy3::commandsRun(paste0('wikipathways import-as-pathway id=',pathwayID ))
   #get node table from imported pathway in cytoscape
   ID.cols <- getTableColumns(table ="node", columns = c("XrefId","Ensembl", "ChEBI"))
   #filter out rows which contain NA value for columns Ensembl and ChEBI

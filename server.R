@@ -721,7 +721,7 @@ server = function(input, output,session) {
       sendSweetAlert(
         session = session,
         title = "Error!",
-        text = "Cytoscape is cannot be found! Make sure Cytoscape is running!",
+        text = "Cytoscape cannot be found! Make sure Cytoscape is running!",
         type = "error")
     }
     if (!(class(testCy) == "try-error")){
@@ -740,13 +740,95 @@ server = function(input, output,session) {
         text = "Network analysis has been performed successfully!",
         type = "success")
       
-      output$NetworkPlot<- renderImage({
+      output$NetworkPlot <- renderPlotly({
         wp.hs.gmt <- "wikipathways-20220510-gmt-Homo_sapiens.gmt"
-        path <- paste0 ("6-network_analysis/PPI_Pathway_Network_",input$location_network, wp.hs.gmt,"_clustered",".png")
-        list(src = path, contentType = 'image/png',width = "800px", height = "auto",
+        path <- paste0("6-network_analysis/PPI_Pathway_Network_",input$location_network, wp.hs.gmt,"_clustered",".png")
+        
+        
+        #Constants 
+        img_width = 2000 
+        img_height = 1125 
+        scale_factor = 0.5 
+        
+        
+        # Add invisible scatter trace. 
+        # This trace is added to help the autoresize logic work. 
+        fig <- plot_ly(width=img_width * scale_factor, 
+                       height=img_height * scale_factor 
+        ) %>% 
+          add_trace( x= c(0, img_width * scale_factor), 
+                     y= c(0, img_height * scale_factor), 
+                     type = 'scatter',  mode = 'markers', alpha = 0) 
+        
+        # Configure axes 
+        xconfig <- list( 
+          title = "", 
+          zeroline = FALSE, 
+          showline = FALSE, 
+          showticklabels = FALSE, 
+          showgrid = FALSE, 
+          range = c(0, img_width * scale_factor) 
+        ) 
+        
+        yconfig <- list( 
+          title = "", 
+          zeroline = FALSE, 
+          showline = FALSE, 
+          showticklabels = FALSE, 
+          showgrid = FALSE, 
+          range = c(0, img_height * scale_factor), 
+          scaleanchor="x" 
+        ) 
+        
+        fig <- fig %>% layout(xaxis = xconfig, yaxis = yconfig) 
+        
+        image_file <- path
+        txt <- RCurl::base64Encode(readBin(image_file, "raw", file.info(image_file)[1, "size"]), "txt")
+        
+        # Add image 
+        fig <- fig %>% layout( 
+          images = list(  
+            list(  
+              source = paste('data:image/png;base64', txt, sep=','),  
+              x=0, 
+              sizex=img_width * scale_factor, 
+              y=img_height * scale_factor, 
+              sizey=img_height * scale_factor, 
+              xref="x", 
+              yref="y", 
+              opacity=1.0, 
+              layer="below", 
+              sizing="stretch" 
+            )  
+          )) 
+        # Configure other layout 
+        
+        m = list(r=0, l=0, b=0, t=0) 
+        fig <- fig %>% layout(margin = m) %>%
+          layout(plot_bgcolor='white',  
+                 xaxis = list(  
+                   zerolinecolor = '#ffff',  
+                   zerolinewidth = 2,  
+                   gridcolor = 'ffff'),  
+                 yaxis = list(  
+                   zerolinecolor = '#ffff',  
+                   zerolinewidth = 2,  
+                   gridcolor = 'ffff')  
+          )
+        
+        #fig <- fig %>% layout(height = 562, width = 1000)
+
+        return(fig)
+      })
+      
+      output$legendNetwork <- renderImage({
+        path <- paste0(work_DIR,"/6-network_analysis/legend_network_analysis.jpg")
+        list(src = path, contentType = 'image/jpeg',width = 300, height = "auto",
              alt = "This is alternate text")
         
       }, deleteFile=FALSE)
+      
+      
       
     }
     
@@ -1355,21 +1437,97 @@ server = function(input, output,session) {
                                align = "center")))
       
       visualizeMultiOmics(pathwayID = input$vis_pathway, 
-                          location_transcriptomics = input$vis_location, 
+                         location_transcriptomics = input$vis_location, 
                           disorder = input$vis_disease)
       
-      output$multiPlot <- renderImage({
+      
+      output$multiPlot <- renderPlotly({
+        path <- paste0("12-multiomics_visualization/", 
+                       input$vis_pathway, "_", 
+                       input$vis_disease, "_location_", 
+                       input$vis_location,"_visualization.png")
         
-        figure <- paste0("12-multiomics_visualization/", 
-                         input$vis_pathway, "_", 
-                         input$vis_disease, "_location_", 
-                         input$vis_location,"_visualization.png")
+        #Constants 
+        img_width = 2000 
+        img_height = 1125 
+        scale_factor = 0.5 
         
-        path <- paste0(work_DIR,"/",figure)
-        list(src = path, contentType = 'image/png',width = "1200px", height = "auto",
+        
+        # Add invisible scatter trace. 
+        # This trace is added to help the autoresize logic work. 
+        fig <- plot_ly(width=img_width * scale_factor, 
+                       height=img_height * scale_factor 
+        ) %>% 
+          add_trace( x= c(0, img_width * scale_factor), 
+                     y= c(0, img_height * scale_factor), 
+                     type = 'scatter',  mode = 'markers', alpha = 0) 
+        
+        # Configure axes 
+        xconfig <- list( 
+          title = "", 
+          zeroline = FALSE, 
+          showline = FALSE, 
+          showticklabels = FALSE, 
+          showgrid = FALSE, 
+          range = c(0, img_width * scale_factor) 
+        ) 
+        
+        yconfig <- list( 
+          title = "", 
+          zeroline = FALSE, 
+          showline = FALSE, 
+          showticklabels = FALSE, 
+          showgrid = FALSE, 
+          range = c(0, img_height * scale_factor), 
+          scaleanchor="x" 
+        ) 
+        
+        fig <- fig %>% layout(xaxis = xconfig, yaxis = yconfig) 
+        
+        image_file <- path
+        txt <- RCurl::base64Encode(readBin(image_file, "raw", file.info(image_file)[1, "size"]), "txt")
+        
+        # Add image 
+        fig <- fig %>% layout( 
+          images = list(  
+            list(  
+              source = paste('data:image/png;base64', txt, sep=','),  
+              x=0, 
+              sizex=img_width * scale_factor, 
+              y=img_height * scale_factor, 
+              sizey=img_height * scale_factor, 
+              xref="x", 
+              yref="y", 
+              opacity=1.0, 
+              layer="below", 
+              sizing="stretch" 
+            )  
+          )) 
+        # Configure other layout 
+        
+        m = list(r=0, l=0, b=0, t=0) 
+        fig <- fig %>% layout(margin = m) %>%
+          layout(plot_bgcolor='white',  
+                 xaxis = list(  
+                   zerolinecolor = '#ffff',  
+                   zerolinewidth = 2,  
+                   gridcolor = 'ffff'),  
+                 yaxis = list(  
+                   zerolinecolor = '#ffff',  
+                   zerolinewidth = 2,  
+                   gridcolor = 'ffff')  
+          )
+        
+        return(fig)
+      })
+      
+      output$legendMulti <- renderImage({
+        path <- paste0(work_DIR,"/12-multiomics_visualization/legend_visualization.jpg")
+        list(src = path, contentType = 'image/jpeg', height = 300,
              alt = "This is alternate text")
         
-      } ,deleteFile=FALSE)
+      }, deleteFile=FALSE)
+      
       
       removeModal()
       

@@ -515,9 +515,17 @@ ui <- tagList(
                                                            choices = c(Ileum = "ileum", 
                                                                        Rectum = "rectum"),
                                                            selected = "ileum"),
-                                               imageOutput("NetworkPlot",
-                                                           width = "700px",
-                                                           height = "auto")
+                                               plotlyOutput("NetworkPlot"),
+                                               br(),
+                                               br(),
+                                               br(),
+                                               br(),
+                                               br(),
+                                               br(),
+                                               br(),
+                                               br(),
+                                               br(),
+                                               imageOutput("legendNetwork")
                                              )
                                       )
                                     
@@ -1055,9 +1063,17 @@ ui <- tagList(
                                              # Main panel
                                              #==========================================#
                                              mainPanel(
-                                               imageOutput("multiPlot",
-                                                           width = "1200px",
-                                                           height = "auto")
+                                               plotlyOutput("multiPlot"),
+                                               br(),
+                                               br(),
+                                               br(),
+                                               br(),
+                                               br(),
+                                               br(),
+                                               br(),
+                                               br(),
+                                               br(),
+                                               plotOutput("legendMulti")
                                              )
    
                                              )
