@@ -387,10 +387,10 @@ server = function(input, output,session) {
     DE_analysis(data1()[[1]], data1()[[2]], FC_threshold())
       
     # Read tables
-    topTable[[1]] <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Ileum_vs_nonIBD_Ileum.tab"))
-    topTable[[2]] <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_CD_Rectum_vs_nonIBD_Rectum.tab"))
-    topTable[[3]]<- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_UC_Ileum_vs_nonIBD_Ileum.tab"))
-    topTable[[4]] <- read.delim(paste0(WORK_DIR,"/2-differential_gene_expression_analysis/statsmodel/table_UC_Rectum_vs_nonIBD_Rectum.tab"))
+    topTable[[1]] <- read.delim(paste0(WORK_DIR,"/3-differential_gene_expression_analysis/statsmodel/table_CD_Ileum_vs_nonIBD_Ileum.tab"))
+    topTable[[2]] <- read.delim(paste0(WORK_DIR,"/3-differential_gene_expression_analysis/statsmodel/table_CD_Rectum_vs_nonIBD_Rectum.tab"))
+    topTable[[3]]<- read.delim(paste0(WORK_DIR,"/3-differential_gene_expression_analysis/statsmodel/table_UC_Ileum_vs_nonIBD_Ileum.tab"))
+    topTable[[4]] <- read.delim(paste0(WORK_DIR,"/3-differential_gene_expression_analysis/statsmodel/table_UC_Rectum_vs_nonIBD_Rectum.tab"))
     
     names(topTable) <- c("Ileum: CD vs non-IBD",
                          "Rectum: CD vs non-IBD",
