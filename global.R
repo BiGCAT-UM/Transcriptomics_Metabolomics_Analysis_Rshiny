@@ -105,12 +105,10 @@ normalize_QCplots <- function (sampleLabels, htxCount){
   #for QC remove genes that have not been measured in any sample in the experiment
   datlogQC <- datlog[rowSums(datlog)!=0,]
   normlogQC <- normlog[rowSums(normlog)!=0,]
-  
   cat ("Normalization done\n ")
   
   WORK.DIR <- getwd()  
-  setwd(paste0(WORK.DIR,"/2-differential_gene_expression_analysis")) 
-  #write.table(normlogQC, "normExpression.csv", sep=",",quote=FALSE,row.names = TRUE)
+  setwd(paste0(WORK.DIR,"/2-data_normalization")) 
 
   #create QC plots for raw data, colored by different variables
   factors <- c("disease","biopsy_location","group")
@@ -121,7 +119,6 @@ normalize_QCplots <- function (sampleLabels, htxCount){
   dev.off()
   createQCPlots(datlogQC, factors, Table=sampleLabels, normMeth="", postfix="")
   setwd("..")#go back to main directory
-  
   cat ("QC plot for raw data done\n ")
   
   #create QC plots for normalized data colored by different variables
@@ -129,7 +126,6 @@ normalize_QCplots <- function (sampleLabels, htxCount){
   setwd("QCnorm")
   createQCPlots(normlogQC, factors, Table=sampleLabels, normMeth="DESeq", postfix="")
   setwd("..")#go back to main dir
-  
   cat ("QC plot for normalized data done\n ")
   
   #go back main directory 
@@ -283,7 +279,7 @@ DE_analysis <- function (sampleLabels, htxCount, FC_threshold){
 
 WORK.DIR <- getwd()
 
-setwd(paste0(WORK.DIR,"/2-differential_gene_expression_analysis"))
+setwd(paste0(WORK.DIR,"/3-differential_gene_expression_analysis"))
 sampleLabels$disease <- relevel(factor(sampleLabels$disease),ref="nonIBD")
 #add an experimental group variable to sampleLabels
 sampleLabels$group <- as.factor(paste(sampleLabels$disease,sampleLabels$biopsy_location,sep="_"))
@@ -329,15 +325,15 @@ createPvalTab(files,postfix="",namePVal="pvalue",nameAdjPVal="padj",nameFC="Fold
 
 mappingTranscriptomics <- function (RawOrAdj){
   
-  #input data is all files starts with "table" under the folder 2-differential_gene_expression_analysis/statsmodel/
+  #input data is all files starts with "table" under the folder 3-differential_gene_expression_analysis/statsmodel/
   #output files will be in "3-identifier_mapping" folder with the same structure IDMapping_CD OR IDMapping_UC
   
   # Read top tables
   setwd(work_DIR)
-  dataset1 <- read.delim("2-differential_gene_expression_analysis/statsmodel/table_UC_Ileum_vs_nonIBD_Ileum.tab")
-  dataset2 <- read.delim("2-differential_gene_expression_analysis/statsmodel/table_UC_Rectum_vs_nonIBD_Rectum.tab")
-  dataset3 <- read.delim("2-differential_gene_expression_analysis/statsmodel/table_CD_Ileum_vs_nonIBD_Ileum.tab")
-  dataset4 <- read.delim("2-differential_gene_expression_analysis/statsmodel/table_CD_Rectum_vs_nonIBD_Rectum.tab")
+  dataset1 <- read.delim("3-differential_gene_expression_analysis/statsmodel/table_UC_Ileum_vs_nonIBD_Ileum.tab")
+  dataset2 <- read.delim("3-differential_gene_expression_analysis/statsmodel/table_UC_Rectum_vs_nonIBD_Rectum.tab")
+  dataset3 <- read.delim("3-differential_gene_expression_analysis/statsmodel/table_CD_Ileum_vs_nonIBD_Ileum.tab")
+  dataset4 <- read.delim("3-differential_gene_expression_analysis/statsmodel/table_CD_Rectum_vs_nonIBD_Rectum.tab")
   
   disease <- c("CD", "UC")
   

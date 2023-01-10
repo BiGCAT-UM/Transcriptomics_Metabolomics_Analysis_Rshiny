@@ -266,21 +266,21 @@ server = function(input, output,session) {
         if (input$whichQCplot == "PCA"){
           if (input$normalizedQC == "Raw"){
             if (input$colorQC == "Location"){
-              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCraw/PCAanalysis__biopsylocation2.png")
+              path <- paste0(WORK_DIR,"/3-differential_gene_expression_analysis/QCraw/PCAanalysis__biopsylocation2.png")
               cat ("image path =",path,"\n")
             }
             if (input$colorQC == "Disease"){
-              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCraw/PCAanalysis__disease2.png")
+              path <- paste0(WORK_DIR,"/3-differential_gene_expression_analysis/QCraw/PCAanalysis__disease2.png")
               cat ("image path =",path,"\n")
             }
           }
           if (input$normalizedQC == "Normalized"){
             if (input$colorQC == "Location"){
-              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCnorm/PCAanalysis__biopsylocation2.png")
+              path <- paste0(WORK_DIR,"/3-differential_gene_expression_analysis/QCnorm/PCAanalysis__biopsylocation2.png")
               cat ("image path =",path,"\n")
             }
             if (input$colorQC == "Disease"){
-              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCnorm/PCAanalysis__disease2.png")
+              path <- paste0(WORK_DIR,"/3-differential_gene_expression_analysis/QCnorm/PCAanalysis__disease2.png")
               cat ("image path =",path,"\n")
             }
           }
@@ -288,21 +288,21 @@ server = function(input, output,session) {
         if (input$whichQCplot == "Boxplot"){
           if (input$normalizedQC == "Raw"){
             if (input$colorQC == "Location"){
-              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCraw/Boxplot__biopsylocation.png")
+              path <- paste0(WORK_DIR,"/3-differential_gene_expression_analysis/QCraw/Boxplot__biopsylocation.png")
               cat ("image path =",path,"\n")
             }
             if (input$colorQC == "Disease"){
-              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCraw/Boxplot__disease.png")
+              path <- paste0(WORK_DIR,"/2-data_normalization/QCraw/Boxplot__disease.png")
               cat ("image path =",path,"\n")
             }
           }
           if (input$normalizedQC == "Normalized"){
             if (input$colorQC == "Location"){
-              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCnorm/Boxplot__biopsylocation.png")
+              path <- paste0(WORK_DIR,"/2-data_normalization/QCnorm/Boxplot__biopsylocation.png")
               cat ("image path =",path,"\n")
             }
             if (input$colorQC == "Disease"){
-              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCnorm/Boxplot__disease.png")
+              path <- paste0(WORK_DIR,"/2-data_normalization/QCnorm/Boxplot__disease.png")
               cat ("image path =",path,"\n")
             }
           }
@@ -310,21 +310,21 @@ server = function(input, output,session) {
         if (input$whichQCplot == "Heatmap"){
           if (input$normalizedQC == "Raw"){
             if (input$colorQC == "Location"){
-              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCraw/Correlation__biopsylocation.png")
+              path <- paste0(WORK_DIR,"/2-data_normalization/QCraw/Correlation__biopsylocation.png")
               cat ("image path =",path,"\n")
             }
             if (input$colorQC == "Disease"){
-              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCraw/Correlation__disease.png")
+              path <- paste0(WORK_DIR,"/2-data_normalization/QCraw/Correlation__disease.png")
               cat ("image path =",path,"\n")
             }
           }
           if (input$normalizedQC == "Normalized"){
             if (input$colorQC == "Location"){
-              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCnorm/Correlation__biopsylocation.png")
+              path <- paste0(WORK_DIR,"/2-data_normalization/QCnorm/Correlation__biopsylocation.png")
               cat ("image path =",path,"\n")
             }
             if (input$colorQC == "Disease"){
-              path <- paste0(WORK_DIR,"/2-differential_gene_expression_analysis/QCnorm/Correlation__disease.png")
+              path <- paste0(WORK_DIR,"/2-data_normalization/QCnorm/Correlation__disease.png")
               cat ("image path =",path,"\n")
             }
           }
