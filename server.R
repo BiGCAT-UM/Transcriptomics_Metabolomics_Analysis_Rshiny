@@ -551,7 +551,7 @@ server = function(input, output,session) {
       type = "success")
     
     output$mappingTable <- DT::renderDataTable({
-      output <- read.delim(paste0(work_DIR, "/3-identifier_mapping/IDMapping_",input$mappingDisease, ".tsv"))
+      output <- read.delim(paste0(work_DIR, "/4-identifier_mapping/IDMapping_",input$mappingDisease, ".tsv"))
       return(output)
     }, server=TRUE,
     options = list(pageLength = 10), rownames= FALSE)
@@ -594,16 +594,16 @@ server = function(input, output,session) {
     output$pathwayTable <- DT::renderDataTable({
       req(input$pathwayComparison)
       if (input$pathwayComparison == "Ileum: CD vs non-IBD"){
-        output <- read.delim(paste0(work_DIR,"/4-pathway_analysis/enrichResults_ORA_CD_ileum.tsv"))
+        output <- read.delim(paste0(work_DIR,"/5-pathway_analysis/enrichResults_ORA_CD_ileum.tsv"))
       }
       if (input$pathwayComparison == "Rectum: CD vs non-IBD"){
-        output <- read.delim(paste0(work_DIR,"/4-pathway_analysis/enrichResults_ORA_CD_rectum.tsv"))
+        output <- read.delim(paste0(work_DIR,"/5-pathway_analysis/enrichResults_ORA_CD_rectum.tsv"))
       }
       if (input$pathwayComparison == "Ileum: UC vs non-IBD"){
-        output <- read.delim(paste0(work_DIR,"/4-pathway_analysis/enrichResults_ORA_UC_ileum.tsv"))
+        output <- read.delim(paste0(work_DIR,"/5-pathway_analysis/enrichResults_ORA_UC_ileum.tsv"))
       }
       if (input$pathwayComparison == "Rectum: UC vs non-IBD"){
-        output <- read.delim(paste0(work_DIR,"/4-pathway_analysis/enrichResults_ORA_UC_rectum.tsv"))
+        output <- read.delim(paste0(work_DIR,"/5-pathway_analysis/enrichResults_ORA_UC_rectum.tsv"))
       }
       
       output <- output[,1:7]
@@ -616,16 +616,16 @@ server = function(input, output,session) {
     output$pathwayPlot <- renderPlot({
       req(input$pathwayComparison)
       if (input$pathwayComparison == "Ileum: CD vs non-IBD"){
-        output <- read.delim(paste0(work_DIR,"/4-pathway_analysis/enrichResults_ORA_CD_ileum.tsv"))
+        output <- read.delim(paste0(work_DIR,"/5-pathway_analysis/enrichResults_ORA_CD_ileum.tsv"))
       }
       if (input$pathwayComparison == "Rectum: CD vs non-IBD"){
-        output <- read.delim(paste0(work_DIR,"/4-pathway_analysis/enrichResults_ORA_CD_rectum.tsv"))
+        output <- read.delim(paste0(work_DIR,"/5-pathway_analysis/enrichResults_ORA_CD_rectum.tsv"))
       }
       if (input$pathwayComparison == "Ileum: UC vs non-IBD"){
-        output <- read.delim(paste0(work_DIR,"/4-pathway_analysis/enrichResults_ORA_UC_ileum.tsv"))
+        output <- read.delim(paste0(work_DIR,"/5-pathway_analysis/enrichResults_ORA_UC_ileum.tsv"))
       }
       if (input$pathwayComparison == "Rectum: UC vs non-IBD"){
-        output <- read.delim(paste0(work_DIR,"/4-pathway_analysis/enrichResults_ORA_UC_rectum.tsv"))
+        output <- read.delim(paste0(work_DIR,"/5-pathway_analysis/enrichResults_ORA_UC_rectum.tsv"))
       }
       
       output <- arrange(output, pvalue)
@@ -691,7 +691,7 @@ server = function(input, output,session) {
     removeModal()
     
     output$HeatmapPlot<- renderImage({
-      path <- paste0(work_DIR,"/5-create_heatmap/heatmap_log10_large.png")
+      path <- paste0(work_DIR,"/6-create_heatmap/heatmap_log10_large.png")
       list(src = path, contentType = 'image/png',width = "800px", height = "auto",
            alt = "This is alternate text")
       
@@ -742,7 +742,7 @@ server = function(input, output,session) {
       
       output$NetworkPlot <- renderPlotly({
         wp.hs.gmt <- "wikipathways-20220510-gmt-Homo_sapiens.gmt"
-        path <- paste0("6-network_analysis/PPI_Pathway_Network_",input$location_network, wp.hs.gmt,"_clustered",".png")
+        path <- paste0("7-network_analysis/PPI_Pathway_Network_",input$location_network, wp.hs.gmt,"_clustered",".png")
         
         
         #Constants 
@@ -822,19 +822,15 @@ server = function(input, output,session) {
       })
       
       output$legendNetwork <- renderImage({
-        path <- paste0(work_DIR,"/6-network_analysis/legend_network_analysis.jpg")
+        path <- paste0(work_DIR,"/7-network_analysis/legend_network_analysis.jpg")
         list(src = path, contentType = 'image/jpeg',width = 300, height = "auto",
              alt = "This is alternate text")
         
       }, deleteFile=FALSE)
       
-      
-      
     }
     
   })
-  
-  
   
   
   #**************************************************************************************************************#
@@ -1005,7 +1001,7 @@ server = function(input, output,session) {
       session = session,
       title = "Success!",
       text = "Normalization and QC done. 
-        You can find all QC plots in the 7-metabolite_data_preprocessing folder.",
+        You can find all QC plots in the 9-metabolite_data_normalization folder.",
       type = "success")
     
   return (shapiroResults)  
@@ -1032,11 +1028,11 @@ server = function(input, output,session) {
       output$histPlotCD <- renderImage({
         req(input$whichHistCD)
         if (input$whichHistCD == "Normalized"){
-          path <- paste0(WORK_DIR,"/7-metabolite_data_preprocessing/normalized/CD_histogram_norm.png")
+          path <- paste0(WORK_DIR,"/9-metabolite_data_normalization/CD_histogram_norm.png")
           cat ("image path =",path,"\n")
         }
         if (input$whichHistCD == "Raw"){
-          path <- paste0(WORK_DIR,"/7-metabolite_data_preprocessing/normalized/CD_histogram_raw.png")
+          path <- paste0(WORK_DIR,"/9-metabolite_data_normalization/CD_histogram_raw.png")
           cat ("image path =",path,"\n")
         }
         
@@ -1063,11 +1059,11 @@ server = function(input, output,session) {
       output$histPlotUC <- renderImage({
         req(input$whichHistUC)
         if (input$whichHistUC == "Normalized"){
-          path <- paste0(WORK_DIR,"/7-metabolite_data_preprocessing/normalized/UC_histogram_norm.png")
+          path <- paste0(WORK_DIR,"/9-metabolite_data_normalization/UC_histogram_norm.png")
           cat ("image path =",path,"\n")
         }
         if (input$whichHistUC == "Raw"){
-          path <- paste0(WORK_DIR,"/7-metabolite_data_preprocessing/normalized/UC_histogram_raw.png")
+          path <- paste0(WORK_DIR,"/9-metabolite_data_normalization/UC_histogram_norm.png")
           cat ("image path =",path,"\n")
         }
         list(src = path, contentType = 'image/png',width = "500px", height = "auto",
@@ -1093,8 +1089,6 @@ server = function(input, output,session) {
     showTab("tabs_mets", target = "stat_mets")
     
   })
- 
-  
    
   #***************************************************#
   # Statistical Analysis
@@ -1120,14 +1114,14 @@ server = function(input, output,session) {
                           h5("This might take a while. Please be patient.", 
                              align = "center")))
     
-    mSet_transformedCD <- read.csv("7-metabolite_data_preprocessing/normalized/CD_norm_data.csv", na.strings=c("", "NA"))
-    mSet_transformedUC <- read.csv("7-metabolite_data_preprocessing/normalized/UC_norm_data.csv", na.strings=c("", "NA"))
+    mSet_transformedCD <- read.csv("9-metabolite_data_normalization/CD_norm_data.csv", na.strings=c("", "NA"))
+    mSet_transformedUC <- read.csv("9-metabolite_data_normalization/UC_norm_data.csv", na.strings=c("", "NA"))
     
     statAnalysisMets(mSet_transformedCD, "CD", selectedMethod(), FC_met(),pvalue_met())
     statAnalysisMets(mSet_transformedUC, "UC", selectedMethod(), FC_met(),pvalue_met())
  
-    allResults [[1]] <- read.csv("8-significantly_changed_metabolites_analysis/mbxData_CD.csv")
-    allResults [[2]] <- read.csv("8-significantly_changed_metabolites_analysis/mbxData_UC.csv")
+    allResults [[1]] <- read.csv("10-significantly_changed_metabolites_analysis/mbxData_CD.csv")
+    allResults [[2]] <- read.csv("10-significantly_changed_metabolites_analysis/mbxData_UC.csv")
     
     names(allResults) <- c("CD vs non-IBD",
                         "UC vs non-IBD")
@@ -1192,11 +1186,11 @@ server = function(input, output,session) {
         WORK_DIR <- getwd()
         req(input$metCompPair)
         if (compPairMet() == "CD vs non-IBD"){
-          path <- paste0(WORK_DIR,"/8-significantly_changed_metabolites_analysis/CD_relevant_labels_VolcanoPlot.png")
+          path <- paste0(WORK_DIR,"/10-significantly_changed_metabolites_analysis/CD_relevant_labels_VolcanoPlot.png")
           cat ("image path =",path,"\n")
         }
         if (compPairMet() == "UC vs non-IBD"){
-          path <- paste0(WORK_DIR,"/8-significantly_changed_metabolites_analysis/UC_relevant_labels_VolcanoPlot.png")
+          path <- paste0(WORK_DIR,"/10-significantly_changed_metabolites_analysis/UC_relevant_labels_VolcanoPlot.png")
           cat ("image path =",path,"\n")
         }
         
@@ -1241,8 +1235,8 @@ server = function(input, output,session) {
     
     if(success){
 
-    results [[1]] <- read.csv("9-metabolite_identifier_mapping/mbx_mapped_data_CD.csv",na.strings=c("", "NA"))
-    results [[2]] <- read.csv("9-metabolite_identifier_mapping/mbx_mapped_data_UC.csv",na.strings=c("", "NA"))
+    results [[1]] <- read.csv("11-metabolite_identifier_mapping/mbx_mapped_data_CD.csv",na.strings=c("", "NA"))
+    results [[2]] <- read.csv("11-metabolite_identifier_mapping/mbx_mapped_data_UC.csv",na.strings=c("", "NA"))
     
     names(results) <- c("CD vs non-IBD",
                         "UC vs non-IBD")
@@ -1317,14 +1311,14 @@ server = function(input, output,session) {
                              align = "center")))
     results <- list()
     
-    mSet_CD <- read.csv("8-significantly_changed_metabolites_analysis/mbxData_CD.csv", na.strings=c("", "NA"))
-    mSet_UC <- read.csv("8-significantly_changed_metabolites_analysis/mbxData_UC.csv", na.strings=c("", "NA"))
+    mSet_CD <- read.csv("10-significantly_changed_metabolites_analysis/mbxData_CD.csv", na.strings=c("", "NA"))
+    mSet_UC <- read.csv("10-significantly_changed_metabolites_analysis/mbxData_UC.csv", na.strings=c("", "NA"))
     
     pathwayAnalysisMets(mSet_CD,"CD")
     pathwayAnalysisMets(mSet_UC, "UC")
     
-    results [[1]] <- read.csv("10-metabolite_pathway_analysis/mbxPWdata_CD.csv",na.strings=c("", "NA"))
-    results [[2]] <- read.csv("10-metabolite_pathway_analysis/mbxPWdata_UC.csv",na.strings=c("", "NA"))
+    results [[1]] <- read.csv("12-metabolite_pathway_analysis/mbxPWdata_CD.csv",na.strings=c("", "NA"))
+    results [[2]] <- read.csv("12-metabolite_pathway_analysis/mbxPWdata_UC.csv",na.strings=c("", "NA"))
     
     names(results) <- c("CD vs non-IBD",
                         "UC vs non-IBD")
@@ -1522,7 +1516,7 @@ server = function(input, output,session) {
       })
       
       output$legendMulti <- renderImage({
-        path <- paste0(work_DIR,"/12-multiomics_visualization/legend_visualization.jpg")
+        path <- paste0(work_DIR,"/14-multiomics_visualization/legend_visualization.jpg")
         list(src = path, contentType = 'image/jpeg', height = 300,
              alt = "This is alternate text")
         

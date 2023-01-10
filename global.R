@@ -404,8 +404,8 @@ mappingTranscriptomics <- function (RawOrAdj){
     colnames(dataset)[1] = "Ensembl.ID"
     
     # Write output
-    if(!dir.exists("3-identifier_mapping")){dir.create("3-identifier_mapping")}
-    write.table(dataset, file=paste0("3-identifier_mapping/IDMapping_",d, ".tsv"),
+    if(!dir.exists("4-identifier_mapping")){dir.create("4-identifier_mapping")}
+    write.table(dataset, file=paste0("4-identifier_mapping/IDMapping_",d, ".tsv"),
                 sep = "\t" ,quote = FALSE, row.names = FALSE)
   }
   
@@ -424,18 +424,18 @@ pathwayAnalysisTranscriptomics <- function(FCthreshold, Pthreshold, Pthreshold_p
   for (disorder in c("CD", "UC")){
     # Load data
     if (disorder == "CD") {
-      dataset_CD <- read.delim("3-identifier_mapping/IDMapping_CD.tsv")
+      dataset_CD <- read.delim("4-identifier_mapping/IDMapping_CD.tsv")
       #filter out  unused columns, we select Entrez.ID, log2FC and pvalue, remove NA values: #background genes to be used in enrichment analysis
       dataset <- na.omit(subset( dataset_CD, select = c(3,2,4:7)))
       print("Selected disorder is Crohn's disease")
     }else if(disorder == "UC"){ 
-      dataset_UC <- read.delim("3-identifier_mapping/IDMapping_UC.tsv")
+      dataset_UC <- read.delim("4-identifier_mapping/IDMapping_UC.tsv")
       #filter out  unused columns, we select Entrez.ID, log2FC and pvalue
       dataset <- na.omit(subset( dataset_UC, select = c(3,2,4:7)))
       print("Selected disorder is Ulcerative Colitis")}else{print("Disorder not Recognised")
       }
     
-    if(!dir.exists("4-pathway_analysis")) dir.create("4-pathway_analysis")
+    if(!dir.exists("5-pathway_analysis")) dir.create("5-pathway_analysis")
     #we will use selection criteria as Fold change=1.5,log2FC=0.58 and p.value < 0.05
     #for ileum location
     up.genes.ileum   <- dataset[(dataset$log2FC_ileum >= logFCthreshold) & dataset$pvalue_ileum < Pthreshold, 2] 
@@ -448,11 +448,11 @@ pathwayAnalysisTranscriptomics <- function(FCthreshold, Pthreshold, Pthreshold_p
     down.genes.rectum <- dataset[(dataset$log2FC_rectum <= (-1*logFCthreshold)) & dataset$pvalue_rectum < Pthreshold, 2] 
     deg.rectum <- unique(dataset[!is.na(dataset$ENTREZ.ID) & !is.na(dataset$pvalue_rectum) & dataset$pvalue_rectum < Pthreshold & 
                                    abs(dataset$log2FC_rectum) > logFCthreshold,c(1,2,5,6)])
-    write.table(deg.rectum, file=paste0("4-pathway_analysis/DEGs_",disorder,"_rectum.tsv"),sep="\t", quote=FALSE, row.names = FALSE)
+    write.table(deg.rectum, file=paste0("5-pathway_analysis/DEGs_",disorder,"_rectum.tsv"),sep="\t", quote=FALSE, row.names = FALSE)
     
     pathway_data <- "local" #Options: local, new
     if (pathway_data == "local") {
-      wp.hs.gmt <-list.files(paste0(work_DIR,"/4-pathway_analysis"), pattern="wikipathways", full.names=FALSE)
+      wp.hs.gmt <-list.files(paste0(work_DIR,"/5-pathway_analysis"), pattern="wikipathways", full.names=FALSE)
       paste0("Using local file, from: ", wp.hs.gmt )
     }else if(pathway_data == "new"){ 
       #below code should be performed first to handle the ssl certificate error while downloading pathways 
@@ -462,7 +462,7 @@ pathwayAnalysisTranscriptomics <- function(FCthreshold, Pthreshold, Pthreshold_p
       paste0("Using new data, from: ", wp.hs.gmt)}else{print("Pathway data type not recognized")
       }
     
-    wp2gene   <- rWikiPathways::readPathwayGMT(paste0(work_DIR,"/4-pathway_analysis/",wp.hs.gmt))
+    wp2gene   <- rWikiPathways::readPathwayGMT(paste0(work_DIR,"/5-pathway_analysis/",wp.hs.gmt))
     wpid2gene <- wp2gene %>% dplyr::select(wpid,gene) #TERM2GENE
     wpid2name <- wp2gene %>% dplyr::select(wpid,name) #TERM2NAME
     ewp.ileum <- clusterProfiler::enricher(
@@ -492,7 +492,7 @@ pathwayAnalysisTranscriptomics <- function(FCthreshold, Pthreshold, Pthreshold_p
     #number of significantly enriched pathways
     paste0("The number of significantly enriched pathways is: ", num.pathways.ileum.sign <- dim(ileum.sign)[1])
     #exporting results to the file
-    write.table(ewp.ileum.res, file=paste0("4-pathway_analysis/enrichResults_ORA_",disorder,"_ileum.tsv"),
+    write.table(ewp.ileum.res, file=paste0("5-pathway_analysis/enrichResults_ORA_",disorder,"_ileum.tsv"),
                 sep = "\t" ,quote = FALSE, row.names = FALSE)
     ##################RECTUM location#######################
     ewp.rectum <- clusterProfiler::enricher(
@@ -517,7 +517,7 @@ pathwayAnalysisTranscriptomics <- function(FCthreshold, Pthreshold, Pthreshold_p
     #number of significantly enriched pathways
     paste0("The number of significantly enriched pathways is: ", num.pathways.rectum.sign <- dim(rectum.sign)[1])
     #exporting results to the file
-    write.table(ewp.rectum.res, file=paste0("4-pathway_analysis/enrichResults_ORA_",disorder,"_rectum.tsv"),
+    write.table(ewp.rectum.res, file=paste0("5-pathway_analysis/enrichResults_ORA_",disorder,"_rectum.tsv"),
                 sep = "\t" ,quote = FALSE, row.names = FALSE)
     
   }
@@ -531,10 +531,10 @@ createHeatmap <- function(p_threshold_pathway, q_threshold_pathway){
   setwd(work_DIR)
   
   # Read files
-  CD.ileum <- read.delim("4-pathway_analysis/enrichResults_ORA_CD_ileum.tsv",sep = "\t", header = TRUE)
-  CD.rectum <- read.delim("4-pathway_analysis/enrichResults_ORA_CD_rectum.tsv", sep = "\t",header = TRUE)
-  UC.ileum <- read.delim("4-pathway_analysis/enrichResults_ORA_UC_ileum.tsv",sep = "\t", header = TRUE)
-  UC.rectum <- read.delim("4-pathway_analysis/enrichResults_ORA_UC_rectum.tsv", sep = "\t",header = TRUE)
+  CD.ileum <- read.delim("5-pathway_analysis/enrichResults_ORA_CD_ileum.tsv",sep = "\t", header = TRUE)
+  CD.rectum <- read.delim("5-pathway_analysis/enrichResults_ORA_CD_rectum.tsv", sep = "\t",header = TRUE)
+  UC.ileum <- read.delim("5-pathway_analysis/enrichResults_ORA_UC_ileum.tsv",sep = "\t", header = TRUE)
+  UC.rectum <- read.delim("5-pathway_analysis/enrichResults_ORA_UC_rectum.tsv", sep = "\t",header = TRUE)
 
   #we need to get pathways that has p.adjust value lower than 0.05 and qvalue<0.02
   #To prevent high false discovery rate (FDR) in multiple testing, q-values are also estimated for FDR control.
@@ -615,7 +615,7 @@ createHeatmap <- function(p_threshold_pathway, q_threshold_pathway){
   colnames(all.pathways) <- c("CD Ileum","CD Rectum","UC Ileum","UC Rectum")
   
   #create output folder if not exist
-  if(!dir.exists("5-create_heatmap")){dir.create("5-create_heatmap")}
+  if(!dir.exists("6-create_heatmap")){dir.create("6-create_heatmap")}
   
   ## Select a size to visualize the heatmap with (options; large or small)
   size_heatmap <- "large"
@@ -626,14 +626,14 @@ createHeatmap <- function(p_threshold_pathway, q_threshold_pathway){
     fontsize_l = 30
     width_l =2000 
     height_l =2000 
-    name_heatmap_file <- "5-create_heatmap/heatmap_log10_large.png"
+    name_heatmap_file <- "6-create_heatmap/heatmap_log10_large.png"
   }else if(size_heatmap == "small"){ 
     fontsize_row_l = 10 
     fontsize_col_l = 10 
     width_l =1500 
     height_l =1500 
     fontsize_l = 10
-    name_heatmap_file <- "5-create_heatmap/heatmap_log10_small.png"
+    name_heatmap_file <- "6-create_heatmap/heatmap_log10_small.png"
   }else{print("Size not Recognised")}
   #normally darker value represent higher values light color represent smaller values
   #when we use rev function higher ones are represented by light color
@@ -662,10 +662,10 @@ createHeatmap <- function(p_threshold_pathway, q_threshold_pathway){
 networkAnalysis <- function(PPI_cutoff = 0.7){
   setwd(work_DIR)
   #read all DEG data
-  CD.ileum <- read.delim("4-pathway_analysis/DEGs_CD_ileum.tsv",sep = "\t", header = TRUE)
-  CD.rectum <- read.delim("4-pathway_analysis/DEGs_CD_rectum.tsv", sep = "\t",header = TRUE)
-  UC.ileum <- read.delim("4-pathway_analysis/DEGs_UC_ileum.tsv",sep = "\t", header = TRUE)
-  UC.rectum <- read.delim("4-pathway_analysis/DEGs_UC_rectum.tsv", sep = "\t",header = TRUE)
+  CD.ileum <- read.delim("5-pathway_analysis/DEGs_CD_ileum.tsv",sep = "\t", header = TRUE)
+  CD.rectum <- read.delim("5-pathway_analysis/DEGs_CD_rectum.tsv", sep = "\t",header = TRUE)
+  UC.ileum <- read.delim("5-pathway_analysis/DEGs_UC_ileum.tsv",sep = "\t", header = TRUE)
+  UC.rectum <- read.delim("5-pathway_analysis/DEGs_UC_rectum.tsv", sep = "\t",header = TRUE)
 
   #Listing all up and down regulated genes separately for CD:
   CD.up.ileum   <-unique(CD.ileum[CD.ileum$log2FC_ileum > 0,])
@@ -698,7 +698,7 @@ networkAnalysis <- function(PPI_cutoff = 0.7){
   #merge all DEG with corresponding logFC for both diseases
   DEG.overlapped_ileum <- rbind(merged.ileum.downCDdownUC, merged.ileum.upCDdownUC, merged.ileum.upCDupUC, merged.ileum.downCDupUC)
   if(!dir.exists("6-network_analysis")) dir.create("6-network_analysis")
-  write.table(DEG.overlapped_ileum ,"6-network_analysis/DEG.overlapped_ileum",row.names=FALSE,col.names = TRUE,quote= FALSE, sep = "\t")
+  write.table(DEG.overlapped_ileum ,"7-network_analysis/DEG.overlapped_ileum",row.names=FALSE,col.names = TRUE,quote= FALSE, sep = "\t")
   
   # OVERLAP RECTUM
   # overlap genes between CD down and UC down
@@ -711,7 +711,7 @@ networkAnalysis <- function(PPI_cutoff = 0.7){
   merged.rectum.downCDupUC <- merge(x=CD.down.rectum,y=UC.up.rectum,by=c('ENTREZ', 'HGNC_symbol'),all.x=FALSE, all.y=FALSE)
   #merge all DEG with corresponding logFC for both diseases
   DEG.overlapped_rectum <- rbind(merged.rectum.downCDdownUC, merged.rectum.upCDdownUC, merged.rectum.upCDupUC, merged.rectum.downCDupUC)
-  write.table(DEG.overlapped_rectum ,"6-network_analysis/DEG.overlapped_rectum",row.names=FALSE,col.names = TRUE,quote= FALSE, sep = "\t")
+  write.table(DEG.overlapped_rectum ,"7-network_analysis/DEG.overlapped_rectum",row.names=FALSE,col.names = TRUE,quote= FALSE, sep = "\t")
   
   # PPI NETWORK
   ## Select a location to analyse (options; ileum or rectum)
@@ -756,7 +756,7 @@ networkAnalysis <- function(PPI_cutoff = 0.7){
     ##Work with local file (for publication), or new download:
     pathway_data <- "local" #Options: local, new
     if (pathway_data == "local") {
-      wp.hs.gmt <-list.files(paste0(work_DIR,"/4-pathway_analysis"), pattern="wikipathways", full.names=FALSE)
+      wp.hs.gmt <-list.files(paste0(work_DIR,"/5-pathway_analysis"), pattern="wikipathways", full.names=FALSE)
       paste0("Using local file, from: ", wp.hs.gmt )
     }else if(pathway_data == "new"){ 
       #below code should be performed first to handle the ssl certificate error while downloading pathways 
@@ -804,7 +804,7 @@ networkAnalysis <- function(PPI_cutoff = 0.7){
     RCy3::setVisualStyle("ppi")
     RCy3::clearSelection()
     # Saving output
-    outputName = paste0("6-network_analysis/PPI_Pathway_Network_", wp.hs.gmt, location,".png")
+    outputName = paste0("7-network_analysis/PPI_Pathway_Network_", wp.hs.gmt, location,".png")
     png.file <- file.path(getwd(), outputName)
     exportImage(png.file,'PNG', zoom = 500)
     
@@ -831,11 +831,11 @@ networkAnalysis <- function(PPI_cutoff = 0.7){
     RCy3::setNodeBorderWidthBypass(node.names = pathways$nodes, 10)
     RCy3::clearSelection()
     #export image
-    outputName = paste0 ("6-network_analysis/PPI_Pathway_Network_",location, wp.hs.gmt,"_clustered",".png")
+    outputName = paste0 ("7-network_analysis/PPI_Pathway_Network_",location, wp.hs.gmt,"_clustered",".png")
     png.file <- file.path(getwd(), outputName)
     exportImage(png.file,'PNG', zoom = 500)
     #save session
-    cys.file <- file.path(getwd(), "6-network_analysis/PPI_Pathway_Network_",wp.hs.gmt, location,"_clustered",".cys")
+    cys.file <- file.path(getwd(), "7-network_analysis/PPI_Pathway_Network_",wp.hs.gmt, location,"_clustered",".cys")
   }
   
 }
@@ -936,7 +936,7 @@ filteringMets <- function(metaData,mbxData){
   
   #Convert intensity data to numeric values                         
   CD_NoMissingData[, c(3:columns)] <- apply(CD_NoMissingData[, c(3:columns)],2, function(x) as.numeric(as.character(x)))
-  write.table(CD_NoMissingData, "7-metabolite_data_preprocessing/filtered/mbxDataCD_nonIBD.csv", sep =",", row.names = FALSE)
+  write.table(CD_NoMissingData, "8-metabolite_data_filtering/mbxDataCD_nonIBD.csv", sep =",", row.names = FALSE)
   
   ############# for UC disease ################
   #Merge column headers: disorder_patientID
@@ -955,7 +955,7 @@ filteringMets <- function(metaData,mbxData){
   
   #Convert intensity data to numeric values                         
   UC_NoMissingData[, c(3:columns)] <- apply(UC_NoMissingData[, c(3:columns)],2, function(x) as.numeric(as.character(x)))
-  write.table(UC_NoMissingData, "7-metabolite_data_preprocessing/filtered/mbxDataUC_nonIBD.csv", sep =",", row.names = FALSE)
+  write.table(UC_NoMissingData, "8-metabolite_data_filtering/mbxDataUC_nonIBD.csv", sep =",", row.names = FALSE)
   
   return(list((CD_NoMissingData),(UC_NoMissingData)))
 }
@@ -972,8 +972,8 @@ normalizeMets <- function(selected = "log2 transformation"){
   cat("Selected transformation ", transformation)
   
   #data will be read from filtered folder
-  mSet_CD <- read.csv("7-metabolite_data_preprocessing/filtered/mbxDataCD_nonIBD.csv", na.strings=c("", "NA"))
-  mSet_UC <- read.csv("7-metabolite_data_preprocessing/filtered/mbxDataUC_nonIBD.csv", na.strings=c("", "NA"))
+  mSet_CD <- read.csv("8-metabolite_data_filtering/mbxDataCD_nonIBD.csv", na.strings=c("", "NA"))
+  mSet_UC <- read.csv("8-metabolite_data_filtering/mbxDataUC_nonIBD.csv", na.strings=c("", "NA"))
   
   ############################# for CD disease #########################
   columns <- ncol(mSet_CD)
@@ -992,13 +992,13 @@ normalizeMets <- function(selected = "log2 transformation"){
  
   ## Visualize the data after the transformation (for one sample to get an idea of suitability of transformation:
   #create histogram for original distribution for first column with data
-  png(paste0("7-metabolite_data_preprocessing/normalized/CD_histogram_raw",".png"),width=1000,height=1000)
+  png(paste0("9-metabolite_data_normalization/CD_histogram_raw",".png"),width=1000,height=1000)
   hist(mSet_CD[,3], col='steelblue', main='Original')
   dev.off()
   cat("raw CD histogram created\n")
   
   #create histogram for log-transformed distribution 
-  png(paste0("7-metabolite_data_preprocessing/normalized/CD_histogram_norm",".png"),width=1000,height=1000)
+  png(paste0("9-metabolite_data_normalization/CD_histogram_norm",".png"),width=1000,height=1000)
   hist(mSet_transformed[,3], col='steelblue', main='Original')
   dev.off()
   cat("norm CD histogram created\n")
@@ -1028,7 +1028,7 @@ normalizeMets <- function(selected = "log2 transformation"){
   else{
     print("Advised to select a different data transformation procedure")
   }
-  write.table(mSet_transformed, "7-metabolite_data_preprocessing/normalized/CD_norm_data.csv", sep =",", row.names = FALSE)
+  write.table(mSet_transformed, "9-metabolite_data_normalization/CD_norm_data.csv", sep =",", row.names = FALSE)
   
   
   ############################# for UC disease #########################
@@ -1048,13 +1048,13 @@ normalizeMets <- function(selected = "log2 transformation"){
   
   ## Visualize the data after the transformation (for one sample to get an idea of suitability of transformation:
   #create histogram for original distribution for first column with data
-  png(paste0("7-metabolite_data_preprocessing/normalized/UC_histogram_raw",".png"),width=800,height=800)
+  png(paste0("9-metabolite_data_normalization/UC_histogram_raw",".png"),width=800,height=800)
   hist(mSet_UC[,3], col='steelblue', main='Original')
   dev.off()
   cat("raw UC histogram created\n")
   
   #create histogram for log-transformed distribution 
-  png(paste0("7-metabolite_data_preprocessing/normalized/UC_histogram_norm",".png"),width=800,height=800)
+  png(paste0("9-metabolite_data_normalization/UC_histogram_norm",".png"),width=800,height=800)
   hist(mSet_transformed[,3], col='steelblue', main='Original')
   dev.off()
   cat("norm UC histogram created\n")
@@ -1084,7 +1084,7 @@ normalizeMets <- function(selected = "log2 transformation"){
   else{
     print("Advised to select a different data transformation procedure")
   }
-  write.table(mSet_transformed, "7-metabolite_data_preprocessing/normalized/UC_norm_data.csv", sep =",", row.names = FALSE)
+  write.table(mSet_transformed, "9-metabolite_data_normalization/UC_norm_data.csv", sep =",", row.names = FALSE)
   
   return (list(CD_shapiro, UC_shapiro))
 }
@@ -1095,8 +1095,6 @@ normalizeMets <- function(selected = "log2 transformation"){
 #==============================================================================#
 
 statAnalysisMets <- function (mSet_transformed,disorder,transformation, FC, pvalue){
-  
- # browser()
   
   #take only first token of the transformation 
   transformation <- strsplit(transformation, " ")[[1]][1]
@@ -1245,7 +1243,7 @@ statAnalysisMets <- function (mSet_transformed,disorder,transformation, FC, pval
   ## Export the data and Volcano Plot:
   
   ##Save the data file
-  nameDataFile <- paste0("8-significantly_changed_metabolites_analysis/mbxData_", disorder ,".csv")
+  nameDataFile <- paste0("10-significantly_changed_metabolites_analysis/mbxData_", disorder ,".csv")
   write.table(mSet_AnalysisFinal, nameDataFile, sep =",", row.names = FALSE)
   
   if(!"svglite" %in% installed.packages()){install.packages("svglite")}
@@ -1253,8 +1251,8 @@ statAnalysisMets <- function (mSet_transformed,disorder,transformation, FC, pval
   
   ##Save the Volcano plot:
   imageType <- "png" ##Options are: svg, png, eps, ps, tex, pdf, jpeg, tiff, png, bmp, svg or wmf
-  #nameVolcano <- paste0("8-significantly_changed_metabolites_analysis/", disorder, "_", selectViz, "_VolcanoPlot_absLogFC_", log2FC_max, "_pValue_", p_value_threshold, ".", imageType)
-  nameVolcano <- paste0("8-significantly_changed_metabolites_analysis/", disorder, "_", selectViz, "_VolcanoPlot.", imageType)
+  #nameVolcano <- paste0("10-significantly_changed_metabolites_analysis/", disorder, "_", selectViz, "_VolcanoPlot_absLogFC_", log2FC_max, "_pValue_", p_value_threshold, ".", imageType)
+  nameVolcano <- paste0("10-significantly_changed_metabolites_analysis/", disorder, "_", selectViz, "_VolcanoPlot.", imageType)
   ggsave(nameVolcano)
   
 }
@@ -1269,8 +1267,8 @@ mappingMets <- function (){
   options(timeout=10000)
 
   #Obtain data from step 8
-  mSet_CD <- read.csv("8-significantly_changed_metabolites_analysis/mbxData_CD.csv", na.strings=c("", "NA"))
-  mSet_UC <- read.csv("8-significantly_changed_metabolites_analysis/mbxData_UC.csv", na.strings=c("", "NA"))
+  mSet_CD <- read.csv("10-significantly_changed_metabolites_analysis/mbxData_CD.csv", na.strings=c("", "NA"))
+  mSet_UC <- read.csv("10-significantly_changed_metabolites_analysis/mbxData_UC.csv", na.strings=c("", "NA"))
   #filter out unused columns
   mSet_CD <- mSet_CD [,c(1:4)]
   mSet_UC <- mSet_UC [,c(1:4)]
@@ -1326,13 +1324,12 @@ mappingMets <- function (){
   colnames(merged.data_CD) <- c("HMDBID","CHEBI", "label", "log2FC_met", "pvalue_met")
   colnames(merged.data_UC) <- c("HMDBID","CHEBI", "label", "log2FC_met", "pvalue_met")
 
-  
   ## Export the mapped metabolomics data:
   if(!dir.exists("9-metabolite_identifier_mapping"))
     dir.create("9-metabolite_identifier_mapping")
   ##Save the data file
-  write.csv(merged.data_CD, '9-metabolite_identifier_mapping/mbx_mapped_data_CD.csv', row.names = FALSE)
-  write.csv(merged.data_UC, '9-metabolite_identifier_mapping/mbx_mapped_data_UC.csv', row.names = FALSE)
+  write.csv(merged.data_CD, '11-metabolite_identifier_mapping/mbx_mapped_data_CD.csv', row.names = FALSE)
+  write.csv(merged.data_UC, '11-metabolite_identifier_mapping/mbx_mapped_data_UC.csv', row.names = FALSE)
   return (TRUE)
   }#else
 }#function
@@ -1371,7 +1368,6 @@ pathwayAnalysisMets <- function (mSet,disorder){
   showresultsMetadata <- resultsMetadata$results
   remove(queryMetadata, resultsMetadata)
    
-  
   ## Create a list of HMDB IDs according to filtering criteria from step 8.
   list_Relevant_HMDB_IDs <- list(mSet$relevant_ids)
   vector_HMDB <- unlist(list_Relevant_HMDB_IDs) #convert list to array, for traversing the data to a SPARQL query later on
@@ -1449,11 +1445,11 @@ pathwayAnalysis_results_sorted <- pathwayAnalysis_results[  with(pathwayAnalysis
 
 print(pathwayAnalysis_results_sorted[1:5,])
 
-if(!dir.exists("10-metabolite_pathway_analysis"))
-  dir.create("10-metabolite_pathway_analysis")
+if(!dir.exists("12-metabolite_pathway_analysis"))
+  dir.create("12-metabolite_pathway_analysis")
 
 ## Export the pathway data:
-nameDataFile <- paste0("10-metabolite_pathway_analysis/mbxPWdata_", disorder ,".csv")
+nameDataFile <- paste0("12-metabolite_pathway_analysis/mbxPWdata_", disorder ,".csv")
 write.table(pathwayAnalysis_results_sorted, nameDataFile, sep =",", row.names = FALSE)
 
 ##Find Missing Biomarkers (not part of any Human pathway model)
@@ -1668,14 +1664,14 @@ pathwaySelection <- function(p_threshold_multi_trans,
                              nMetsPathway){
   
   setwd(work_DIR)
-  filelocation_t <- paste0(work_DIR, "/4-pathway_analysis/")
+  filelocation_t <- paste0(work_DIR, "/5-pathway_analysis/")
   #Obtain data from step 4 (transcript PWs)
   tPWs_CD_ileum <- read.delim(paste0(filelocation_t, 'enrichResults_ORA_CD_ileum.tsv'), sep = "\t", header = TRUE)
   tPWs_CD_rectum <- read.delim(paste0(filelocation_t, 'enrichResults_ORA_CD_rectum.tsv'), sep = "\t",header = TRUE)
   tPWs_UC_ileum <- read.delim(paste0(filelocation_t, 'enrichResults_ORA_UC_ileum.tsv'), sep = "\t", header = TRUE)
   tPWs_UC_rectum <- read.delim(paste0(filelocation_t, 'enrichResults_ORA_UC_rectum.tsv'), sep = "\t",header = TRUE)
   #Set location to download data for metabolomics pathway analysis:
-  filelocation_m <- paste0(work_DIR, "/10-metabolite_pathway_analysis/")
+  filelocation_m <- paste0(work_DIR, "/12-metabolite_pathway_analysis/")
   #Obtain data from step 9 (metabolite PWs)
   mPWs_CD <- read.delim(paste0(filelocation_m, 'mbxPWdata_CD.csv'), sep = ",", na.strings=c("", "NA"))
   mPWs_UC <- read.delim(paste0(filelocation_m, 'mbxPWdata_UC.csv'), sep = ",", na.strings=c("", "NA"))
@@ -1729,14 +1725,14 @@ pathwaySelection <- function(p_threshold_multi_trans,
   finalTable_UC_ileum <- finalTable[finalTable[,1] %in% overlapUC_ileum,]
   finalTable_UC_rectum <- finalTable[finalTable[,1] %in% overlapUC_rectum,]
   
-  if(!dir.exists("11-pathway_selection")) dir.create("11-pathway_selection")
-  write.table(finalTable_CD_ileum, file=paste0("11-pathway_selection/SelectedPathways_CD_Ileum.tsv"),
+  if(!dir.exists("11-pathway_selection")) dir.create("13-pathway_selection")
+  write.table(finalTable_CD_ileum, file=paste0("13-pathway_selection/SelectedPathways_CD_Ileum.tsv"),
               sep = "\t" ,quote = FALSE, row.names = FALSE)
-  write.table(finalTable_CD_rectum, file=paste0("11-pathway_selection/SelectedPathways_CD_Rectum.tsv"),
+  write.table(finalTable_CD_rectum, file=paste0("13-pathway_selection/SelectedPathways_CD_Rectum.tsv"),
               sep = "\t" ,quote = FALSE, row.names = FALSE)
-  write.table(finalTable_UC_ileum, file=paste0("11-pathway_selection/SelectedPathways_UC_Ileum.tsv"),
+  write.table(finalTable_UC_ileum, file=paste0("13-pathway_selection/SelectedPathways_UC_Ileum.tsv"),
               sep = "\t" ,quote = FALSE, row.names = FALSE)
-  write.table(finalTable_UC_rectum, file=paste0("11-pathway_selection/SelectedPathways_UC_Rectum.tsv"),
+  write.table(finalTable_UC_rectum, file=paste0("13-pathway_selection/SelectedPathways_UC_Rectum.tsv"),
               sep = "\t" ,quote = FALSE, row.names = FALSE)
   
   output <- list(
@@ -1765,7 +1761,7 @@ visualizeMultiOmics <- function(pathwayID, location_transcriptomics, disorder){
   setwd(work_DIR)
   
   #Set location to download data for transcriptomics:
-  filelocation_t <- paste0(work_DIR, "/3-identifier_mapping/")
+  filelocation_t <- paste0(work_DIR, "/4-identifier_mapping/")
   #Obtain data from step 3
   tSet_CD <- read.delim(paste0(filelocation_t, 'IDMapping_CD.tsv'), sep = "\t", na.strings=c("", "NA"))
   tSet_UC <- read.delim(paste0(filelocation_t, 'IDMapping_UC.tsv'), sep = "\t", na.strings=c("", "NA"))
@@ -1782,7 +1778,7 @@ visualizeMultiOmics <- function(pathwayID, location_transcriptomics, disorder){
   colnames(tSet_CD) <- c('ID','log2FC','pvalues')
   colnames(tSet_UC) <- c('ID','log2FC','pvalues')
   #Set location to download data for metabolomics:
-  filelocation_m <- paste0(work_DIR, "/9-metabolite_identifier_mapping/")
+  filelocation_m <- paste0(work_DIR, "/11-metabolite_identifier_mapping/")
   #Obtain data from step 10
   mSet_CD <- read.csv(paste0(filelocation_m, 'mbx_mapped_data_CD.csv'), sep = ",", na.strings=c("", "NA"))
   mSet_UC <- read.csv(paste0(filelocation_m, 'mbx_mapped_data_UC.csv'), sep = ",", na.strings=c("", "NA"))
@@ -1857,7 +1853,7 @@ visualizeMultiOmics <- function(pathwayID, location_transcriptomics, disorder){
   
   #Save output 
   if(!dir.exists("12-multiomics_visualization")) dir.create("12-multiomics_visualization")
-  filename_multiomics <- paste0("12-multiomics_visualization/", pathwayID, "_", disorder, "_location_", location_transcriptomics,"_visualization.png")
+  filename_multiomics <- paste0("14-multiomics_visualization/", pathwayID, "_", disorder, "_location_", location_transcriptomics,"_visualization.png")
   png.file <- file.path(getwd(), filename_multiomics)
   exportImage(png.file, 'PNG', zoom = 500)
 }
