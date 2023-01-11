@@ -140,18 +140,19 @@ server = function(input, output,session) {
   # Header for Log CPM filtering   
   observeEvent(input$cpm_filtering, {
     
-    observeEvent(if (length(data())> 0){input$cpm_filtering},{
-      output$histText_pre <- renderUI({
-        tagList(
-          h3(strong("Histogram of Mean Expression Values (pre-filtering)"))
-        )
+      observeEvent(if (length(data())> 0){input$cpm_filtering},{
+        output$histText_pre <- renderUI({
+          tagList(
+            h3(strong("Histogram of Mean Expression Values (pre-filtering)"))
+          )
+        })
       })
-    })
     
-    # Plot log CPM filtering
-    output$plot_prefiltering <- renderPlot({
-      cpm_filter(data()[[1]],data()[[2]], input$threshold)       
-    })
+    preFilter = TRUE
+      # Plot log CPM filtering
+      output$plot_prefiltering <- renderPlot({
+        cpm_filter(data()[[1]],data()[[2]], input$threshold, preFilter)       
+      })
     
     # Header for Log CPM filtering   
     observeEvent(if (length(data())> 0){input$cpm_filtering},{
@@ -163,10 +164,10 @@ server = function(input, output,session) {
         )
       })
     })
-    
+   preFilter = FALSE
     # Plot log CPM giltering
     output$plot_postfiltering <- renderPlot({
-      cpm_filter(data_filtered()[[1]],data_filtered()[[2]], NULL)       
+      cpm_filter(data_filtered()[[1]],data_filtered()[[2]],input$threshold, preFilter)       
     })
     
     sendSweetAlert(

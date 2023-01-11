@@ -144,8 +144,6 @@ removeOutliers <- function (sampleLabels, htxCount,outliers){
     htxCount <- htxCount[,-match(outliers,colnames(htxCount))]
     sampleLabels <- sampleLabels[-match(outliers,rownames(sampleLabels)),]
   }
-
-  
   
   return(list((sampleLabels),(htxCount)))
 }
@@ -212,7 +210,7 @@ return(list((htxMeta),(htxCount)))
 # Filtering applying CPM method: Create histogram
 #==============================================================================#
 
-cpm_filter<-function(htxMeta, htxCount, filter_threshold){
+cpm_filter<-function(htxMeta, htxCount, filter_threshold, preFilter){
 #selected threshold should be converted to numeric value
 filter_threshold <- as.numeric(filter_threshold)
 #aveLogCPM function computes average log2 counts-per-million for each row of counts.
@@ -220,7 +218,7 @@ filter_threshold <- as.numeric(filter_threshold)
 mean_log_cpm = aveLogCPM(htxCount)
 
 cat("selected threshold:", filter_threshold,"\n")
-
+#browser()
 # We plot the distribution of average log2 CPM values to verify that our chosen presence threshold is appropriate. 
 #The distribution is expected to be bi modal, with a low-abundance peak representing non-expressed genes and a high-abundance peak representing expressed genes. The chosen threshold should separate the two peaks of the bi modal distribution. 
 
@@ -241,11 +239,12 @@ htxCount <- htxCount[keep_genes,]
 ileum = nrow(htxMeta[htxMeta$biopsy_location=="Ileum",])
 rectum = nrow(htxMeta[htxMeta$biopsy_location=="Rectum",])
 cat ("Number of samples in ileum:", ileum ,"\nNumber of samples in rectum:",rectum)
-
+#browser()
 #Write all the generated data into the related output files 
+if(preFilter){
 write.table(htxCount, "1-data_filtering/htxCount.csv", sep=",",quote=FALSE, row.names = TRUE )
 write.table(htxMeta, "1-data_filtering/sampleLabels.csv", sep=",",quote=FALSE,row.names = TRUE)
-
+}
 cat("\nPreprocessing is finished, results are saved to output folder.")
 
 return (histogram_tmp)
