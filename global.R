@@ -241,10 +241,10 @@ rectum = nrow(htxMeta[htxMeta$biopsy_location=="Rectum",])
 cat ("Number of samples in ileum:", ileum ,"\nNumber of samples in rectum:",rectum)
 #browser()
 #Write all the generated data into the related output files 
-if(preFilter){
-write.table(htxCount, "1-data_filtering/htxCount.csv", sep=",",quote=FALSE, row.names = TRUE )
-write.table(htxMeta, "1-data_filtering/sampleLabels.csv", sep=",",quote=FALSE,row.names = TRUE)
-}
+# if(preFilter){
+# write.table(htxCount, "1-data_filtering/htxCount.csv", sep=",",quote=FALSE, row.names = TRUE )
+# write.table(htxMeta, "1-data_filtering/sampleLabels.csv", sep=",",quote=FALSE,row.names = TRUE)
+# }
 cat("\nPreprocessing is finished, results are saved to output folder.")
 
 return (histogram_tmp)
@@ -268,6 +268,10 @@ cpm_filter_output <- function(htxMeta, htxCount, filter_threshold){
   keep_genes <- mean_log_cpm >= filter_threshold 
   htxCount <- htxCount[keep_genes,]
   output <- list(htxMeta, htxCount)
+  
+  write.table(htxCount, "1-data_filtering/htxCount.csv", sep=",",quote=FALSE, row.names = TRUE )
+  write.table(htxMeta, "1-data_filtering/sampleLabels.csv", sep=",",quote=FALSE,row.names = TRUE)
+  
   return(output)
 }
 
