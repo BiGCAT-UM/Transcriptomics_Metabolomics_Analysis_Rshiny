@@ -201,7 +201,6 @@ sample_gene_filtering<-function(htxMeta,htxOrj){
   nonzero <- rowSums(htxCount) > 0
   htxCount %<>% .[nonzero,]
   
-
 return(list((htxMeta),(htxCount)))
        
 }
@@ -239,12 +238,6 @@ htxCount <- htxCount[keep_genes,]
 ileum = nrow(htxMeta[htxMeta$biopsy_location=="Ileum",])
 rectum = nrow(htxMeta[htxMeta$biopsy_location=="Rectum",])
 cat ("Number of samples in ileum:", ileum ,"\nNumber of samples in rectum:",rectum)
-#browser()
-#Write all the generated data into the related output files 
-# if(preFilter){
-# write.table(htxCount, "1-data_filtering/htxCount.csv", sep=",",quote=FALSE, row.names = TRUE )
-# write.table(htxMeta, "1-data_filtering/sampleLabels.csv", sep=",",quote=FALSE,row.names = TRUE)
-# }
 cat("\nPreprocessing is finished, results are saved to output folder.")
 
 return (histogram_tmp)
@@ -321,7 +314,6 @@ createPvalTab(files,postfix="",namePVal="pvalue",nameAdjPVal="padj",nameFC="Fold
                 nameLogFC="log2FoldChange",html=FALSE, FC_threshold = FC_threshold)
 
 }
-
 
 #==============================================================================#
 # Identifier mapping of transcriptomics data 
@@ -530,28 +522,25 @@ pathwayAnalysisTranscriptomics <- function(FCthreshold, Pthreshold, Pthreshold_p
 # Make heatmap of pathway significance
 #==============================================================================#
 
-createHeatmap <- function(p_threshold_pathway, q_threshold_pathway){
+createHeatmap <- function(p_threshold_pathway, nSignGenes){
+#createHeatmap <- function(p_threshold_pathway, q_threshold_pathway){
   setwd(work_DIR)
-  
+  q_threshold_pathway = 0.2 
   # Read files
   CD.ileum <- read.delim("5-pathway_analysis/enrichResults_ORA_CD_ileum.tsv",sep = "\t", header = TRUE)
   CD.rectum <- read.delim("5-pathway_analysis/enrichResults_ORA_CD_rectum.tsv", sep = "\t",header = TRUE)
   UC.ileum <- read.delim("5-pathway_analysis/enrichResults_ORA_UC_ileum.tsv",sep = "\t", header = TRUE)
   UC.rectum <- read.delim("5-pathway_analysis/enrichResults_ORA_UC_rectum.tsv", sep = "\t",header = TRUE)
 
-  #we need to get pathways that has p.adjust value lower than 0.05 and qvalue<0.02
+  #we need to get pathways that has p.adjust value lower than 0.05 and qvalue<0.2 and Count > #signGens
   #To prevent high false discovery rate (FDR) in multiple testing, q-values are also estimated for FDR control.
-  CD.ileum.f <- CD.ileum[(CD.ileum$p.adjust<p_threshold_pathway)&(CD.ileum$qvalue<q_threshold_pathway),]
-  CD.rectum.f <- CD.rectum[(CD.rectum$p.adjust<p_threshold_pathway)&(CD.rectum$qvalue<q_threshold_pathway),]
-  UC.ileum.f <- UC.ileum[(UC.ileum$p.adjust<p_threshold_pathway)&(UC.ileum$qvalue<q_threshold_pathway),]
-  UC.rectum.f <- UC.rectum[(UC.rectum$p.adjust<p_threshold_pathway)&(UC.rectum$qvalue<q_threshold_pathway),]
+  CD.ileum.f <- CD.ileum[(CD.ileum$p.adjust<p_threshold_pathway)&(CD.ileum$qvalue<q_threshold_pathway)& (CD.ileum$Count>nSignGenes),c(2,6)]
+  CD.rectum.f <- CD.rectum[(CD.rectum$p.adjust<p_threshold_pathway)&(CD.rectum$qvalue<q_threshold_pathway)& (CD.rectum$Count>nSignGenes),c(2,6)]
+  UC.ileum.f <- UC.ileum[(UC.ileum$p.adjust<p_threshold_pathway)&(UC.ileum$qvalue<q_threshold_pathway)& (UC.ileum$Count>nSignGenes),c(2,6)]
+  UC.rectum.f <- UC.rectum[(UC.rectum$p.adjust<p_threshold_pathway)&(UC.rectum$qvalue<q_threshold_pathway)& (UC.rectum$Count>nSignGenes),c(2,6)]
   
-  #Filter out unused columns 
-  CD.ileum.f  <- CD.ileum.f[,c(2,6)]
-  CD.rectum.f <- CD.rectum.f[,c(2,6)]
-  UC.ileum.f  <- UC.ileum.f[,c(2,6)]
-  UC.rectum.f <- UC.rectum.f[,c(2,6)]
-  #first 20 max value of p.adjust pathways for each comparison: Note that if a dataset has less then 20 sign. changed PWs, less rows need to be selected (e.g. adapt c(1:20))
+  #take only first 20 significant pathways for each comparison: 
+  #Note that if a dataset has less then 20 sign. changed PWs, less rows need to be selected (e.g. adapt c(1:20))
   cd_ileum_temp <- CD.ileum.f
   cd_rectum_temp <- CD.rectum.f
   uc_ileum_temp <- UC.ileum.f
@@ -568,6 +557,8 @@ createHeatmap <- function(p_threshold_pathway, q_threshold_pathway){
   if (nrow(UC.rectum.f) > 20){
     uc_rectum_temp <- UC.rectum.f[c(1:20),]
   }
+  
+  #merge CD pathways
   all.pathways.1 <- merge(cd_ileum_temp, cd_rectum_temp,by.x="Description", by.y="Description",sort = TRUE, all.x = TRUE, all.y = TRUE)
   #merge UC pathways
   all.pathways.2 <- merge(uc_ileum_temp, uc_rectum_temp, by.x="Description", by.y="Description",sort = TRUE, all.x = TRUE, all.y = TRUE)
@@ -577,7 +568,7 @@ createHeatmap <- function(p_threshold_pathway, q_threshold_pathway){
   
   #replace NA values with the values from the whole list
   #### for CD ileum
-  #find pathways which does not occur in the filtered enriched pathway list of cd.ileum (p.adjust<0.05 & qvalue<0.02 )
+  #find pathways which does not occur in the filtered enriched pathway list of cd.ileum (p.adjust<0.05 & qvalue<0.2 )
   #because we will not take into account not sig. enriched pathways, we will assign value of 1 for their p.adjust
   notExist.CDileum <- setdiff(all.pathways$Description,CD.ileum.f$Description)
   all.pathways[all.pathways$Description %in% notExist.CDileum,]$CD.ileum.p.adjust <- 1
@@ -589,7 +580,7 @@ createHeatmap <- function(p_threshold_pathway, q_threshold_pathway){
   df <- df[order(df$Description),]
   all.pathways[all.pathways$Description %in% df$Description,]$CD.ileum.p.adjust <- df$p.adjust
   #### for CD rectum
-  #find pathways which does not occur in the filtered enriched pathway list of cd rectum (p.adjust<0.05 & qvalue<0.02 )
+  #find pathways which does not occur in the filtered enriched pathway list of cd rectum (p.adjust<0.05 & qvalue<0.2 )
   notExist.CDrectum<- setdiff(all.pathways$Description,CD.rectum.f$Description)
   all.pathways[all.pathways$Description %in% notExist.CDrectum,]$CD.rectum.p.adjust <- 1
   #replacing NA values with the values from the whole list
@@ -599,11 +590,11 @@ createHeatmap <- function(p_threshold_pathway, q_threshold_pathway){
   df <- df[order(df$Description),]
   all.pathways[all.pathways$Description %in% df$Description,]$CD.rectum.p.adjust <- df$p.adjust
   #### for UC ileum
-  #find pathways which does not occur in the filtered enriched pathway list of UC ileum (p.adjust<0.05 & qvalue<0.02 )
+  #find pathways which does not occur in the filtered enriched pathway list of UC ileum (p.adjust<0.05 & qvalue<0.2 )
   notExist.UCileum <- setdiff(all.pathways$Description,UC.ileum.f$Description)
   all.pathways[all.pathways$Description %in% notExist.UCileum,]$UC.ileum.p.adjust <- 1
   #### for UC rectum
-  #find pathways which does not occur in the filtered enriched pathway list of UC rectum (p.adjust<0.05 & qvalue<0.02 )
+  #find pathways which does not occur in the filtered enriched pathway list of UC rectum (p.adjust<0.05 & qvalue<0.2 )
   notExist.UCrectum<- setdiff(all.pathways$Description,UC.rectum.f$Description)
   all.pathways[all.pathways$Description %in% notExist.UCrectum,]$UC.rectum.p.adjust <- 1
   #replacing NA values with the values from the whole list
@@ -616,7 +607,7 @@ createHeatmap <- function(p_threshold_pathway, q_threshold_pathway){
   row.names(all.pathways) <- all.pathways$Description
   all.pathways  <- all.pathways[,2:5]
   colnames(all.pathways) <- c("CD Ileum","CD Rectum","UC Ileum","UC Rectum")
-  
+browser() 
   #create output folder if not exist
   if(!dir.exists("6-create_heatmap")){dir.create("6-create_heatmap")}
   
@@ -1254,7 +1245,6 @@ statAnalysisMets <- function (mSet_transformed,disorder,transformation, FC, pval
   
   ##Save the Volcano plot:
   imageType <- "png" ##Options are: svg, png, eps, ps, tex, pdf, jpeg, tiff, png, bmp, svg or wmf
-  #nameVolcano <- paste0("10-significantly_changed_metabolites_analysis/", disorder, "_", selectViz, "_VolcanoPlot_absLogFC_", log2FC_max, "_pValue_", p_value_threshold, ".", imageType)
   nameVolcano <- paste0("10-significantly_changed_metabolites_analysis/", disorder, "_", selectViz, "_VolcanoPlot.", imageType)
   ggsave(nameVolcano)
   

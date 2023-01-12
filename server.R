@@ -9,14 +9,14 @@ server = function(input, output,session) {
   
   # ################################################################
   # 
-  hideTab("tabs_trans", target = "filtering_trans")
-  hideTab("tabs_trans", target = "norm_trans")
-  hideTab("tabs_trans", target = "deg_trans")
-  hideTab("tabs_trans", target = "mapping_trans")
-  hideTab("tabs_trans", target = "pathway_trans")
-  hideTab("tabs_trans", target = "heatmap_trans")
-  hideTab("tabs_trans", target = "network_trans")
-  hideTab("tabs_multi", target = "visualization")
+  # hideTab("tabs_trans", target = "filtering_trans")
+  # hideTab("tabs_trans", target = "norm_trans")
+  # hideTab("tabs_trans", target = "deg_trans")
+  # hideTab("tabs_trans", target = "mapping_trans")
+  # hideTab("tabs_trans", target = "pathway_trans")
+  # hideTab("tabs_trans", target = "heatmap_trans")
+  # hideTab("tabs_trans", target = "network_trans")
+  # hideTab("tabs_multi", target = "visualization")
 
   # 
   # ################################################################
@@ -675,8 +675,8 @@ server = function(input, output,session) {
     input$p_threshold_pathway
   })
   
-  q_threshold_pathway <- eventReactive(input$heatmapButton, {
-    input$q_threshold_pathway
+  nSignGenes <- eventReactive(input$heatmapButton, {
+    input$nSignGenesPathways
   })
   
   observeEvent(input$heatmapButton, {
@@ -687,7 +687,7 @@ server = function(input, output,session) {
                           h5("This might take a while. Please be patient.", 
                              align = "center")))
     
-    createHeatmap(p_threshold_pathway(),q_threshold_pathway())
+    createHeatmap(p_threshold_pathway(),nSignGenes())
     
     removeModal()
     
@@ -1442,11 +1442,10 @@ server = function(input, output,session) {
                        input$vis_disease, "_location_", 
                        input$vis_location,"_visualization.png")
         
-        #Constants 
-        img_width = 2000 
-        img_height = 1125 
-        scale_factor = 0.5 
-        
+        # #Constants 
+        img_width = 2000
+        img_height = 1125
+        scale_factor = 0.5
         
         # Add invisible scatter trace. 
         # This trace is added to help the autoresize logic work. 
@@ -1518,7 +1517,7 @@ server = function(input, output,session) {
       
       output$legendMulti <- renderImage({
         path <- paste0(work_DIR,"/14-multiomics_visualization/legend_visualization.jpg")
-        list(src = path, contentType = 'image/jpeg', height = 300,
+        list(src = path, contentType = 'image/jpeg', height = 200,
              alt = "This is alternate text")
         
       }, deleteFile=FALSE)

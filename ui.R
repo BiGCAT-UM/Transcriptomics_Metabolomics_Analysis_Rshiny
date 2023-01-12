@@ -440,7 +440,7 @@ ui <- tagList(
                                                br(),
                                                numericInput(
                                                  inputId = "p_threshold_pathway",
-                                                 label = "p-value threshold",
+                                                 label = "adj.p-value threshold",
                                                  value = 0.05,
                                                  min = 0,
                                                  max = 1,
@@ -448,12 +448,12 @@ ui <- tagList(
                                                ),
                                                br(),
                                                numericInput(
-                                                 inputId = "q_threshold_pathway",
-                                                 label = "q-value threshold",
-                                                 value = 0.02,
+                                                 inputId = "nSignGenesPathways",
+                                                 label = "# Significant genes",
+                                                 value = 5,
                                                  min = 0,
-                                                 max = 1,
-                                                 step = 0.01
+                                                 max = 20,
+                                                 step = 1
                                                ),
                                                
                                                actionBttn(inputId ="heatmapButton", label ="Apply", style = "jelly",
@@ -1044,7 +1044,7 @@ ui <- tagList(
                                                br(),
                                                textInput(inputId = "vis_pathway",
                                                          label = "Pathway ID",
-                                                         value = "WP4726"),
+                                                         value = "WP15"),
                                                radioButtons(inputId = "vis_location", 
                                                             label = "Location",
                                                             choices = c(Ileum = "ileum", 
