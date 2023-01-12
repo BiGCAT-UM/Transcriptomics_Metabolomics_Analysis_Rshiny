@@ -954,7 +954,7 @@ ui <- tagList(
                                                numericInput(
                                                  inputId = "q_threshold_multi_trans",
                                                  label = "q-value threshold",
-                                                 value = 0.02,
+                                                 value = 0.2,
                                                  min = 0,
                                                  max = 1,
                                                  step = 0.01

@@ -607,7 +607,7 @@ createHeatmap <- function(p_threshold_pathway, nSignGenes){
   row.names(all.pathways) <- all.pathways$Description
   all.pathways  <- all.pathways[,2:5]
   colnames(all.pathways) <- c("CD Ileum","CD Rectum","UC Ileum","UC Rectum")
-browser() 
+
   #create output folder if not exist
   if(!dir.exists("6-create_heatmap")){dir.create("6-create_heatmap")}
   
@@ -1669,7 +1669,7 @@ pathwaySelection <- function(p_threshold_multi_trans,
   #Obtain data from step 9 (metabolite PWs)
   mPWs_CD <- read.delim(paste0(filelocation_m, 'mbxPWdata_CD.csv'), sep = ",", na.strings=c("", "NA"))
   mPWs_UC <- read.delim(paste0(filelocation_m, 'mbxPWdata_UC.csv'), sep = ",", na.strings=c("", "NA"))
-
+browser()
   #filter out enrichedPathway based on criterias
   tPWs_CD_ileum_sign <- tPWs_CD_ileum[(tPWs_CD_ileum$p.adjust<p_threshold_multi_trans)
                                       &(tPWs_CD_ileum$qvalue<q_threshold_multi_trans)
