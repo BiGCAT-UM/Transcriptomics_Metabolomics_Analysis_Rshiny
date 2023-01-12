@@ -1437,7 +1437,7 @@ server = function(input, output,session) {
       
       
       output$multiPlot <- renderPlotly({
-        path <- paste0("12-multiomics_visualization/", 
+        path <- paste0("14-multiomics_visualization/", 
                        input$vis_pathway, "_", 
                        input$vis_disease, "_location_", 
                        input$vis_location,"_visualization.png")

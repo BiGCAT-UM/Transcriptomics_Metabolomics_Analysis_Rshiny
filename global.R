@@ -1673,6 +1673,7 @@ pathwaySelection <- function(p_threshold_multi_trans,
   tPWs_CD_rectum <- read.delim(paste0(filelocation_t, 'enrichResults_ORA_CD_rectum.tsv'), sep = "\t",header = TRUE)
   tPWs_UC_ileum <- read.delim(paste0(filelocation_t, 'enrichResults_ORA_UC_ileum.tsv'), sep = "\t", header = TRUE)
   tPWs_UC_rectum <- read.delim(paste0(filelocation_t, 'enrichResults_ORA_UC_rectum.tsv'), sep = "\t",header = TRUE)
+ 
   #Set location to download data for metabolomics pathway analysis:
   filelocation_m <- paste0(work_DIR, "/12-metabolite_pathway_analysis/")
   #Obtain data from step 9 (metabolite PWs)
@@ -1802,7 +1803,8 @@ visualizeMultiOmics <- function(pathwayID, location_transcriptomics, disorder){
   #close all opened session before starting
   closeSession(FALSE)
   #Set up WikiPathways app in Cytoscape, v.3.3.10
-  if("wikipathways" %in% commandsHelp("")) print("Success: the WikiPathways app is installed") else print("Warning: WikiPathways app is not installed. Please install the WikiPathways app before proceeding.")
+  if("wikipathways" %in% commandsHelp("")) print("Success: the WikiPathways app is installed") 
+  else print("Warning: WikiPathways app is not installed. Please install the WikiPathways app before proceeding.")
   if(!"wikipathways" %in% commandsHelp("")) {
     installApp("wikipathways")
   }
@@ -1855,7 +1857,7 @@ visualizeMultiOmics <- function(pathwayID, location_transcriptomics, disorder){
   RCy3::setEdgeTargetArrowShapeMapping(table.column = 'EndArrow', c('mim-conversion', 'Arrow', 'mim-catalysis'), c('DELTA', 'DELTA', 'OPEN_CIRCLE'), style.name = "pathwayStyle")
   
   #Save output 
-  if(!dir.exists("12-multiomics_visualization")) dir.create("12-multiomics_visualization")
+  if(!dir.exists("14-multiomics_visualization")) dir.create("14-multiomics_visualization")
   filename_multiomics <- paste0("14-multiomics_visualization/", pathwayID, "_", disorder, "_location_", location_transcriptomics,"_visualization.png")
   png.file <- file.path(getwd(), filename_multiomics)
   exportImage(png.file, 'PNG', zoom = 500)
