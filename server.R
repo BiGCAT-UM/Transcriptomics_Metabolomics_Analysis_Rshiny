@@ -9,14 +9,14 @@ server = function(input, output,session) {
   
   # ################################################################
   # 
-  # hideTab("tabs_trans", target = "filtering_trans")
-  # hideTab("tabs_trans", target = "norm_trans")
-  # hideTab("tabs_trans", target = "deg_trans")
-  # hideTab("tabs_trans", target = "mapping_trans")
-  # hideTab("tabs_trans", target = "pathway_trans")
-  # hideTab("tabs_trans", target = "heatmap_trans")
-  # hideTab("tabs_trans", target = "network_trans")
-  # hideTab("tabs_multi", target = "visualization")
+  hideTab("tabs_trans", target = "filtering_trans")
+  hideTab("tabs_trans", target = "norm_trans")
+  hideTab("tabs_trans", target = "deg_trans")
+  hideTab("tabs_trans", target = "mapping_trans")
+  hideTab("tabs_trans", target = "pathway_trans")
+  hideTab("tabs_trans", target = "heatmap_trans")
+  hideTab("tabs_trans", target = "network_trans")
+  hideTab("tabs_multi", target = "visualization")
 
   # 
   # ################################################################
@@ -507,6 +507,10 @@ server = function(input, output,session) {
                            pCutoff = P_threshold(), 
                            FCcutoff = log2(FC_threshold()))
       }
+      ggsave(p, file = paste0(work_DIR,"/3-differential_gene_expression_analysis/volcanoPlot_",
+                 str_replace_all(str_replace_all(Comparison_DEG(), ": ", "_")," ", "_"),".png"),
+             width = 8, height = 6)
+      
       return(p)
     })
     

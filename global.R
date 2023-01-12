@@ -28,7 +28,8 @@ CRANpackages <- c("shiny",
                   "pheatmap",
                   "RColorBrewer",
                   "rJava",
-                  "plotly")
+                  "plotly",
+                  "stringr")
 
 #Install (if not yet installed) and load the required packages: 
 for (pkg in CRANpackages) {
