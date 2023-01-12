@@ -437,7 +437,7 @@ pathwayAnalysisTranscriptomics <- function(FCthreshold, Pthreshold, Pthreshold_p
     down.genes.ileum <- dataset[(dataset$log2FC_ileum <= (-1*logFCthreshold)) & dataset$pvalue_ileum < Pthreshold, 2] 
     deg.ileum <- unique(dataset[(!is.na(dataset$ENTREZ.ID)) & (!is.na(dataset$pvalue_ileum)) & (dataset$pvalue_ileum < Pthreshold) & 
                                   (abs(dataset$log2FC_ileum) > logFCthreshold),c(1:4)])
-    write.table(deg.ileum,file = paste0("4-pathway_analysis/DEGs_",disorder,"_ileum.tsv"),sep="\t", quote=FALSE, row.names = FALSE)
+    write.table(deg.ileum,file = paste0("5-pathway_analysis/DEGs_",disorder,"_ileum.tsv"),sep="\t", quote=FALSE, row.names = FALSE)
     #for rectum location
     up.genes.rectum   <- dataset[(dataset$log2FC_rectum >= logFCthreshold) & dataset$pvalue_rectum < Pthreshold, 2] 
     down.genes.rectum <- dataset[(dataset$log2FC_rectum <= (-1*logFCthreshold)) & dataset$pvalue_rectum < Pthreshold, 2] 
@@ -760,7 +760,7 @@ networkAnalysis <- function(PPI_cutoff = 0.7){
       paste0("Using new data, from: ", wp.hs.gmt)}else{print("Pathway data type not recognized")
       }
     #all wp and gene information stored in wp2gene object
-    wp2gene   <- rWikiPathways::readPathwayGMT(paste0(work_DIR,"/4-pathway_analysis/",wp.hs.gmt))
+    wp2gene   <- rWikiPathways::readPathwayGMT(paste0(work_DIR,"/5-pathway_analysis/",wp.hs.gmt))
     #filter out  pathways that does not consist of any differentially expressed genes 
     wp2gene.filtered <- wp2gene [wp2gene$gene %in% deg$ENTREZ,]
     #change column names 
