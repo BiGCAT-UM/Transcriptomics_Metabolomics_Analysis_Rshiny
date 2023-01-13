@@ -218,9 +218,9 @@ filter_threshold <- as.numeric(filter_threshold)
 mean_log_cpm = aveLogCPM(htxCount)
 
 cat("selected threshold:", filter_threshold,"\n")
-#browser()
 # We plot the distribution of average log2 CPM values to verify that our chosen presence threshold is appropriate. 
-#The distribution is expected to be bi modal, with a low-abundance peak representing non-expressed genes and a high-abundance peak representing expressed genes. The chosen threshold should separate the two peaks of the bi modal distribution. 
+#The distribution is expected to be bi modal, with a low-abundance peak representing non-expressed genes and a 
+#high-abundance peak representing expressed genes. The chosen threshold should separate the two peaks of the bi modal distribution. 
 
 #jpeg(file="avgLogCpmDist.jpeg")#if you want to save the histogram uncomment the following command  
 histogram_tmp <- ggplot() + aes(x=mean_log_cpm) +
