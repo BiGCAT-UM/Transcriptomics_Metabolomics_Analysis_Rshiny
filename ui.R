@@ -1121,7 +1121,7 @@ ui <- tagList(
                                              h5("3. Removal of genes with a mean logCPM below the selected threshold. 
                                                 For this, the default threshold is 1 logCPM, but can be changed by the user."),
                                              h5("NOTE: The filtered meta data and RNA-seq count data can be found in the ",
-                                                em("'1-data_preprocessing'"), " folder."),
+                                                em("'1-data_filtering'"), " folder."),
                                              br(),
                                              
                                              

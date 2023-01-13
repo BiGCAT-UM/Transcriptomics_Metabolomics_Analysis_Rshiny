@@ -1186,8 +1186,9 @@ statAnalysisMets <- function (mSet_transformed,disorder,transformation, FC, pval
   ##Duplication issues:
   if(!"dplyr" %in% installed.packages()){install.packages("dplyr")}
   library(dplyr)
-  
-  ##Check for duplicate HMDB.IDs, however with different compound name (example: HMDB0011130, called LPE, LPE-A (both relevant), and LPE-B (not relevant) & HMDB0000252, called sphingosine isomer 1, 2 and 3.)
+#browser()  
+  ##Check for duplicate HMDB.IDs, however with different compound name (example: HMDB0011130, called LPE, LPE-A (both relevant), 
+  #and LPE-B (not relevant) & HMDB0000252, called sphingosine isomer 1, 2 and 3.)
   mSet_AnalysisReady_Duplicates <- mSet_AnalysisReady %>% group_by(HMDB_ID) %>% distinct(Compound_Name, .keep_all = TRUE)
   #Remove all rows with relevant data, which will be added later by their average in case of duplicate HMDB.IDs:
   mSet_AnalysisReady_Duplicates <- subset(mSet_AnalysisReady_Duplicates, is.na(mSet_AnalysisReady_Duplicates$relevant_labels))
@@ -1195,8 +1196,8 @@ statAnalysisMets <- function (mSet_transformed,disorder,transformation, FC, pval
   
   ##Check for duplicates HMDB.IDs, calculate the average for these if both significant (example: HMDB0010384).
   mSet_AnalysisReady_FC <- mSet_AnalysisReady %>% group_by(HMDB_ID, Compound_Name) %>% filter(!is.na(relevant_labels)) %>% summarize(foldchange_disorder=mean(foldchange_disorder)) 
-  mSet_AnalysisReady_p <- mSet_AnalysisReady %>% group_by(HMDB_ID, Compound_Name)  %>% filter(!is.na(relevant_labels)) %>% summarize(p_values_disorder=mean(p_values_disorder))
-  
+ # mSet_AnalysisReady_p <- mSet_AnalysisReady %>% group_by(HMDB_ID, Compound_Name)  %>% filter(!is.na(relevant_labels)) %>% summarize(p_values_disorder=mean(p_values_disorder))
+  mSet_AnalysisReady_p <- mSet_AnalysisReady %>% group_by(HMDB_ID, Compound_Name)  %>% filter(!is.na(relevant_labels)) %>% summarize(p_values_disorder=min(p_values_disorder))
   #Merge FC and p-value data together based on HMDB.ID
   mSet_AnalysisReady_FCandp <-
     left_join(mSet_AnalysisReady_FC, mSet_AnalysisReady_p, by=c("HMDB_ID", "Compound_Name")) %>%
@@ -1328,8 +1329,8 @@ mappingMets <- function (){
   colnames(merged.data_UC) <- c("HMDBID","CHEBI", "label", "log2FC_met", "pvalue_met")
 
   ## Export the mapped metabolomics data:
-  if(!dir.exists("9-metabolite_identifier_mapping"))
-    dir.create("9-metabolite_identifier_mapping")
+  if(!dir.exists("11-metabolite_identifier_mapping"))
+    dir.create("11-metabolite_identifier_mapping")
   ##Save the data file
   write.csv(merged.data_CD, '11-metabolite_identifier_mapping/mbx_mapped_data_CD.csv', row.names = FALSE)
   write.csv(merged.data_UC, '11-metabolite_identifier_mapping/mbx_mapped_data_UC.csv', row.names = FALSE)
