@@ -1256,13 +1256,7 @@ statAnalysisMets <- function (mSet_transformed,disorder,transformation, FC, pval
   ##Save the Volcano plot:
   imageType <- "png" ##Options are: svg, png, eps, ps, tex, pdf, jpeg, tiff, png, bmp, svg or wmf
   nameVolcano <- paste0("10-significantly_changed_metabolites_analysis/", disorder, "_", selectViz, "_VolcanoPlot.", imageType)
-  #ggsave(nameVolcano)
   ggsave(nameVolcano,width = 8, height = 6)
-  
-  # png(paste("pvalue_hist_",colnames(design)[i],"_",postfix,".png",sep=""),width=1000,height=1000)
-  # hist(toptab[,"pvalue"],main=paste("p-value histogram for",colnames(design)[i]),xlab="p-values",col="blue",breaks=120,cex.axis=1.2,cex.lab=1.2)
-  # dev.off()
-  
   
 }
 
