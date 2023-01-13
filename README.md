@@ -12,17 +12,18 @@ This workflow, developed in R Shiny, includes differential gene expression analy
 [7-Network analysis](/7-network_analysis)<br />
 
 #### Metabolomics analysis  
-[8-Data filterin](/7-metabolite_data_preprocessing)<br />
-[8-Significantly changed metabolites analysis](/8-significantly_changed_metabolites_analysis)<br />
-[9-Identifier mapping](9-metabolite_identifier_mapping)<br />
-[10-Metabolite Pathway Analysis (ORA)](/10-metabolite_pathway_analysis)<br />
+[8-Metabolite data filtering](/8-metabolite_data_filtering)<br />
+[9-Metabolite data normalization](/9-metabolite_data_normalization)<br />
+[10-Significantly changed metabolites analysis](/10-significantly_changed_metabolites_analysis)<br />
+[11-Identifier mapping](11-metabolite_identifier_mapping)<br />
+[12-Metabolite Pathway Analysis (ORA)](/12-metabolite_pathway_analysis)<br />
 
 #### Multi-omics visualization
-[11-Pathway selection](11-pathway_selection)<br />
-[12-Multi-omics visualization](12-multiomics_visualization)<br />
+[13-Pathway selection](13-pathway_selection)<br />
+[14-Multi-omics visualization](14-multiomics_visualization)<br />
 
 The workflow is an example of how to bring together different software tools and methods to analyze transcriptomics and metabolomics data to reveal the underlying mechanism behind IBD disease as a use case study.
-![workflow pptx](https://user-images.githubusercontent.com/65600609/210248763-ae312fec-4df9-43f0-9cc6-c995629dd2c2.jpg)
+![Figure-1](https://user-images.githubusercontent.com/65600609/212306268-321a361e-7056-4adf-91e6-44460f4199c3.jpg)
 
 ## Setup and Preparation
 The setup of this project has been tested with:
