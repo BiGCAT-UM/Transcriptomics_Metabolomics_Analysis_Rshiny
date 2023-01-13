@@ -695,7 +695,7 @@ browser()
 #cat(paste0("# overlap genes between CD down and UC up",merged.ileum.downCDupUC,"\n" )  )
   #merge all DEG with corresponding logFC for both diseases
   DEG.overlapped_ileum <- rbind(merged.ileum.downCDdownUC, merged.ileum.upCDdownUC, merged.ileum.upCDupUC, merged.ileum.downCDupUC)
-  if(!dir.exists("6-network_analysis")) dir.create("6-network_analysis")
+  if(!dir.exists("7-network_analysis")) dir.create("7-network_analysis")
   write.table(DEG.overlapped_ileum ,"7-network_analysis/DEG.overlapped_ileum",row.names=FALSE,col.names = TRUE,quote= FALSE, sep = "\t")
   
   # OVERLAP RECTUM
@@ -1224,10 +1224,12 @@ statAnalysisMets <- function (mSet_transformed,disorder,transformation, FC, pval
   
   if(selectViz == "relevant_labels"){
     ##volcanoPlot_Disorder 
-    volcanoPlot_disorder <- ggplot(data=mSet_AnalysisFinal, aes(x=foldchange_disorder, y=-log10(p_values_disorder), label=relevant_labels)) + geom_point() + theme_minimal() + geom_text_repel()
+    volcanoPlot_disorder <- ggplot(data=mSet_AnalysisFinal, aes(x=foldchange_disorder, y=-log10(p_values_disorder), 
+                                  label=relevant_labels)) + geom_point() + theme_minimal() + geom_text_repel()
   }else if(selectViz == "relevant_ids"){
     ##volcanoPlot_Disorder 
-    volcanoPlot_disorder <- ggplot(data=mSet_AnalysisFinal, aes(x=foldchange_disorder, y=-log10(p_values_disorder), label=relevant_ids)) + geom_point() + theme_minimal() + geom_text_repel()
+    volcanoPlot_disorder <- ggplot(data=mSet_AnalysisFinal, aes(x=foldchange_disorder, y=-log10(p_values_disorder), 
+                                  label=relevant_ids)) + geom_point() + theme_minimal() + geom_text_repel()
   }else{print("Column name not recognized for label visualization.")}
   
   ## Add vertical lines for FoldChange and P-value thresholds:
@@ -1254,7 +1256,13 @@ statAnalysisMets <- function (mSet_transformed,disorder,transformation, FC, pval
   ##Save the Volcano plot:
   imageType <- "png" ##Options are: svg, png, eps, ps, tex, pdf, jpeg, tiff, png, bmp, svg or wmf
   nameVolcano <- paste0("10-significantly_changed_metabolites_analysis/", disorder, "_", selectViz, "_VolcanoPlot.", imageType)
-  ggsave(nameVolcano)
+  #ggsave(nameVolcano)
+  ggsave(nameVolcano,width = 8, height = 6)
+  
+  # png(paste("pvalue_hist_",colnames(design)[i],"_",postfix,".png",sep=""),width=1000,height=1000)
+  # hist(toptab[,"pvalue"],main=paste("p-value histogram for",colnames(design)[i]),xlab="p-values",col="blue",breaks=120,cex.axis=1.2,cex.lab=1.2)
+  # dev.off()
+  
   
 }
 
@@ -1677,7 +1685,7 @@ pathwaySelection <- function(p_threshold_multi_trans,
   #Obtain data from step 9 (metabolite PWs)
   mPWs_CD <- read.delim(paste0(filelocation_m, 'mbxPWdata_CD.csv'), sep = ",", na.strings=c("", "NA"))
   mPWs_UC <- read.delim(paste0(filelocation_m, 'mbxPWdata_UC.csv'), sep = ",", na.strings=c("", "NA"))
-browser()
+
   #filter out enrichedPathway based on criterias
   tPWs_CD_ileum_sign <- tPWs_CD_ileum[(tPWs_CD_ileum$p.adjust<p_threshold_multi_trans)
                                       &(tPWs_CD_ileum$qvalue<q_threshold_multi_trans)
