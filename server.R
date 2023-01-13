@@ -9,14 +9,14 @@ server = function(input, output,session) {
   
   # ################################################################
   # 
-  hideTab("tabs_trans", target = "filtering_trans")
-  hideTab("tabs_trans", target = "norm_trans")
-  hideTab("tabs_trans", target = "deg_trans")
-  hideTab("tabs_trans", target = "mapping_trans")
-  hideTab("tabs_trans", target = "pathway_trans")
-  hideTab("tabs_trans", target = "heatmap_trans")
-  hideTab("tabs_trans", target = "network_trans")
-  hideTab("tabs_multi", target = "visualization")
+  # hideTab("tabs_trans", target = "filtering_trans")
+  # hideTab("tabs_trans", target = "norm_trans")
+  # hideTab("tabs_trans", target = "deg_trans")
+  # hideTab("tabs_trans", target = "mapping_trans")
+  # hideTab("tabs_trans", target = "pathway_trans")
+  # hideTab("tabs_trans", target = "heatmap_trans")
+  # hideTab("tabs_trans", target = "network_trans")
+  # hideTab("tabs_multi", target = "visualization")
 
   # 
   # ################################################################

@@ -432,7 +432,6 @@ pathwayAnalysisTranscriptomics <- function(FCthreshold, Pthreshold, Pthreshold_p
       }
     
     if(!dir.exists("5-pathway_analysis")) dir.create("5-pathway_analysis")
-    #we will use selection criteria as Fold change=1.5,log2FC=0.58 and p.value < 0.05
     #for ileum location
     up.genes.ileum   <- dataset[(dataset$log2FC_ileum >= logFCthreshold) & dataset$pvalue_ileum < Pthreshold, 2] 
     down.genes.ileum <- dataset[(dataset$log2FC_ileum <= (-1*logFCthreshold)) & dataset$pvalue_ileum < Pthreshold, 2] 
@@ -478,15 +477,15 @@ pathwayAnalysisTranscriptomics <- function(FCthreshold, Pthreshold, Pthreshold_p
     #     BgRatio   = (number of genes measured in the current pathway) / (number of genes measured in all pathways)
     #     geneRatio = (number of DEGs in the current pathway) / (total number of DEGs in all pathways)
     ##Print location:
-    paste0("Pathways enrichment results for disorder: ", disorder , ", location: ILEUM")
+    cat("Pathways enrichment results for disorder: ", disorder , ", location: ILEUM\n")
     # number of genes measured in all pathways
-    paste0("The number of genes measured in all pathways is: ", length(ewp.ileum@universe))
+    cat("The number of genes measured in all pathways is: ", length(ewp.ileum@universe),"\n")
     # number of DEGs in all pathways
-    paste0("The number of DEGs measured in all pathways is: ", length(deg.ileum$ENTREZ.ID[deg.ileum$ENTREZ.ID %in% unique(wp2gene$gene)]))
+    cat("The number of DEGs measured in all pathways is: ", length(deg.ileum$ENTREZ.ID[deg.ileum$ENTREZ.ID %in% unique(wp2gene$gene)]),"\n")
     #number of enriched pathways
-    paste0("The number of enriched pathways is: ", num.pathways.ileum <- dim(ewp.ileum.res)[1])
+    cat("The number of enriched pathways is: ", num.pathways.ileum <- dim(ewp.ileum.res)[1],"\n")
     #number of significantly enriched pathways
-    paste0("The number of significantly enriched pathways is: ", num.pathways.ileum.sign <- dim(ileum.sign)[1])
+    cat("The number of significantly enriched pathways is: ", num.pathways.ileum.sign <- dim(ileum.sign)[1],"\n")
     #exporting results to the file
     write.table(ewp.ileum.res, file=paste0("5-pathway_analysis/enrichResults_ORA_",disorder,"_ileum.tsv"),
                 sep = "\t" ,quote = FALSE, row.names = FALSE)
@@ -503,15 +502,15 @@ pathwayAnalysisTranscriptomics <- function(FCthreshold, Pthreshold, Pthreshold_p
     #Count all significant pathways that have p.adjust value lower than 0.05 and qvalue<0.02
     rectum.sign <- ewp.rectum.res[(ewp.rectum.res$p.adjust<Pthreshold_pathway)&(ewp.rectum.res$qvalue<Qthreshold_pathway),]
     ##Print location:
-    paste0("Pathways enrichment results for disorder: ", disorder , ", location: RECTUM")
+    cat("Pathways enrichment results for disorder: ", disorder , ", location: RECTUM\n")
     # number of genes measured in all pathways
-    paste0("The number of genes measured in all pathways is: ", length(ewp.rectum@universe))
+    cat("The number of genes measured in all pathways is: ", length(ewp.rectum@universe),"\n")
     # number of DEGs in all pathways
-    paste0("The number of DEGs measured in all pathways is: ", length(deg.rectum$ENTREZ.ID[deg.rectum$ENTREZ.ID %in% unique(wp2gene$gene)]))
+    cat("The number of DEGs measured in all pathways is: ", length(deg.rectum$ENTREZ.ID[deg.rectum$ENTREZ.ID %in% unique(wp2gene$gene)]),"\n")
     #number of enriched pathways
-    paste0("The number of enriched pathways is: ", num.pathways.rectum <- dim(ewp.rectum.res)[1])
+    cat("The number of enriched pathways is: ", num.pathways.rectum <- dim(ewp.rectum.res)[1],"\n")
     #number of significantly enriched pathways
-    paste0("The number of significantly enriched pathways is: ", num.pathways.rectum.sign <- dim(rectum.sign)[1])
+    cat("The number of significantly enriched pathways is: ", num.pathways.rectum.sign <- dim(rectum.sign)[1],"\n")
     #exporting results to the file
     write.table(ewp.rectum.res, file=paste0("5-pathway_analysis/enrichResults_ORA_",disorder,"_rectum.tsv"),
                 sep = "\t" ,quote = FALSE, row.names = FALSE)
@@ -680,16 +679,20 @@ networkAnalysis <- function(PPI_cutoff = 0.7){
   colnames(UC.up.rectum) <- c ("HGNC_symbol", "ENTREZ", "log2FC_UC", "pvalue_UC")
   UC.down.rectum <-unique(UC.rectum[UC.rectum$log2FC_rectum < 0,])
   colnames(UC.down.rectum) <- c ("HGNC_symbol", "ENTREZ", "log2FC_UC", "pvalue_UC")
-  
+browser()  
   #OVERLAP ILEUM
   # overlap genes between CD down and UC down
   merged.ileum.downCDdownUC <- merge(x=CD.down.ileum, y=UC.down.ileum, by=c('ENTREZ', 'HGNC_symbol'), all.x=FALSE, all.y=FALSE)
+#cat("overlap genes between CD down and UC down",(merged.ileum.downCDdownUC),"\n")
   # overlap genes between CD up and UC down
   merged.ileum.upCDdownUC <- merge(x=CD.up.ileum,y=UC.down.ileum, by=c('ENTREZ', 'HGNC_symbol'),all.x=FALSE, all.y=FALSE)
+#cat(paste0("overlap genes between CD up and UC down",merged.ileum.upCDdownUC,"\n"))
   # overlap genes between CD up and UC up
   merged.ileum.upCDupUC <- merge(x=CD.up.ileum,y=UC.up.ileum,by=c('ENTREZ', 'HGNC_symbol'), all.x=FALSE, all.y=FALSE)
+#cat(paste0(" # overlap genes between CD up and UC up",merged.ileum.upCDupUC,"\n" ))  
   # overlap genes between CD down and UC up
   merged.ileum.downCDupUC <- merge(x=CD.down.ileum,y=UC.up.ileum,by=c('ENTREZ', 'HGNC_symbol'),all.x=FALSE, all.y=FALSE)
+#cat(paste0("# overlap genes between CD down and UC up",merged.ileum.downCDupUC,"\n" )  )
   #merge all DEG with corresponding logFC for both diseases
   DEG.overlapped_ileum <- rbind(merged.ileum.downCDdownUC, merged.ileum.upCDdownUC, merged.ileum.upCDupUC, merged.ileum.downCDupUC)
   if(!dir.exists("6-network_analysis")) dir.create("6-network_analysis")
@@ -698,12 +701,16 @@ networkAnalysis <- function(PPI_cutoff = 0.7){
   # OVERLAP RECTUM
   # overlap genes between CD down and UC down
   merged.rectum.downCDdownUC <- merge(x=CD.down.rectum,y=UC.down.rectum,by=c('ENTREZ', 'HGNC_symbol'),all.x=FALSE, all.y=FALSE)
+#cat(paste0("overlap genes between CD down and UC down",merged.rectum.downCDdownUC,"\n") ) 
   # overlap genes between CD up and UC down
   merged.rectum.upCDdownUC <- merge(x=CD.up.rectum,y=UC.down.rectum,by=c('ENTREZ', 'HGNC_symbol'),all.x=FALSE, all.y=FALSE)
+#cat(paste0("overlap genes between CD up and UC down",merged.rectum.upCDdownUC,"\n"))  
   # overlap genes between CD up and UC up
   merged.rectum.upCDupUC <- merge(x=CD.up.rectum,y=UC.up.rectum,by=c('ENTREZ', 'HGNC_symbol'),all.x=FALSE, all.y=FALSE)
+#cat(paste0(" # overlap genes between CD up and UC up",merged.rectum.upCDupUC,"\n" ) ) 
   # overlap genes between CD down and UC up
   merged.rectum.downCDupUC <- merge(x=CD.down.rectum,y=UC.up.rectum,by=c('ENTREZ', 'HGNC_symbol'),all.x=FALSE, all.y=FALSE)
+#cat(paste0("# overlap genes between CD down and UC up",merged.rectum.downCDupUC,"\n" ))    
   #merge all DEG with corresponding logFC for both diseases
   DEG.overlapped_rectum <- rbind(merged.rectum.downCDdownUC, merged.rectum.upCDdownUC, merged.rectum.upCDupUC, merged.rectum.downCDupUC)
   write.table(DEG.overlapped_rectum ,"7-network_analysis/DEG.overlapped_rectum",row.names=FALSE,col.names = TRUE,quote= FALSE, sep = "\t")
