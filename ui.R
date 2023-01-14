@@ -1044,7 +1044,7 @@ ui <- tagList(
                                                br(),
                                                textInput(inputId = "vis_pathway",
                                                          label = "Pathway ID",
-                                                         value = "WP15"),
+                                                         value = "WP4726"),
                                                radioButtons(inputId = "vis_location", 
                                                             label = "Location",
                                                             choices = c(Ileum = "ileum", 
