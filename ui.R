@@ -1098,35 +1098,39 @@ ui <- tagList(
                                              h2(strong("Documentation of Transcriptomics Analysis")),
                                              hr(),
                                              
-                                             
-                                             h3(strong("1. Data pre-processing")),
-                                             br(),
-                                             h4(strong("1.1. Data upload")),
-                                             h5("Before starting with the transcriptomics analysis,
+                                             h3(strong("Data")),
+                                             span("Before starting with the transcriptomics analysis,
                                                 the data needs to be uploaded first. Particularly, the 
                                                 transcriptomics analysis requires two files:"),
-                                             h5(strong("1. Meta data file: "), em("hmp2_metadata.csv")),
-                                             h5(strong("2. RNA-seq count data file: "), 
-                                                em("host_tx_counts.tsv")),
-                                             h5("Both files can be found in the ", em("'data'"), " folder in
+                                             br(),
+                                             span(strong("1. Meta data file: "), em("hmp2_metadata.csv")),
+                                             br(),
+                                             span(strong("2. RNA-seq count data file: "), 
+                                                  em("host_tx_counts.tsv")),
+                                             br(),
+                                             span("Both files can be found in the ", em("'data'"), " folder in
                                                 the working directory. The default settings for the data upload are
                                                 correct and, thus, only the file location needs to be selected manually."),
                                              br(),
+                                             hr(),
                                              
-                                             
-                                             h4(strong("1.2. Filtering")),
-                                             h5("In this part, three filtering steps will be applied:"), 
-                                             h5("1. Removal of samples with zero values only."),
-                                             h5("2. Removal of genes with zero values only."),
-                                             h5("3. Removal of genes with a mean logCPM below the selected threshold. 
+                                             h3(strong("1. Filtering")),
+                                             span("In this part, three filtering steps will be applied:"),
+                                             br(),
+                                             span("1. Removal of samples with zero values only."),
+                                             br(),
+                                             span("2. Removal of genes with zero values only."),
+                                             br(),
+                                             span("3. Removal of genes with a mean logCPM below the selected threshold. 
                                                 For this, the default threshold is 1 logCPM, but can be changed by the user."),
-                                             h5("NOTE: The filtered meta data and RNA-seq count data can be found in the ",
+                                             br(),
+                                             span("NOTE: The filtered meta data and RNA-seq count data can be found in the ",
                                                 em("'1-data_filtering'"), " folder."),
                                              br(),
+                                             hr(),
                                              
-                                             
-                                             h4(strong("1.3. Normalization & QC")),
-                                             h5("Using the filtered data, normalization with the ", 
+                                             h3(strong("2. Normalization & QC")),
+                                             span("Using the filtered data, normalization with the ", 
                                                 tags$a(href = "https://bioconductor.org/packages/release/bioc/html/DESeq2.html", 
                                                         "DESeq2")  
                                                 ," package will be performed. Additional quality control 
@@ -1134,37 +1138,39 @@ ui <- tagList(
                                                 tags$a(href = "https://doi.org/10.1093/nar/gkt293", 
                                                        "ArrayAnalysis"), "
                                                 functions (v.2). The QC plots of the raw and normalized data are saved in the ",
-                                                em("'2-differential_gene_expression_analysis/QCraw'"), " and ",
-                                                em("'2-differential_gene_expression_analysis/QCnorm'"), " folders, respectively."),
+                                                em("'2-data_normalization/QCraw'"), " and ",
+                                                em("'2-data_normalization/QCnorm'"), " folders, respectively."),
                                              br(),
                                              hr(),
                                              
                                              
-                                             h3(strong("2. Differential gene expression analysis")),
-                                             h5("Also the differential gene expression (DEG) analysis will be performed using the ", 
+                                             h3(strong("3. Differential gene expression analysis")),
+                                             span("The differential gene expression (DEG) analysis will be performed using the ", 
                                                 tags$a(href = "https://bioconductor.org/packages/release/bioc/html/DESeq2.html", 
                                                        "DESeq2")  
                                                 ," package. All output plots and tables can be found in the ",
-                                                em("'2-differential_gene_expression_analysis/statsmodel'"), " folder."),
+                                                em("'3-differential_gene_expression_analysis'"), " folder."),
                                              br(),
                                              hr(),
                                              
                                              
-                                             h3(strong("3. Identifier mapping")),
-                                             h5("In the identifier mapping procedure, gene symbols will 
+                                             h3(strong("4. Identifier mapping")),
+                                             span("In the identifier mapping procedure, gene symbols will 
                                              be converted to Entrez Gene and ENSEMBL IDs. For this, the ",
                                              tags$a(href = "https://bioconductor.org/packages/release/bioc/html/AnnotationDbi.html", 
                                                        "AnnotationDbi"),
                                              "package (v1.58.0) will be used. In the applied methodology, 
                                              one-to-many mappings will be omitted by selecting the first hit only. 
                                              The identifier mapping output is located in the ",
-                                             em("'3-identifier_mapping'"), " folder."),
+                                             em("'4-identifier_mapping'"), " folder. NOTE: this procedure uses the files 
+                                             in the ", em("'3-differential_gene_expression_analysis'"), " folder (generated by 
+                                             the DEG analysis)."),
                                              br(),
                                              hr(),
                                              
                                              
-                                             h3(strong("4. Pathway analysis")),
-                                             h5("In this step, pathway overrepresentation analysis (ORA) will be performed 
+                                             h3(strong("5. Pathway analysis")),
+                                             span("In this step, pathway overrepresentation analysis (ORA) will be performed 
                                              using the mapped identifiers (Identifier Mapping step) and the selected logFC and 
                                              p-value thresholds (DEG Analysis step). The ORA implementation in ",
                                              tags$a(href = "https://bioconductor.org/packages/release/bioc/html/clusterProfiler.html", 
@@ -1174,22 +1180,25 @@ ui <- tagList(
                                              the WikiPathways .gmt file needs to be located in the ", em("'4-pathway_analysis'"), 
                                              " folder. The false discovery rate (FDR) approach will be used to acquire adjusted p-values. 
                                              Accordingly, the q-values were calculated to prevent a high FDR in multiple testing. 
-                                             The output files can be found in the ", em("'4-pathway_analysis'"), " folder."),
+                                             The output files can be found in the ", em("'4-pathway_analysis'"), " folder. 
+                                             NOTE: this procedure uses the output files from the identifier mapping (see ", 
+                                             em("'4-identifier_mapping'"), " folder)."),
                                              br(),
                                              hr(),
                                              
                                              
-                                             h3(strong("5. Heatmap")),
-                                             h5("A heatmap of pathway significance for the different 
+                                             h3(strong("6. Heatmap")),
+                                             span("A heatmap of pathway significance for the different 
                                                 biopsy locations and diseases will be created using the ",
                                                 tags$a(href = "https://github.com/raivokolde/pheatmap", 
-                                                       "pheatmap"), " package."),
+                                                       "pheatmap"), " package. This step depends on the output files 
+                                                generated by the pathway analysis."),
                                              br(),
                                              hr(),
                                              
                                              
-                                             h3(strong("6. Network analysis")),
-                                             h5("This part requires Cytoscape to be installed and opened. 
+                                             h3(strong("7. Network analysis")),
+                                             span("This part requires Cytoscape to be installed and opened. 
                                              The first step of the network analysis includes the construction 
                                              of Protein-Protein-Interaction (PPI) networks from the STRING database 
                                              using the stringApp (v2.0.0) in Cytoscape through the R package ",
@@ -1205,7 +1214,8 @@ ui <- tagList(
                                              to allow for the investigation of up-regulated and down-regulated genes in both diseases. 
                                              The Markov Clustering Algorithm (MCL) was applied to the PPP-I networks through the 
                                              Cytoscape plugin named clusterMaker2 (v2.0) to investigate similarities 
-                                             between genes and pathways."),
+                                             between genes and pathways. NOTE: This step depends on the output files 
+                                                generated by the pathway analysis."),
                                              br()
                                              ),
                                     
@@ -1216,53 +1226,64 @@ ui <- tagList(
                                              h2(strong("Documentation of Metabolomics Analysis")),
                                              hr(),
                                              
-                                             h3(strong("7. Data pre-processing")),
-                                             br(),
-                                             h4(strong("7.1. Data upload")),
-                                             h5("Before starting with the metabolomics analysis,
+                                             h3(strong("Data")),
+                                             span("Before starting with the metabolomics analysis,
                                                 the data needs to be uploaded first. Particularly, the 
                                                 metabolomics analysis requires two files:"),
-                                             h5(strong("1. Meta data file: "), em("hmp2_metadata.csv")),
-                                             h5(strong("2. Metabolomics data file: "), 
+                                             br(),
+                                             span(strong("1. Meta data file: "), em("hmp2_metadata.csv")),
+                                             br(),
+                                             span(strong("2. Metabolomics data file: "), 
                                                 em("metabolomics.csv")),
-                                             h5("Both files can be found in the ", em("'data'"), " folder in
+                                             br(),
+                                             span("Both files can be found in the ", em("'data'"), " folder in
                                                 the working directory. The default settings for the data upload are
                                                 correct and, thus, only the file location needs to be selected manually."),
                                              br(),
+                                             hr(),
                                              
                                              
-                                             h4(strong("7.2. Filtering")),
-                                             h5("In this part, three filtering steps will be applied:"), 
-                                             h5("1. Samples will be filtered based on visit number and data type."),
-                                             h5("2. Metabolites with all zero values across all samples will be filtered."),
-                                             h5("3. Metabolites having >50% missing values will be filtered."),
-                                             h5("NOTE: The filtered metabolomics data can be found in the ",
-                                                em("'7-metabolite_data_preprocessing/filtered'"), " folder."),
+                                             h3(strong("8. Filtering")),
+                                             span("In this part, three filtering steps will be applied:"),
+                                             br(),
+                                             span("1. Samples will be filtered based on visit number and data type."),
+                                             br(),
+                                             span("2. Metabolites with all zero values across all samples will be filtered."),
+                                             br(),
+                                             span("3. Metabolites having > 50% missing values will be filtered."),
+                                             br(),
+                                             span("NOTE: The filtered metabolomics data can be found in the ",
+                                                em("'8-metabolite_data_filtering/filtered'"), " folder."),
                                              br(),
                                              
                                              
-                                             h4(strong("7.3. Normalization & QC")),
-                                             h5("In this step, different normalization methods including cube-root, square-root, 
+                                             h3(strong("9. Normalization & QC")),
+                                             span("In this step, different normalization methods including cube-root, square-root, 
                                                 log2, and log10 transformation can be applied. Shapiro-Wilk normality test will be 
                                                 applied to observe whether the normalization method generates data with normal distribution. 
                                                 The QC plots of the raw and normalized data are saved in the ",
-                                                em("'7-metabolite_data_preprocessing/normalized'"), " folder."),
+                                                em("'9-metabolite_data_normalization/normalized'"), " folder. 
+                                                NOTE: This step depends on the output files 
+                                                generated by the metabolite filtering step (see ",
+                                                em("'8-metabolite_data_filtering/filtered'"), " folder)."),
                                              br(),
                                              hr(),
                                              
                                              
-                                             h3(strong("8. Significantly changed metabolites analysis")),
-                                             h5("In the statstical analysis procedure, 
+                                             h3(strong("10. Significantly changed metabolites analysis")),
+                                             span("In the statstical analysis procedure, 
                                              the p-value for each metabolite will be calculated using 
                                                 a t-test. The user can specificy log2FC and p-value thresholds 
                                                 to establish significantly changed metabolites which will be used as 
-                                                input for the pathway analysis (step 10)."),
+                                                input for the pathway analysis (step 12). NOTE: This step depends on the 
+                                                output files from the normalization step (see ",
+                                                  em("'9-metabolite_data_normalization/normalized'"), " folder)."),
                                              br(),
                                              hr(),
                                              
                                              
-                                             h3(strong("9. Identifier mapping")),
-                                             h5("The metabolomics data is annotated with HMDB identifiers 
+                                             h3(strong("11. Identifier mapping")),
+                                             span("The metabolomics data is annotated with HMDB identifiers 
                                              , which can be transformed into ChEBI IDs using the ",
                                                 tags$a(href = "https://bioconductor.org/packages/release/bioc/html/BridgeDbR.html", 
                                                        "BridgeDbR"), 
@@ -1271,20 +1292,26 @@ ui <- tagList(
                                                 tags$a(href = "https://figshare.com/ndownloader/files/26001794", "here"),
                                                        " and then be placed in the ", em("data"), " folder.
                                                        Furthermore, in the applied procedure, one-to-many mappings 
-                                                       are omitted by selecting the first hit only containing the prefix ‘CHEBI:’"),
+                                                       are omitted by selecting the first hit only containing the prefix ‘CHEBI:’. 
+                                                The identifier mapping uses the normalized data generated in the previous step 
+                                                (data normalization) as input. The output files are generated in the ",
+                                                em("'11-metabolite_identifier_mapping'"), " folder."),
                                              br(),
                                              hr(),
                                              
                                              
-                                             h3(strong("10. Pathway analysis")),
-                                             h5("The significantly changed metabolites from the 
+                                             h3(strong("12. Pathway analysis")),
+                                             span("The significantly changed metabolites from the 
                                              statistical analysis are retrieved as HMDB IDs and compared 
                                              against the content of each pathway in the WikiPathways SPARQL 
                                              endpoint using a semantic web query, filtering out pathways 
                                              from the Reactome database. Enrichment analysis of the 
                                              metabolomics data was conducted by over-representation 
                                              analysis (ORA) using a Fisher's 
-                                             exact test by means of a hypergeometric density calculation.")
+                                             exact test by means of a hypergeometric density calculation.
+                                             NOTE: This step depends on the 
+                                                output files from the identifier mapping step (see ",
+                                                  em("'11-metabolite_identifier_mapping'"), " folder).")
                                     ),
                                     
                                     #***************************************************#
@@ -1293,17 +1320,19 @@ ui <- tagList(
                                     tabPanel("Multi-omics Visualization",value = "doc_multi",
                                              h2(strong("Documentation of Multi-omics Visualization")),
                                              hr(),
-                                             h3(strong("11. Pathway selection")),
-                                             h5("In this step, the user can find interesting pathways by
+                                             h3(strong("13. Pathway selection")),
+                                             span("In this step, the user can find interesting pathways by
                                                 looking at the overlap of the significant pathways from 
-                                                the transcriptomics and metabolomics analysis. The user 
+                                                the transcriptomics and metabolomics pathway analysis (see the ",
+                                                em("'5-pathway_analysis'"), " and ", em("'12-metabolite_pathway_analysis'"), 
+                                                " folders). The user 
                                                 can select different significance thresholds for the metabolomics 
                                                 and transcriptomics results, giving more weight to the 
                                                 user-desired data type."),
                                              br(),
                                              hr(),
-                                             h3(strong("12. Multi-omics visualization")),
-                                             h5("This part requires Cytoscape to be installed and opened.
+                                             h3(strong("14. Multi-omics visualization")),
+                                             span("This part requires Cytoscape to be installed and opened.
                                                 The user-selected pathway will be loaded into Cytoscape 
                                                 using the ",
                                                 tags$a(href = "https://bioconductor.org/packages/release/bioc/html/RCy3.html", 
