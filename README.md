@@ -23,7 +23,7 @@ This workflow, developed in R Shiny, includes differential gene expression analy
 [14-Multi-omics visualization](14-multiomics_visualization)<br />
 
 The workflow is an example of how to bring together different software tools and methods to analyze transcriptomics and metabolomics data to reveal the underlying mechanism behind IBD disease as a use case study.
-![Figure-1](https://user-images.githubusercontent.com/65600609/212306268-321a361e-7056-4adf-91e6-44460f4199c3.jpg)
+![Figure-1](https://user-images.githubusercontent.com/65600609/212947530-700d3dc5-1d14-4cbe-a86b-977299d3a81e.jpg)
 
 ## Setup and Preparation
 The setup of this project has been tested with:
