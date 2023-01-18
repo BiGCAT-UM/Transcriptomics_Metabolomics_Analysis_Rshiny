@@ -1067,7 +1067,7 @@ server = function(input, output,session) {
           cat ("image path =",path,"\n")
         }
         if (input$whichHistUC == "Raw"){
-          path <- paste0(WORK_DIR,"/9-metabolite_data_normalization/UC_histogram_norm.png")
+          path <- paste0(WORK_DIR,"/9-metabolite_data_normalization/UC_histogram_raw.png")
           cat ("image path =",path,"\n")
         }
         list(src = path, contentType = 'image/png',width = "500px", height = "auto",
