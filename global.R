@@ -679,7 +679,7 @@ networkAnalysis <- function(PPI_cutoff = 0.7){
   colnames(UC.up.rectum) <- c ("HGNC_symbol", "ENTREZ", "log2FC_UC", "pvalue_UC")
   UC.down.rectum <-unique(UC.rectum[UC.rectum$log2FC_rectum < 0,])
   colnames(UC.down.rectum) <- c ("HGNC_symbol", "ENTREZ", "log2FC_UC", "pvalue_UC")
-browser()  
+ 
   #OVERLAP ILEUM
   # overlap genes between CD down and UC down
   merged.ileum.downCDdownUC <- merge(x=CD.down.ileum, y=UC.down.ileum, by=c('ENTREZ', 'HGNC_symbol'), all.x=FALSE, all.y=FALSE)
