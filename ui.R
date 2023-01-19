@@ -1283,8 +1283,8 @@ ui <- tagList(
                                              
                                              
                                              h3(strong("11. Identifier mapping")),
-                                             span("The metabolomics data is annotated with HMDB identifiers 
-                                             , which can be transformed into ChEBI IDs using the ",
+                                             span("The metabolomics data is annotated with HMDB identifiers, 
+                                                  which can be transformed into ChEBI IDs using the ",
                                                 tags$a(href = "https://bioconductor.org/packages/release/bioc/html/BridgeDbR.html", 
                                                        "BridgeDbR"), 
                                                        " (v2.6.0) package. This requires the .bridge file
@@ -1344,7 +1344,7 @@ ui <- tagList(
                                                 tags$a(href = "https://apps.cytoscape.org/apps/wikipathways", 
                                                        "WikiPathways app for Cytoscape"),
                                                 " (v3.3.10). The gene expression 
-                                                and metabolite data were visualized on the nodes of the 
+                                                and metabolite data are visualized on the nodes of the 
                                                 Cytoscape network as log2FC and p-values, based on their 
                                                 Ensembl and ChEBI identifiers, respectively.")
                                              ),
