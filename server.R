@@ -25,11 +25,11 @@ server = function(input, output,session) {
   # 
   # ################################################################
   # 
-  # hideTab("tabs_mets", target = "filtering_mets")
-  # hideTab("tabs_mets", target = "norm_mets")
-  # hideTab("tabs_mets", target = "stat_mets")
-  # hideTab("tabs_mets", target = "mapping_mets")
-  # hideTab("tabs_mets", target = "pathway_mets")
+  hideTab("tabs_mets", target = "filtering_mets")
+  hideTab("tabs_mets", target = "norm_mets")
+  hideTab("tabs_mets", target = "stat_mets")
+  hideTab("tabs_mets", target = "mapping_mets")
+  hideTab("tabs_mets", target = "pathway_mets")
 
   # Welcome message
   sendSweetAlert(
